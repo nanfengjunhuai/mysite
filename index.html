@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>My Personal Space</title>
+  <meta name="description" content="李银的个人空间。由工作台进入研究室、项目库和自叙帖。">
+  <script>
+    const entry = location.hash.startsWith("#relay-") ? "nearshore.html" : "workroom.html";
+    location.replace(entry + location.search + location.hash);
+  </script>
+</head>
+<body>
+  <main><a href="workroom.html">进入工作台</a></main>
+</body>
+</html>

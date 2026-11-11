@@ -1,0 +1,80 @@
+.monitor--collection {
+  --polygon: polygon(82% 66%,94.7% 60.2%,98.2% 66.1%,87.1% 73.1%,82% 70.5%);
+  --frame: polygon(evenodd,82% 66%,94.7% 60.2%,98.2% 66.1%,87.1% 73.1%,82% 70.5%,82% 66%,
+    82.2% 66.3%,82.2% 70.2%,87.1% 72.7%,97.9% 66.1%,94.7% 60.6%,82.2% 66.3%);
+  --x: 89.8%; --y: 67.1%; --glass: #25343af2; --halo: #c9eada;
+}
+.monitor--collection .monitor-tag { font-size: clamp(13px,1dvh + .44vw,16px); }
+.story-drawers { display: grid; grid-template-columns: 1.32fr 1fr; gap: 4px; }
+.story-collection-entry { grid-template-columns: 1fr auto; }
+.story-drawers .story-archive-entry { gap: 5px; }
+.story-drawers .story-archive-entry small { white-space: nowrap; }
+
+.room--collection {
+  --primary: #eaf8f4; --secondary: #d2e7e3; --accent: #f2c8a1;
+  --room-glow: #1f494c; --room-x: 50%; --room-y: 53%;
+}
+.room--collection .room-environment img { animation: none; }
+.room--collection .room-environment::before { content: none; }
+.collection-shelf {
+  position: absolute; top: var(--room-y); left: var(--room-x); translate: -50% -53%;
+  width: max(100cqw,177.68cqh); height: max(100cqh,56.28cqw);
+  margin: 0; padding: 0; list-style: none; pointer-events: none;
+}
+.collection-shelf li {
+  position: absolute; top: 27%; left: 37.5%; width: 12.2%; height: 23.3%;
+  min-width: 0; pointer-events: auto;
+}
+.collection-shelf li:nth-child(2) { left: 55%; }
+.collection-shelf li:nth-child(3) { left: 73%; }
+.collection-exhibit {
+  position: relative; isolation: isolate; display: flex; align-items: flex-end;
+  width: 100%; height: 100%; min-height: 0; padding: clamp(9px,1vw,15px);
+  overflow: hidden; border: 1px solid #bce4d598; border-radius: 8px;
+  background: #182f38; color: #f2fbf7; text-align: left; text-decoration: none;
+  box-shadow: 0 12px 35px #010b1399, inset 0 1px #ddf8ed37;
+  transition: border-color 230ms ease, box-shadow 230ms ease;
+}
+.collection-exhibit:hover { border-color: #dcfff0; box-shadow: 0 12px 38px #010b1399, 0 0 17px #88dbc64a; }
+.collection-exhibit:focus-visible { outline-offset: -4px; }
+.collection-exhibit img, .collection-exhibit::before { position: absolute; inset: 0; width: 100%; height: 100%; }
+.collection-exhibit img { z-index: -2; object-fit: cover; object-position: 54% center; }
+.collection-exhibit::before {
+  z-index: -1; content: ""; background: linear-gradient(0deg,#07141df7 3%,#07141dd8 22%,#07141d65 47%,transparent 71%);
+}
+.collection-copy { display: grid; grid-template-columns: 1fr auto; gap: 5px 6px; width: 100%; }
+.collection-copy small { grid-column: 1 / -1; color: #ccefe1; font-size: 11px; }
+.collection-copy strong { font-size: clamp(18px,1.7vw,27px); line-height: 1.13; font-weight: 650; }
+.collection-copy span { grid-column: 1 / -1; color: #e4f4ee; font-size: clamp(11px,.95vw,14px); line-height: 1.45; }
+.collection-copy b { align-self: center; color: #f7d3aa; font-size: 14px; font-weight: 500; }
+.collection-shelf[data-expanded] {
+  left: 50%; translate: -50% -50%; width: min(88vw,970px); height: auto;
+  max-height: calc(100dvh - 132px); overflow: auto;
+  display: grid; grid-template-columns: repeat(auto-fit,minmax(min(180px,100%),1fr)); gap: 10px;
+  pointer-events: auto;
+}
+.collection-shelf[data-expanded] li { position: static; width: auto; height: auto; }
+.collection-shelf[data-expanded] .collection-exhibit { min-height: 155px; }
+
+@media (max-aspect-ratio: 5/4), (max-height: 485px) {
+  .collection-shelf {
+    left: 50%; translate: -50% -50%; height: auto;
+    display: grid; grid-template-columns: 1.32fr 1fr 1fr; gap: clamp(7px,1.25vw,17px);
+  }
+  .collection-shelf li { position: static; width: auto; height: auto; }
+}
+@media (max-aspect-ratio: 5/4) {
+  .collection-shelf { top: 47%; width: min(calc(100% - 28px),530px); grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .collection-shelf li:first-child { grid-column: 1 / -1; }
+  .collection-exhibit { min-height: clamp(130px,22dvh,225px); padding: 10px; }
+  .collection-shelf li:first-child .collection-exhibit { min-height: clamp(150px,27dvh,260px); }
+  .collection-copy strong { font-size: clamp(16px,4.6vw,24px); }
+}
+@media (max-height: 485px) and (min-aspect-ratio: 5/4) {
+  .collection-shelf { top: 44%; width: min(88vw,820px); }
+  .collection-exhibit { min-height: clamp(120px,44dvh,205px); padding: 9px; }
+  .collection-copy strong { font-size: clamp(16px,2.15vw,24px); }
+}
+@media (max-height: 490px) and (max-aspect-ratio: 5/4) {
+  .collection-shelf { max-height: calc(100% - 118px); overflow: auto; }
+}

@@ -1,0 +1,123 @@
+.field-study {
+  --field-edge: clamp(16px,4vw,64px);
+  --field-top: max(17px, env(safe-area-inset-top));
+  --field-line: #d2f1e9a1;
+  position: fixed; inset: 0; width: 100%; max-width: none;
+  height: 100vh; height: 100dvh; max-height: none; margin: 0; padding: 0; border: 0;
+  color: #f2fcf8; background: radial-gradient(ellipse at 50% 35%,#305764,#0a1821 72%);
+  overflow: auto; overscroll-behavior: contain;
+}
+.field-study::backdrop { background: #061018; }
+.field-views, .field-views picture, .field-views img, .field-views::after {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+}
+.field-views { overflow: hidden; pointer-events: none; }
+.field-views img { display: block; object-fit: cover; }
+.field-views picture:not([hidden]) img { animation: field-camera 460ms var(--ease) both; }
+.field-study[data-inspecting] .field-views img { animation: none; }
+.field-views::after {
+  content: "";
+  background:
+    linear-gradient(0deg,#061019f0 0%,#061019bd 13%,#06101959 27%,transparent 45%),
+    linear-gradient(180deg,#061019b8,transparent 25%);
+}
+@keyframes field-camera {
+  from { transform: scale(1.045); filter: brightness(.83); }
+  to { transform: scale(1); filter: brightness(1); }
+}
+.field-interface {
+  position: relative; min-height: 100%;
+  display: grid; grid-template-rows: 1fr auto auto;
+  padding: var(--field-top) max(var(--field-edge),env(safe-area-inset-right)) var(--bottom)
+    max(var(--field-edge),env(safe-area-inset-left));
+}
+.field-header { align-self: start; display: flex; align-items: center; gap: 15px; margin-right: calc(var(--sound-width) + 16px); }
+.field-header h2 { font-size: 17px; font-weight: 650; letter-spacing: .08em; text-shadow: 0 2px 5px #030910; }
+.field-header h2 span { display: block; margin-top: 3px; font-size: 10px; font-weight: 550; color: #d4f0e8; letter-spacing: .06em; }
+.field-study .sound-dial {
+  position: absolute; inset: var(--field-top) max(var(--field-edge),env(safe-area-inset-right)) auto auto;
+}
+.field-button {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px;
+  padding: 5px 13px; border: 1px solid #c5e5de70; border-radius: 7px;
+  color: #f2fff9; background: #091b24db; font-size: 13px; font-weight: 600;
+  transition: background 220ms ease,border-color 220ms ease;
+}
+.field-button:hover { border-color: var(--field-line); background: #183f44; }
+.field-button span { font-size: 20px; line-height: 1; }
+.field-waypoints { position: absolute; inset: 0; pointer-events: none; }
+.field-waypoint {
+  position: absolute; top: 66%; left: 27%; translate: -50% -50%; pointer-events: auto;
+  display: flex; align-items: center; gap: 9px; min-height: 46px; padding: 7px 12px;
+  color: #f0fff8; background: #0b2429ea; border: 1px solid var(--field-line); border-radius: 7px;
+  text-align: left; font-size: clamp(12px,1.25vw,16px); font-weight: 650; line-height: 1.35;
+  box-shadow: 0 5px 18px #05111b70; transition: background 220ms ease,box-shadow 220ms ease;
+}
+.field-waypoint[data-waypoint="ridge"] { top: 58%; left: 77%; }
+.field-waypoint::after {
+  position: absolute; left: 50%; top: 100%; width: 1px; height: clamp(15px,3.5vh,44px); content: "";
+  background: linear-gradient(#dcfff0bb,#d7fff43b);
+}
+.field-waypoint:hover { background: #164a4a; box-shadow: 0 4px 21px #a3f9db38; }
+.field-waypoint > span:first-child { color: #b4ead9; font-size: 17px; }
+.field-waypoint small { display: block; color: #c6ede0; font-size: 10px; margin-top: 2px; }
+.field-observation {
+  grid-row: 3; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between;
+  column-gap: 26px; row-gap: 10px; padding-bottom: 9px;
+}
+.field-caption { flex: 1 1 290px; max-width: 610px; }
+.field-caption h3 {
+  margin: 0 0 .19em; font-size: clamp(28px,4vw,58px); font-weight: 620;
+  line-height: 1.12; letter-spacing: .05em; text-shadow: 0 2px 13px #071522;
+}
+.field-caption h3:focus { outline: none; }
+.field-caption p { font-size: clamp(13px,1.45vw,16px); line-height: 1.64; color: #e1f3ed; }
+.field-tools { display: flex; gap: 7px; flex-wrap: wrap; }
+.field-return { background: #c9ece1; color: #08252a; }
+.field-return:hover { background: #e4fff3; }
+.field-landmarks {
+  grid-row: 2; display: flex; flex-wrap: wrap; align-self: end; gap: 6px;
+  margin: 8px 0 12px;
+}
+.field-landmark-choice[aria-pressed="true"] { border-color: #d1f7eb; background: #24544e; }
+.field-marker {
+  position: absolute; z-index: 1; translate: -50% -50%; pointer-events: none;
+  width: clamp(32px,3.2vw,53px); aspect-ratio: 1; border: 1px solid #d7fff1;
+  border-radius: 50%; box-shadow: 0 0 0 4px #09242c8a,0 0 14px #92f3df8c;
+}
+.field-marker::after {
+  position: absolute; top: 50%; left: 50%; translate: -50% -50%;
+  width: 5px; height: 5px; border-radius: 50%; background: #f1fff9; content: "";
+  box-shadow: 0 0 0 2px #0d2b33c4;
+}
+.field-interface { z-index: 2; }
+
+@media (max-aspect-ratio: 5/4), (max-height: 500px) {
+  .field-waypoints {
+    position: static; grid-row: 2; display: grid; grid-template-columns: repeat(2,minmax(0,1fr));
+    gap: 8px; margin: 10px 0 12px;
+  }
+  .field-waypoint, .field-waypoint[data-waypoint="ridge"] { position: relative; inset: auto; translate: none; }
+  .field-waypoint::after { content: none; }
+  .field-observation { padding-bottom: 0; }
+  .field-views::after {
+    background: linear-gradient(0deg,#061019f5,#061019ce 23%,#06101953 43%,transparent 58%),
+      linear-gradient(180deg,#061019bd,transparent 23%);
+  }
+}
+@media (max-width: 390px) {
+  .field-header { gap: 8px; }
+  .field-header h2 { font-size: 14px; }
+  .field-header h2 span { font-size: 9px; }
+  .field-header .field-button { padding-inline: 7px; white-space: nowrap; }
+  .field-waypoint { gap: 5px; padding-inline: 7px; }
+}
+@media (max-height: 420px) and (min-aspect-ratio: 5/4) {
+  .field-views::after {
+    background: linear-gradient(0deg,#061019e9,#06101985 27%,transparent 52%),
+      linear-gradient(180deg,#061019a0,transparent 27%);
+  }
+  .field-waypoints { width: min(440px,100%); margin-block: 6px 8px; }
+  .field-caption h3 { font-size: 24px; }
+  .field-caption p { font-size: 12px; }
+}

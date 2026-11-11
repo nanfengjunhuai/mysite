@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>My Personal Space</title>
+  <meta name="description" content="李银的个人空间。由工作台进入研究室、项目库和自叙帖。">
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/workroom.css">
+  <link rel="stylesheet" href="assets/css/field-study.css">
+  <link rel="stylesheet" href="assets/css/project-bay.css">
+  <link rel="stylesheet" href="assets/css/story-room.css">
+  <link rel="stylesheet" href="assets/css/robotics-study.css">
+  <link rel="stylesheet" href="assets/css/collection-room.css">
+  <script defer src="content/site.js"></script>
+  <script defer src="content/projects.js"></script>
+  <script defer src="content/notes.js"></script>
+  <script defer src="content/field-study.js"></script>
+  <script defer src="content/robotics-study.js"></script>
+  <script defer src="content/collection.js"></script>
+  <script defer src="assets/js/robotics-study.js"></script>
+  <script defer src="assets/js/project-bay.js"></script>
+  <script defer src="assets/js/workroom.js"></script>
+</head>
+<body>
+  <button class="sound-dial" type="button" id="sound" aria-pressed="false" aria-label="环境音" title="开启环境音">
+    <span class="sound-meter" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span>
+    <span class="sound-copy" aria-hidden="true">环境音 <small id="sound-state">静音</small></span>
+  </button>
+  <main>
+    <section class="workroom" id="desk" aria-label="工作台">
+      <div class="workroom-scene" id="scene" data-phase="loading">
+        <h1 class="workroom-signature" lang="en"><span id="desk-title">My Personal Space</span></h1>
+        <div class="workroom-stage">
+          <img class="workroom-poster" src="assets/img/workroom-settled.webp" width="1248" height="704" alt="傍晚的动漫工作室。程序员坐在悬臂桌前打字，三块显示器亮着，右侧有一个小机器人。" fetchpriority="high">
+          <video class="workroom-film" id="opening" muted playsinline preload="auto" aria-hidden="true" disablepictureinpicture src="assets/video/workroom-opening.mp4"></video>
+          <div class="room-ports" id="ports" inert>
+            <button class="monitor monitor--research" type="button" data-target="research"><span class="monitor-tag">研究室<b aria-hidden="true">↗</b></span></button>
+            <button class="monitor monitor--projects" type="button" data-target="projects"><span class="monitor-tag">项目库<b aria-hidden="true">↗</b></span></button>
+            <button class="monitor monitor--story" type="button" data-target="story"><span class="monitor-tag">自叙帖<b aria-hidden="true">↗</b></span></button>
+            <button class="monitor monitor--collection" type="button" data-target="collection"><span class="monitor-tag">收藏室<b aria-hidden="true">↗</b></span></button>
+          </div>
+        </div>
+        <div class="view-controls" id="view-controls" role="group" aria-label="切换工作台视角" hidden>
+          <div class="view-panorama" id="view-panorama" aria-hidden="true">
+            <img src="assets/img/workroom-settled.webp" width="1248" height="704" alt="" draggable="false">
+            <span class="view-lens"></span>
+          </div>
+          <div class="view-shortcuts">
+            <button type="button" data-view="0" aria-label="看向研究室显示器">研究室</button>
+            <button type="button" data-view="1" aria-label="看向项目库显示器">项目库</button>
+            <button type="button" data-view="2" aria-label="看向自叙帖显示器">自叙帖</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="room room--research" id="research" aria-labelledby="research-title" hidden>
+      <div class="room-environment" aria-hidden="true">
+        <img src="assets/img/universe-research.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low">
+        <div class="research-lighting">
+          <div class="research-ring"></div>
+          <div class="research-reflection"></div>
+        </div>
+      </div>
+      <header class="room-header">
+        <button class="back-button" type="button" data-desk>← 工作台</button>
+        <h1 id="research-title" tabindex="-1">研究室</h1>
+      </header>
+      <div class="room-content research-console">
+        <button class="research-screen" id="open-topic" type="button" aria-haspopup="dialog">
+          <span class="research-screen-art"><img src="assets/img/workroom-worlds.webp" width="1672" height="941" alt="" loading="lazy" decoding="async"></span>
+          <span class="research-screen-copy">
+            <small>开放世界游戏</small>
+            <strong>世界模型与未来产业</strong>
+            <span>走到哪里，世界就延伸到哪里。</span>
+            <b>进入海岸城 <span aria-hidden="true">↗</span></b>
+          </span>
+        </button>
+        <button class="research-screen" id="open-robot-lab" type="button" aria-haspopup="dialog" hidden>
+          <span class="research-screen-art"><img src="assets/img/robotics-training-bay.webp" width="1672" height="941" alt="" loading="lazy" decoding="async"></span>
+          <span class="research-screen-copy">
+            <small>机器人训练 · 仓库物流</small>
+            <strong>机器人的练习场</strong>
+            <span>同一座仓库，换一种通道条件。</span>
+            <b>打开训练场 <span aria-hidden="true">↗</span></b>
+          </span>
+        </button>
+        <div class="research-topics" role="group" aria-label="切换研究主题">
+          <button type="button" data-research-topic="field" aria-controls="open-topic" aria-pressed="true">开放世界</button>
+          <button type="button" data-research-topic="robot" aria-controls="open-robot-lab" aria-pressed="false">机器人训练</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="room room--projects" id="projects" aria-labelledby="projects-title" hidden>
+      <div class="room-environment" aria-hidden="true"><img src="assets/img/universe-projects.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low"></div>
+      <header class="room-header">
+        <button class="back-button" type="button" data-desk>← 工作台</button>
+        <h1 id="projects-title" tabindex="-1">项目库</h1>
+      </header>
+      <div class="project-console">
+        <div class="project-screens" id="project-screens" role="region" aria-label="项目显示器"></div>
+        <nav class="project-controls" id="project-controls" aria-label="选择项目" hidden>
+          <button class="project-step" type="button" id="previous-project" aria-label="上一个项目">‹</button>
+          <div class="project-index" id="project-index"></div>
+          <button class="project-step" type="button" id="next-project" aria-label="下一个项目">›</button>
+        </nav>
+        <p class="visually-hidden" id="project-position" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <section class="room room--story" id="story" aria-labelledby="story-title" hidden>
+      <div class="room-environment" aria-hidden="true"><img src="assets/img/universe-story.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low"></div>
+      <header class="room-header">
+        <button class="back-button" type="button" data-desk>← 工作台</button>
+        <h1 id="story-title" tabindex="-1">自叙帖</h1>
+      </header>
+      <div class="room-content story-content">
+        <div class="story-monitor" id="story-monitor">
+          <div class="story-display">
+            <div class="story-intro">
+              <p class="typed-intro" id="typed-intro" aria-hidden="true"></p>
+              <p class="visually-hidden" id="accessible-intro"></p>
+              <button class="story-reveal" id="show-intro" type="button">显示全文</button>
+            </div>
+            <button class="story-reel" id="open-story-film" type="button" aria-haspopup="dialog">
+              <img src="assets/img/story-night-poster.webp" width="1920" height="870" alt="" loading="lazy" decoding="async">
+              <span class="story-reel-caption">
+                <span class="story-play" aria-hidden="true"></span>
+                <span>夜空短片<small>星轨、银河与极光</small></span>
+              </span>
+            </button>
+          </div>
+          <div class="story-drawers">
+            <button class="story-archive-entry" id="open-story-archive" type="button" aria-haspopup="dialog">
+              <span>生活记录</span><small id="story-archive-count"></small><span aria-hidden="true">↗</span>
+            </button>
+            <button class="story-archive-entry story-collection-entry" id="open-collection-from-story" type="button">
+              <span>收藏室</span><span aria-hidden="true">↗</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="room room--collection" id="collection" aria-labelledby="collection-title" hidden>
+      <div class="room-environment" aria-hidden="true">
+        <img src="assets/img/universe-collection.webp" width="1672" height="941" alt="" loading="lazy" decoding="async" fetchpriority="low">
+      </div>
+      <header class="room-header">
+        <button class="back-button" type="button" data-desk>← 工作台</button>
+        <h1 id="collection-title" tabindex="-1">收藏室</h1>
+      </header>
+      <ul class="collection-shelf" id="collection-shelf" aria-label="收藏室陈列"></ul>
+    </section>
+  </main>
+
+  <div class="tunnel" id="tunnel" aria-hidden="true" hidden>
+    <img data-passage="research" src="assets/img/universe-tunnel.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low">
+    <img data-passage="projects" src="assets/img/universe-tunnel-projects.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low" hidden>
+    <img data-passage="story" src="assets/img/universe-tunnel-story.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low" hidden>
+    <canvas id="tunnel-light"></canvas>
+  </div>
+
+  <dialog class="field-study" id="field-study" aria-labelledby="field-title">
+    <div class="field-views" id="field-views"></div>
+    <div class="field-marker" id="field-marker" aria-hidden="true" hidden></div>
+    <div class="field-interface">
+      <header class="field-header">
+        <button class="field-button" id="field-exit" type="button" autofocus><span aria-hidden="true">‹</span> 研究室</button>
+        <h2 id="field-title">海岸城 <span>世界模型路线演示</span></h2>
+      </header>
+      <div class="field-waypoints" id="field-waypoints" aria-label="选择一条路线"></div>
+      <div class="field-landmarks" id="field-landmarks" role="group" aria-label="核对地标" hidden></div>
+      <footer class="field-observation">
+        <div class="field-caption">
+          <h3 id="field-location" tabindex="-1"></h3>
+          <p id="field-description" aria-live="polite"></p>
+        </div>
+        <div class="field-tools">
+          <button class="field-button field-return" id="field-return" type="button" hidden>← 回到岔路口</button>
+          <button class="field-button field-return" id="field-inspect" type="button" aria-expanded="false" aria-controls="field-landmarks" hidden>核对地标</button>
+          <button class="field-button" id="field-source" type="button" aria-haspopup="dialog">观察说明</button>
+        </div>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog class="robot-lab" id="robot-lab" aria-labelledby="robot-lab-title">
+    <div class="robot-lab-layout">
+      <header>
+        <button class="field-button" id="robot-lab-exit" type="button" autofocus>← 研究室</button>
+        <div>
+          <h2 id="robot-lab-title">机器人的练习场</h2>
+          <p>仓库路线演示</p>
+        </div>
+      </header>
+      <section class="robot-console" aria-labelledby="robot-console-title">
+        <h3 id="robot-console-title">改变通道条件</h3>
+        <div class="robot-conditions" id="robot-conditions" role="group" aria-label="选择通道条件"></div>
+        <canvas id="robot-map" width="720" height="400" role="img" aria-label="仓库路线图"></canvas>
+        <p class="robot-result" id="robot-result" aria-live="polite"></p>
+        <p class="robot-note" id="robot-note"></p>
+        <details class="robot-source">
+          <summary>它和训练有什么关系</summary>
+          <p>这张网格用最短路径计算演示如何改变场景条件。实际仿真还会改变摩擦、物体与传感器等条件，再到真实环境验证机器人能否适应。</p>
+          <a href="https://isaac-sim.github.io/IsaacLab/v3.0.0/source/isaaclab/tutorial.html" target="_blank" rel="noopener noreferrer">Isaac Lab 的仿真迁移示例 ↗</a>
+        </details>
+      </section>
+    </div>
+  </dialog>
+
+  <dialog class="topic-dialog" id="topic" aria-labelledby="topic-title">
+    <form method="dialog"><button class="quiet-button" type="submit" autofocus>关闭</button></form>
+    <div class="topic-art"><img src="assets/img/workroom-worlds.webp" width="1672" height="941" alt="从一处街角向远方延伸的海岸街区，画面远处叠着浅苔色的线框。" loading="lazy"></div>
+    <div class="topic-body">
+      <h2 id="topic-title">世界模型与未来产业</h2>
+      <p class="topic-lead">走到哪里，世界就延伸到哪里。</p>
+      <p>沿两条路线看到不同的地方，回到岔路口再认出同一组地标。这里用预制画面演示这两件事。检验一个交互式世界模型时，可以沿陌生路线继续走，再回到刚才的街角，观察重新呈现的地标和道路是否接得上。</p>
+      <p><a href="https://deepmind.google/blog/genie-4-a-new-generation-of-world-simulation/" target="_blank" rel="noopener noreferrer">观看 Google DeepMind 的交互世界演示 ↗</a></p>
+      <aside><strong>实时生成空间待打造</strong><p>可以先在本页走完两条路线，再对照官方演示里的移动与回访。</p></aside>
+    </div>
+  </dialog>
+  <dialog class="record-dialog" id="record" aria-labelledby="record-title">
+    <form method="dialog"><button class="quiet-button" type="submit" autofocus>关闭</button></form>
+    <div class="record-body">
+      <p id="record-kind"></p>
+      <h2 id="record-title"></h2>
+      <ul class="project-tags" id="record-project-tags" aria-label="技术" hidden></ul>
+      <div class="record-project-links" id="record-project-links" hidden></div>
+      <div id="record-text"></div>
+    </div>
+  </dialog>
+  <dialog class="story-archive-dialog" id="story-archive" aria-labelledby="story-archive-title">
+    <header class="story-dialog-header">
+      <h2 id="story-archive-title">生活记录</h2>
+      <form method="dialog"><button class="quiet-button" type="submit" autofocus>关闭</button></form>
+    </header>
+    <div class="story-archive-body">
+      <ul id="story-entries"></ul>
+      <p id="story-empty" hidden>生活记录待补充。</p>
+    </div>
+  </dialog>
+  <dialog class="story-film-dialog" id="story-film" aria-labelledby="story-film-title">
+    <header class="story-dialog-header">
+      <div>
+        <p>收藏影像</p>
+        <h2 id="story-film-title">夜空短片</h2>
+      </div>
+      <form method="dialog"><button class="quiet-button" type="submit" autofocus>关闭</button></form>
+    </header>
+    <video id="story-film-player" width="1920" height="870" controls playsinline preload="none"
+      poster="assets/img/story-night-poster.webp" src="assets/video/story-night-sky.mp4" aria-label="星轨、银河与极光的短片"></video>
+    <nav class="story-film-chapters" id="story-film-chapters" aria-label="跳转到片段" hidden></nav>
+  </dialog>
+</body>
+</html>
