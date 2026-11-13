@@ -618,6 +618,7 @@
     tunnel.style.removeProperty("--passage-opacity");
     tunnel.style.removeProperty("--passage-color");
     tunnel.style.removeProperty("--passage-window");
+    tunnel.style.removeProperty("--passage-fade");
     tunnel.hidden = true;
   }
 
@@ -691,6 +692,7 @@
       const brightness = .72 + fadeIn * .30 - fadeOut ** 2 * .62;
       tunnel.style.setProperty("--tunnel-scale", zoom.toFixed(3));
       tunnel.style.setProperty("--tunnel-bright", brightness.toFixed(2));
+      tunnel.style.setProperty("--passage-fade",Math.min(1,t / .19).toFixed(3));
       tunnel.style.setProperty("--passage-opacity", (fadeIn * (1 - Math.max(0,(t - handoff) / (1 - handoff)))).toFixed(3));
       if (t >= handoff) {
         const hole = length * ((t - handoff) / (1 - handoff)) ** 1.4;
@@ -719,8 +721,9 @@
         const radius = base * (.03 + .76 * t ** 2.4);
         const light = (1 - fadeOut) * fadeIn;
         const glow = ctx.createRadialGradient(x,y,0,x,y,Math.max(1,radius * 1.3));
-        glow.addColorStop(0,palette[0] + "89");
-        glow.addColorStop(.46,palette[1] + "34");
+        glow.addColorStop(0,palette[0] + "b5");
+        glow.addColorStop(.27,palette[1] + "47");
+        glow.addColorStop(.54,palette[2] + "21");
         glow.addColorStop(1,palette[1] + "00");
         ctx.globalAlpha = light;
         ctx.fillStyle = glow;
@@ -729,10 +732,12 @@
         ctx.lineWidth = 1.4;
         ctx.shadowColor = palette[2];
         ctx.shadowBlur = 14;
-        for (let i = 0; i < 3; i += 1) {
-          ctx.globalAlpha = light * (1 - i * .25);
+        for (let i = 0; i < 4; i += 1) {
+          ctx.globalAlpha = light * (1 - i * .21);
           ctx.beginPath();
-          ctx.ellipse(x,y,radius * (1 - i * .14),radius * (.69 + lock * .25 - i * .09),t * .55, t * 2.4 + i * 2,t * 2.4 + i * 2 + 4.1);
+          const spin = t * 3.1 + i * 1.8;
+          ctx.strokeStyle = palette[i % palette.length];
+          ctx.ellipse(x,y,radius * (1 - i * .115),radius * (.69 + lock * .25 - i * .085),t * .62 + i * .26,spin,spin + 3.6);
           ctx.stroke();
         }
         ctx.shadowBlur = 0;

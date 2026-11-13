@@ -20,7 +20,7 @@
   48%,72% { opacity: .9; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(-3px); }
 }
-.tunnel { mask-image: var(--passage-window,none); }
+.tunnel { mask-image: var(--passage-window,none); opacity: var(--passage-fade,0); }
 .tunnel[data-route="collection"] img { filter: brightness(var(--tunnel-bright,.8)) saturate(.58) hue-rotate(-12deg); }
 .tunnel[data-route="collection"] {
   background: radial-gradient(ellipse at center,#436b61,#091c20 62%);
@@ -59,6 +59,43 @@
   border-radius: 3px 10px 3px 10px;
 }
 .workroom-scene .monitor-tag b { border-left-color: color-mix(in srgb,var(--halo) 35%,transparent); }
+.workroom-refractions {
+  position: absolute; inset: 0; pointer-events: none;
+  mix-blend-mode: screen; opacity: 0; transition: opacity 420ms var(--ease);
+}
+.workroom-refractions::before, .workroom-refractions::after {
+  content: ""; position: absolute; inset: 0;
+}
+.workroom-refractions::before {
+  background: radial-gradient(ellipse 4.8% 20% at 51% 55%,#77e9ff55,transparent 82%),
+    radial-gradient(ellipse 5.2% 17% at 75% 62%,#67dbff55,transparent 78%);
+  animation: workroom-refract 4.4s ease-in-out infinite alternate;
+}
+.workroom-refractions::after {
+  background: radial-gradient(ellipse 14% 10% at var(--screen-x,50%) var(--screen-y,58%),var(--screen-glow,#82ceff55),transparent 78%);
+  clip-path: polygon(28% 55%,46% 49%,77% 49%,100% 59%,100% 78%,56% 74%,28% 62%);
+  opacity: 0; transition: opacity 360ms var(--ease);
+}
+[data-phase="ready"] .workroom-refractions { opacity: 1; }
+.workroom-stage:has(.monitor:is(:hover,:focus-visible)) .workroom-refractions::after { opacity: 1; }
+.workroom-stage:has(.monitor--research:is(:hover,:focus-visible)) { --screen-x: 39%; --screen-glow: #a4efdc62; }
+.workroom-stage:has(.monitor--projects:is(:hover,:focus-visible)) { --screen-x: 58%; --screen-glow: #d2b0ff73; }
+.workroom-stage:has(.monitor--story:is(:hover,:focus-visible)) { --screen-x: 83%; --screen-glow: #fbd4a872; }
+.workroom-stage:has(.monitor--collection:is(:hover,:focus-visible)) { --screen-x: 92%; --screen-y: 68%; --screen-glow: #9ce7cb66; }
+@keyframes workroom-refract {
+  from { opacity: .14; }
+  to { opacity: .74; }
+}
+.room--projects .room-environment::after,
+.room--story .room-environment::after,
+.room--collection .room-environment::after { background-size: 120% 115%,100% 100%; }
+.room--projects .room-environment::after { animation: scene-reflection 6.4s ease-in-out infinite alternate; }
+.room--story .room-environment::after { animation: scene-reflection 10s ease-in-out infinite alternate; }
+.room--collection .room-environment::after { animation: scene-reflection 8s ease-in-out infinite alternate; }
+@keyframes scene-reflection {
+  from { background-position: 0 0,0 0; }
+  to { background-position: 100% 100%,0 0; }
+}
 .room[data-passage-arrival] .room-header h1,
 .room[data-passage-arrival] :is(.research-console,.project-console,.story-content,.collection-shelf) {
   animation: scene-display-arrive 510ms var(--ease) both;
@@ -78,4 +115,7 @@
 @media (max-height: 485px) {
   .room .room-header h1 { top: 7px; font-size: 16px; gap: 2px; padding-block: 3px; }
   .room-header h1 small { font-size: 8px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .workroom-refractions::before { display: none; }
 }

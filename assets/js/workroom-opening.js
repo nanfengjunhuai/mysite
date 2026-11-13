@@ -20,6 +20,40 @@
     return t * t * (3 - 2 * t);
   }
 
+  // Project twisted strands around a sphere. Draw the far side first so
+  // the bright surface has depth even at phone sizes.
+  function drawCore(x,y,radius,time,opacity) {
+    const rotation = time * .0023;
+    const strands = [[],[]];
+    for (let strand = 0; strand < 30; strand += 1) {
+      let previous;
+      for (let step = 0; step <= 32; step += 1) {
+        const latitude = .19 + step / 32 * (Math.PI - .38);
+        const longitude = strand * turn / 30 + rotation + latitude * 2.15;
+        const u = Math.sin(latitude) * Math.cos(longitude);
+        const v = Math.cos(latitude);
+        const w = Math.sin(latitude) * Math.sin(longitude);
+        const depth = w * .91 - v * .41;
+        const scale = 1 / (1.19 - depth * .18);
+        const point = [x + u * radius * scale,y + (v * .91 + w * .41) * radius * scale,depth];
+        if (previous) strands[depth > 0 ? 1 : 0].push([previous,point]);
+        previous = point;
+      }
+    }
+    strands.forEach((segments,side) => {
+      context.beginPath();
+      for (const [a,b] of segments) {
+        context.moveTo(a[0],a[1]);
+        context.lineTo(b[0],b[1]);
+      }
+      context.globalAlpha = opacity * (side ? .74 : .29);
+      context.strokeStyle = side ? "#bbfaff" : "#5488dd";
+      context.lineWidth = side ? .85 : .65;
+      context.stroke();
+    });
+    context.globalAlpha = 1;
+  }
+
   function paint(now) {
     const elapsed = now - start;
     const width = layer.clientWidth;
@@ -99,14 +133,14 @@
       context.stroke();
     }
 
-    const core = unit * (.115 + forward * .38);
+    const core = unit * (.23 + forward * .43);
     context.globalAlpha = pulse;
     const glass = context.createRadialGradient(x - core * .32,y - core * .29,0,x,y,core * 1.12);
-    glass.addColorStop(0,"#dcfbff");
-    glass.addColorStop(.18,"#65c5ed");
-    glass.addColorStop(.48,"#266990");
-    glass.addColorStop(.8,"#102138");
-    glass.addColorStop(1,"#87dfff");
+    glass.addColorStop(0,"#8ad3ef");
+    glass.addColorStop(.22,"#297f9d");
+    glass.addColorStop(.54,"#20365e");
+    glass.addColorStop(.8,"#101b31");
+    glass.addColorStop(1,"#536fc2");
     context.fillStyle = glass;
     context.shadowColor = "#5acbff";
     context.shadowBlur = 24;
@@ -114,6 +148,7 @@
     context.arc(x,y,core,0,turn);
     context.fill();
     context.shadowBlur = 0;
+    drawCore(x,y,core,elapsed,pulse);
     context.lineWidth = 1;
     context.strokeStyle = `rgba(205,242,255,${pulse * (.6 + .4 * align)})`;
     context.beginPath();
