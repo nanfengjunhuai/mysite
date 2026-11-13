@@ -739,28 +739,69 @@
   });
   storyFilm.addEventListener("close", () => storyFilmPlayer.pause());
   const collectionShelf = document.querySelector("#collection-shelf");
-  collectionShelf.toggleAttribute("data-expanded",window.SPACE_COLLECTION.length > 3);
-  for (const item of window.SPACE_COLLECTION) {
+  const collectionView = document.querySelector("#collection-view");
+  const collectionViewContent = document.querySelector("#collection-view-content");
+  function collectionUrl(value) {
+    if (typeof value !== "string" || !value) return "";
+    if (/^assets\/collection\/[a-f\d-]+\.(jpg|png|webp|gif|avif|mp4|webm)$/.test(value)) return value;
+    try {
+      const url = new URL(value);
+      if (url.protocol === "https:" && !url.username && !url.password) return url.href;
+    } catch {}
+    return "";
+  }
+  function showCollectionItem(item, url) {
+    document.querySelector("#collection-view-title").textContent = item.title;
+    const media = document.createElement({ image: "img", video: "video", quote: "blockquote" }[item.kind]);
+    if (item.kind === "quote") media.textContent = item.quote;
+    else {
+      media.src = url;
+      if (item.kind === "image") media.alt = item.title;
+      else {
+        media.controls = true;
+        media.playsInline = true;
+      }
+    }
+    collectionViewContent.replaceChildren(media);
+    if (item.description) {
+      const caption = document.createElement("p");
+      caption.textContent = item.description;
+      collectionViewContent.append(caption);
+    }
+    collectionView.showModal();
+  }
+  collectionView.addEventListener("close", () => collectionViewContent.replaceChildren());
+  function addCollectionItem(item, personal = false) {
+    const url = personal ? collectionUrl(item.url) : item.href;
+    const imageUrl = personal ? collectionUrl(item.image) : item.image;
+    const link = ["link", "video-link"].includes(item.kind);
+    if (personal && item.kind !== "quote" && !url) return;
     const row = document.createElement("li");
-    const exhibit = document.createElement(item.kind === "link" ? "a" : "button");
+    const exhibit = document.createElement(link ? "a" : "button");
     exhibit.className = "collection-exhibit";
-    if (item.kind === "link") {
-      exhibit.href = item.href;
+    exhibit.classList.toggle("collection-exhibit--personal",personal);
+    if (link) {
+      exhibit.href = url;
       exhibit.target = "_blank";
       exhibit.rel = "noopener noreferrer";
     } else {
       exhibit.type = "button";
       exhibit.setAttribute("aria-haspopup","dialog");
       exhibit.addEventListener("click",() => {
-        if (item.kind === "film") storyFilm.showModal();
+        if (personal) showCollectionItem(item,url);
+        else if (item.kind === "film") storyFilm.showModal();
         else openResearchView(fieldHash,exhibit);
       });
     }
-    const image = document.createElement("img");
-    image.src = item.image;
-    image.alt = "";
-    image.loading = "lazy";
-    image.decoding = "async";
+    if (imageUrl) {
+      const image = document.createElement("img");
+      image.src = imageUrl;
+      image.alt = "";
+      image.loading = "lazy";
+      image.decoding = "async";
+      image.addEventListener("error",() => image.remove(), { once: true });
+      exhibit.append(image);
+    }
     const copy = document.createElement("span");
     copy.className = "collection-copy";
     const category = document.createElement("small");
@@ -771,12 +812,22 @@
     arrow.textContent = "↗";
     arrow.setAttribute("aria-hidden","true");
     const description = document.createElement("span");
-    description.textContent = item.description;
+    description.textContent = item.kind === "quote" ? item.quote : item.description;
     copy.append(category,heading,arrow,description);
-    exhibit.append(image,copy);
+    exhibit.append(copy);
     row.append(exhibit);
     collectionShelf.append(row);
   }
+  window.SPACE_COLLECTION.forEach(item => addCollectionItem(item));
+  fetch("content/collection-personal.json").then(response => response.ok ? response.json() : []).then(items => {
+    if (!Array.isArray(items)) return;
+    for (const item of items) {
+      if (item && typeof item.title === "string" && ["image","video","video-link","quote"].includes(item.kind)) {
+        addCollectionItem(item,true);
+      }
+    }
+    collectionShelf.toggleAttribute("data-expanded",collectionShelf.children.length > 3);
+  }).catch(() => {});
   const chapterButtons = [];
   let pendingChapter = null;
   function syncStoryFilmChapter() {

@@ -16,6 +16,24 @@
 }
 .room--collection .room-environment img { animation: none; }
 .room--collection .room-environment::before { content: none; }
+.room-header .collection-edit {
+  inset: max(18px,env(safe-area-inset-top)) max(var(--edge),env(safe-area-inset-right)) auto auto;
+  text-decoration: none; white-space: nowrap;
+}
+.collection-view {
+  width: min(720px,calc(100% - 28px)); max-height: 88dvh; overflow: auto; padding: clamp(18px,4vw,34px);
+  color: #edf9f4; background: #10242b; border: 1px solid #8fc2b5; border-radius: 14px;
+}
+.collection-view::backdrop { background: #020b12c9; }
+.collection-view form { float: right; margin: 0 0 12px 14px; }
+.collection-view h2 { font-size: clamp(20px,5vw,30px); overflow-wrap: anywhere; }
+#collection-view-content { clear: both; padding-top: 14px; overflow-wrap: anywhere; }
+#collection-view-content :is(img,video) { display: block; max-width: 100%; max-height: 63dvh; margin: 0 auto; }
+#collection-view-content blockquote { margin: 0; padding: 12px 16px; border-left: 2px solid #f2c8a1; white-space: pre-wrap; line-height: 1.75; }
+#collection-view-content p { margin-top: 12px; line-height: 1.6; }
+.collection-exhibit--personal { background: radial-gradient(ellipse at 75% 0%,#345c57,#10282f 72%); }
+.collection-exhibit--personal .collection-copy { overflow-wrap: anywhere; }
+.collection-exhibit--personal .collection-copy span { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; overflow: hidden; }
 .collection-shelf {
   position: absolute; top: var(--room-y); left: var(--room-x); translate: -50% -53%;
   width: max(100cqw,177.68cqh); height: max(100cqh,56.28cqw);

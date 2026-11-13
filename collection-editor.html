@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src https://api.github.com; img-src 'self' blob:; media-src blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
+  <title>添加收藏｜My Personal Space</title>
+  <link rel="stylesheet" href="assets/css/collection-editor.css">
+  <script defer src="assets/js/collection-editor.js"></script>
+</head>
+<body>
+  <main>
+    <a class="back" href="workroom.html#collection">← 收藏室</a>
+    <h1>添加收藏</h1>
+    <p>发布后，访客也可以在收藏室看到这条内容。</p>
+    <form id="collection-editor">
+      <label>内容类型
+        <select name="kind">
+          <option value="image">图片</option>
+          <option value="video">上传短视频</option>
+          <option value="video-link">视频链接</option>
+          <option value="quote">语录</option>
+        </select>
+      </label>
+      <label>标题<input name="title" maxlength="60" required></label>
+      <label id="editor-file-field">选择图片<input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/avif" required><small>最多 10 MB。</small></label>
+      <label id="editor-url-field" hidden>视频链接<input name="url" type="url" placeholder="https://…" maxlength="2000" disabled><small>支持 HTTPS 分享链接，访客会在原平台打开。</small></label>
+      <label id="editor-quote-field" hidden>语录正文<textarea name="quote" rows="4" maxlength="2000" disabled></textarea></label>
+      <label>说明或出处 <small>选填</small><textarea name="description" rows="2" maxlength="300"></textarea></label>
+      <div id="editor-preview" hidden></div>
+      <details>
+        <summary>首次使用，创建 GitHub 发布令牌</summary>
+        <p>打开 <a href="https://github.com/settings/personal-access-tokens/new?name=Personal%20Space%20Publisher&amp;target_name=nanfengjunhuai&amp;contents=write" target="_blank" rel="noopener noreferrer">GitHub 令牌设置 ↗</a>，选择 <strong>Only select repositories → mysite</strong>，将 <strong>Contents</strong> 设为 <strong>Read and write</strong>，生成后粘贴到下方。</p>
+      </details>
+      <label>GitHub 发布令牌<input name="token" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" required><small>令牌只在当前页面使用，关闭页面后需重新输入。</small></label>
+      <button type="submit">发布到收藏室</button>
+      <p id="editor-status" role="status" aria-live="polite"></p>
+      <a id="editor-result" href="workroom.html#collection" hidden>返回收藏室 →</a>
+    </form>
+  </main>
+</body>
+</html>

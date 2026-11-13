@@ -158,10 +158,17 @@
       <header class="room-header">
         <button class="back-button" type="button" data-desk>← 工作台</button>
         <h1 id="collection-title" tabindex="-1">收藏室</h1>
+        <a class="back-button collection-edit" href="collection-editor.html">＋ 添加收藏</a>
       </header>
       <ul class="collection-shelf" id="collection-shelf" aria-label="收藏室陈列"></ul>
     </section>
   </main>
+
+  <dialog class="collection-view" id="collection-view" aria-labelledby="collection-view-title">
+    <form method="dialog"><button class="quiet-button" type="submit">关闭</button></form>
+    <h2 id="collection-view-title"></h2>
+    <div id="collection-view-content"></div>
+  </dialog>
 
   <div class="tunnel" id="tunnel" aria-hidden="true" hidden>
     <img data-passage="research" src="assets/img/universe-tunnel.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low">

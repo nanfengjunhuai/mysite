@@ -4,6 +4,9 @@
 
 ## 修改内容
 
+- 打开工作台的收藏室，点击「添加收藏」，可在手机或电脑上发布图片、短视频、视频链接或语录。图片和 MP4 / WebM 上传上限为 10 MB。较大的视频可使用 HTTPS 分享链接。
+- 首次发布时，在 GitHub 为 `mysite` 创建 Fine-grained personal access token，仓库权限只选 `Contents → Read and write`。令牌仅用于当前编辑页的 GitHub API 请求，发布后内容和上传素材会进入公开仓库。
+- 网页发布的条目保存在 `content/collection-personal.json`，上传文件保存在 `assets/collection/`。在本地继续修改站点前，先执行 `git pull --ff-only`。
 - `content/notes.js` 存放自叙帖和文章。新增文章时复制一条已有记录，给它独立的 ID，再替换标题、日期、摘要和正文。
 - `content/projects.js` 存放项目。新增项目时复制一条已有记录，换一个独立的 ID，再填写介绍、技术标签和素材路径。
 - `content/site.js`、`content/field-study.js`、`content/robotics-study.js` 和 `content/collection.js` 存放空间文字和研究室资料。
