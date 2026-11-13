@@ -127,7 +127,9 @@
     let selected = 0;
     function select(position, focus = false) {
       if (!entries.length) return;
+      const direction = Math.sign(position - selected);
       selected = (position + entries.length) % entries.length;
+      screens.style.setProperty("--project-enter", direction * 28 + "px");
       entries.forEach(({ panel, button }, i) => {
         panel.hidden = i !== selected;
         button.setAttribute("aria-pressed", String(i === selected));

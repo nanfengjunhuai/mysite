@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="assets/css/robotics-study.css">
   <link rel="stylesheet" href="assets/css/collection-room.css">
   <link rel="stylesheet" href="assets/css/spatial-scenes.css">
+  <link rel="stylesheet" href="assets/css/workroom-layout.css">
   <script defer src="content/site.js"></script>
   <script defer src="content/projects.js"></script>
   <script defer src="content/notes.js"></script>
@@ -47,8 +48,14 @@
           <div class="workroom-refractions" aria-hidden="true"></div>
           <div class="room-ports" id="ports" inert>
             <button class="monitor monitor--research" type="button" data-target="research"><span class="monitor-tag">研究室<b aria-hidden="true">↗</b></span></button>
+            <button class="monitor monitor--story" type="button" data-target="story">
+              <span class="desk-journal">
+                <span class="desk-journal-label">自叙帖 <span aria-hidden="true">↗</span></span>
+                <strong id="desk-author"></strong>
+                <span class="desk-journal-note" id="desk-journal-note"></span>
+              </span>
+            </button>
             <button class="monitor monitor--projects" type="button" data-target="projects"><span class="monitor-tag">项目库<b aria-hidden="true">↗</b></span></button>
-            <button class="monitor monitor--story" type="button" data-target="story"><span class="monitor-tag">自叙帖<b aria-hidden="true">↗</b></span></button>
             <button class="monitor monitor--collection" type="button" data-target="collection"><span class="monitor-tag">收藏室<b aria-hidden="true">↗</b></span></button>
           </div>
         </div>
@@ -70,8 +77,9 @@
           </div>
           <div class="view-shortcuts">
             <button type="button" data-view="0" aria-label="看向研究室显示器">研究室</button>
-            <button type="button" data-view="1" aria-label="看向项目库显示器">项目库</button>
-            <button type="button" data-view="2" aria-label="看向自叙帖显示器">自叙帖</button>
+            <button type="button" data-view="1" aria-label="看向自叙帖主屏">自叙帖</button>
+            <button type="button" data-view="2" aria-label="看向项目库显示器">项目库</button>
+            <button type="button" data-view="3" aria-label="看向收藏室入口">收藏室</button>
           </div>
         </div>
       </div>
@@ -144,6 +152,9 @@
             <div class="story-intro">
               <p class="typed-intro" id="typed-intro" aria-hidden="true"></p>
               <p class="visually-hidden" id="accessible-intro"></p>
+              <a class="story-feature" id="story-feature" aria-haspopup="dialog" hidden>
+                <span><small>随笔</small><strong></strong></span><b aria-hidden="true">↗</b>
+              </a>
               <button class="story-reveal" id="show-intro" type="button">显示全文</button>
             </div>
             <button class="story-reel" id="open-story-film" type="button" aria-haspopup="dialog">

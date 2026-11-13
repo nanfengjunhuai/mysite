@@ -43,12 +43,12 @@
   40%,68% { opacity: 1; translate: 0 0; }
   100% { opacity: 0; translate: 0 -5px; }
 }
-.workroom-scene[data-arrival] .monitor-tag {
+.workroom-scene[data-arrival] :is(.monitor-tag,.desk-journal) {
   animation: workroom-monitor-arrive 430ms var(--ease) both;
   animation-delay: var(--arrival-delay,0ms);
 }
-.workroom-scene[data-arrival] .monitor--projects { --arrival-delay: 70ms; }
-.workroom-scene[data-arrival] .monitor--story { --arrival-delay: 140ms; }
+.workroom-scene[data-arrival] .monitor--research { --arrival-delay: 90ms; }
+.workroom-scene[data-arrival] .monitor--projects { --arrival-delay: 140ms; }
 .workroom-scene[data-arrival] .monitor--collection { --arrival-delay: 210ms; }
 @keyframes workroom-monitor-arrive {
   from { opacity: 0; transform: translateY(5px) scale(.96); }

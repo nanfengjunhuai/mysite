@@ -79,8 +79,8 @@
 [data-phase="ready"] .workroom-refractions { opacity: 1; }
 .workroom-stage:has(.monitor:is(:hover,:focus-visible)) .workroom-refractions::after { opacity: 1; }
 .workroom-stage:has(.monitor--research:is(:hover,:focus-visible)) { --screen-x: 39%; --screen-glow: #a4efdc62; }
-.workroom-stage:has(.monitor--projects:is(:hover,:focus-visible)) { --screen-x: 58%; --screen-glow: #d2b0ff73; }
-.workroom-stage:has(.monitor--story:is(:hover,:focus-visible)) { --screen-x: 83%; --screen-glow: #fbd4a872; }
+.workroom-stage:has(.monitor--story:is(:hover,:focus-visible)) { --screen-x: 58%; --screen-glow: #fbd4a872; }
+.workroom-stage:has(.monitor--projects:is(:hover,:focus-visible)) { --screen-x: 83%; --screen-glow: #d2b0ff73; }
 .workroom-stage:has(.monitor--collection:is(:hover,:focus-visible)) { --screen-x: 92%; --screen-y: 68%; --screen-glow: #9ce7cb66; }
 @keyframes workroom-refract {
   from { opacity: .14; }

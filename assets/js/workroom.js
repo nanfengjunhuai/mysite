@@ -7,7 +7,7 @@
   const viewControls = document.querySelector("#view-controls");
   const viewPanorama = document.querySelector("#view-panorama");
   const viewButtons = [...viewControls.querySelectorAll("[data-view]")];
-  const monitorCenters = [.345,.566,.839];
+  const monitorCenters = [.345,.566,.839,.898];
   const sound = document.querySelector("#sound");
   const soundState = document.querySelector("#sound-state");
   const tunnel = document.querySelector("#tunnel");
@@ -49,7 +49,7 @@
   const fullIntro = document.querySelector("#show-intro");
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
   const roomIds = ["research", "projects", "story", "collection"];
-  const deskViews = { research:0, projects:1, story:2, collection:2 };
+  const deskViews = { research:0, story:1, projects:2, collection:3 };
   const palettes = {
     research: ["#E8F1E9", "#D9E7EF", "#F5D2B4"],
     projects: ["#F6F3F7", "#E4D8E8", "#ECCED6"],
@@ -63,8 +63,9 @@
     collection: { duration: 810, zoom: .26, rays: 15, strength: .32, axis: .48 }
   };
 
-  const { title, intro, nightFilmChapters } = window.SITE_CONTENT.workroom;
+  const { title, author, intro, nightFilmChapters } = window.SITE_CONTENT.workroom;
   document.querySelector("#desk-title").textContent = title;
+  document.querySelector("#desk-author").textContent = author;
   document.title = title;
   const letters = Array.from(intro);
   document.querySelector("#accessible-intro").textContent = intro;
@@ -80,7 +81,7 @@
   let pageActive = true;
   let lastEntrance;
   let lastResearchTrigger;
-  let viewIndex = 0;
+  let viewIndex = deskViews.story;
   let cameraX = 0;
   let dragOrigin = 0;
   let cropped = false;
@@ -665,7 +666,7 @@
     const centerX = width * .5, centerY = height * axis;
     const length = Math.hypot(width, height);
     const base = Math.min(width,height);
-    const originRect = !current && lastEntrance?.querySelector(".monitor-tag").getBoundingClientRect();
+    const originRect = !current && lastEntrance?.querySelector(".monitor-tag,.desk-journal")?.getBoundingClientRect();
     const originX = originRect ? Math.max(0,Math.min(width,originRect.x + originRect.width / 2)) : centerX;
     const originY = originRect ? Math.max(0,Math.min(height,originRect.y + originRect.height / 2)) : centerY;
     const rays = Array.from({ length: motion.rays }, (_, i) => {
@@ -889,7 +890,11 @@
     copy.append(category,heading,arrow,description);
     exhibit.append(copy);
     row.append(exhibit);
-    collectionShelf.append(row);
+    if (personal) {
+      const firstDefault = collectionShelf.querySelector("li:not([data-personal])");
+      row.dataset.personal = "";
+      collectionShelf.insertBefore(row,firstDefault);
+    } else collectionShelf.append(row);
   }
   window.SPACE_COLLECTION.forEach(item => addCollectionItem(item));
   fetch("content/collection-personal.json").then(response => response.ok ? response.json() : []).then(items => {
@@ -1033,6 +1038,15 @@
   const personalNotes = window.SITE_NOTES.filter(({ type,sample }) => type === "personal" && sample === false)
     .sort((first, second) => second.date.localeCompare(first.date));
   const entryCount = document.querySelector("#story-archive-count");
+  const feature = personalNotes.find(note => note.id === "cause-or-fate") ?? personalNotes[0];
+  if (feature) {
+    document.querySelector("#desk-journal-note").textContent = feature.title;
+    const featureLink = document.querySelector("#story-feature");
+    featureLink.href = "article.html?id=" + encodeURIComponent(feature.id);
+    featureLink.querySelector("strong").textContent = feature.title;
+    featureLink.addEventListener("click",event => openRecord(event,feature,"story"));
+    featureLink.hidden = false;
+  }
   entryCount.textContent = personalNotes.length
     ? personalNotes.length + " 篇"
     : "待补充";

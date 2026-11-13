@@ -4,6 +4,7 @@ window.SITE_CONTENT = {
   /* === [可替换] 个人空间标题与自叙帖开场 === */
   workroom: {
     title: "My Personal Space",
+    author: "李银",
     intro: "您好，我是李银，欢迎来到我的空间。",
     /* === [可替换] 夜空短片章节。时间以秒为单位，按播放顺序排列。 === */
     nightFilmChapters: [
