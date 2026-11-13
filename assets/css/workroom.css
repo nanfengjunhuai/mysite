@@ -76,6 +76,61 @@ h1, h2, p { margin: 0; }
 .workroom-poster, .workroom-film { object-fit: fill; display: block; }
 .workroom-film { visibility: hidden; }
 [data-phase="playing"] .workroom-film { visibility: visible; }
+.workroom-practicals {
+  position: absolute; inset: 0; pointer-events: none; display: none;
+}
+[data-phase="ready"] .workroom-practicals { display: block; }
+.workroom-practicals span { position: absolute; }
+/* Align the light to features in workroom-settled.webp, in stage coordinates. */
+.workroom-scan {
+  inset: 26.4% 62% 54.8% 31.7%; overflow: hidden; mix-blend-mode: screen;
+  mask-image: linear-gradient(90deg,transparent,#000 24%,#000 76%,transparent);
+}
+.workroom-scan::after {
+  position: absolute; inset: 0; content: "";
+  background: linear-gradient(180deg,transparent 30%,#7efbe32c 48%,#bafff4a8 50%,#7efbe32c 52%,transparent 68%);
+  animation: workroom-scan 6.8s linear infinite;
+}
+.workroom-sample {
+  left: 59.5%; top: 32.3%; width: .42%; aspect-ratio: 1; border-radius: 50%;
+  background: #f7eaff; box-shadow: 0 0 8px 2px #c5aaff; mix-blend-mode: screen;
+  animation: workroom-sample 5.4s linear infinite;
+}
+.workroom-caret {
+  left: 84.3%; top: 32.2%; width: max(1px,.1%); height: .85%;
+  background: #794f42; box-shadow: 0 0 3px #d28862a8;
+  animation: workroom-caret 2.8s ease-in-out infinite;
+}
+.workroom-robot-light {
+  left: 97.25%; top: 60.7%; width: .35%; aspect-ratio: 1; border-radius: 50%;
+  background: #b5edff; box-shadow: 0 0 8px 2px #5fbfff; mix-blend-mode: screen;
+  animation: workroom-robot-light 7.6s ease-in-out infinite;
+}
+@keyframes workroom-scan {
+  0%,22% { opacity: 0; transform: translateY(-62%); }
+  25% { opacity: .85; }
+  31% { opacity: 0; transform: translateY(62%); }
+  100% { opacity: 0; transform: translateY(62%); }
+}
+@keyframes workroom-sample {
+  0%,46% { opacity: 0; left: 59.5%; top: 32.3%; }
+  49% { opacity: .92; left: 61.2%; top: 31%; }
+  52% { opacity: .85; left: 63.4%; top: 27.5%; }
+  55% { opacity: .62; left: 66.1%; top: 27%; }
+  57%,100% { opacity: 0; left: 67.3%; top: 25.6%; }
+}
+@keyframes workroom-caret {
+  0%,34%,100% { opacity: 0; }
+  47%,63% { opacity: .7; }
+  76% { opacity: 0; }
+}
+@keyframes workroom-robot-light {
+  0%,71%,89%,100% { opacity: 0; }
+  77%,83% { opacity: .75; }
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-phase="ready"] .workroom-practicals { display: none; }
+}
 .workroom::after {
   position: absolute; z-index: 1; inset: auto 0 0; height: 112px; content: "";
   background: linear-gradient(0deg,#060d19b0,transparent);
