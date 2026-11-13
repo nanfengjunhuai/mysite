@@ -99,14 +99,28 @@
       context.stroke();
     }
 
-    const core = unit * (.065 + forward * .38);
+    const core = unit * (.115 + forward * .38);
+    context.globalAlpha = pulse;
+    const glass = context.createRadialGradient(x - core * .32,y - core * .29,0,x,y,core * 1.12);
+    glass.addColorStop(0,"#dcfbff");
+    glass.addColorStop(.18,"#65c5ed");
+    glass.addColorStop(.48,"#266990");
+    glass.addColorStop(.8,"#102138");
+    glass.addColorStop(1,"#87dfff");
+    context.fillStyle = glass;
+    context.shadowColor = "#5acbff";
+    context.shadowBlur = 24;
+    context.beginPath();
+    context.arc(x,y,core,0,turn);
+    context.fill();
+    context.shadowBlur = 0;
     context.lineWidth = 1;
     context.strokeStyle = `rgba(205,242,255,${pulse * (.6 + .4 * align)})`;
     context.beginPath();
-    context.moveTo(x,y - core);
-    context.lineTo(x + core,y);
-    context.lineTo(x,y + core);
-    context.lineTo(x - core,y);
+    context.moveTo(x,y - core * .55);
+    context.lineTo(x + core * .55,y);
+    context.lineTo(x,y + core * .55);
+    context.lineTo(x - core * .55,y);
     context.closePath();
     context.stroke();
     context.fillStyle = "#e5f8ff";

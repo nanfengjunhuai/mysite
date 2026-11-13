@@ -12,6 +12,7 @@
   const soundState = document.querySelector("#sound-state");
   const tunnel = document.querySelector("#tunnel");
   const tunnelLight = document.querySelector("#tunnel-light");
+  const passageTitle = document.querySelector("#passage-title");
   const tunnelImages = new Map(Array.from(tunnel.querySelectorAll("[data-passage]"), (image) => [image.dataset.passage,image]));
   const roomStage = document.querySelector("main");
   const researchRoom = document.querySelector("#research");
@@ -585,9 +586,11 @@
     syncPageAudio();
     researchRoom.toggleAttribute("data-arriving", id === "research" && arriving);
     roomIds.forEach((name) => {
-      document.getElementById(name).hidden = name !== id;
+      const room = document.getElementById(name);
+      room.hidden = name !== id;
+      room.toggleAttribute("data-passage-arrival",name === id && arriving);
     });
-    document.title = id ? document.querySelector("#" + id + "-title").textContent + "｜" + title : title;
+    document.title = id ? document.querySelector("#" + id + "-title span").textContent + "｜" + title : title;
     window.scrollTo(0, 0);
     if (!id) {
       layoutDesk();
@@ -612,6 +615,9 @@
     tunnel.style.removeProperty("--tunnel-scale");
     tunnel.style.removeProperty("--tunnel-bright");
     tunnel.style.removeProperty("--tunnel-axis-y");
+    tunnel.style.removeProperty("--passage-opacity");
+    tunnel.style.removeProperty("--passage-color");
+    tunnel.style.removeProperty("--passage-window");
     tunnel.hidden = true;
   }
 
@@ -632,13 +638,16 @@
     const ctx = tunnelLight.getContext("2d");
     const preferred = tunnelImages.get(route);
     const image = preferred?.naturalWidth ? preferred : tunnelImages.get("research");
-    if (!motion || !image.naturalWidth) {
+    if (!motion) {
       showRoom(id);
       return;
     }
     for (const candidate of tunnelImages.values()) candidate.hidden = candidate !== image;
     tunnel.dataset.route = route;
     const returning = !id;
+    passageTitle.textContent = returning ? "工作台" : document.querySelector("#" + id + "-title span").textContent;
+    tunnel.style.setProperty("--passage-color",palette[1]);
+    tunnel.style.setProperty("--passage-opacity","0");
     const axis = passageMotion[image.dataset.passage].axis;
     tunnel.dataset.direction = returning ? "return" : "enter";
     tunnel.style.setProperty("--tunnel-axis-y",axis * 100 + "%");
@@ -654,6 +663,10 @@
     ctx?.scale(scale, scale);
     const centerX = width * .5, centerY = height * axis;
     const length = Math.hypot(width, height);
+    const base = Math.min(width,height);
+    const originRect = !current && lastEntrance?.querySelector(".monitor-tag").getBoundingClientRect();
+    const originX = originRect ? Math.max(0,Math.min(width,originRect.x + originRect.width / 2)) : centerX;
+    const originY = originRect ? Math.max(0,Math.min(height,originRect.y + originRect.height / 2)) : centerY;
     const rays = Array.from({ length: motion.rays }, (_, i) => {
       const a = i * 2.399963;
       return [Math.cos(a), Math.sin(a), (i * .137) % 1];
@@ -661,10 +674,14 @@
     const duration = returning ? 650 : motion.duration;
     const start = performance.now();
     function frame(time) {
-      const t = Math.min(1, (time - start) / duration);
+      const t = Math.max(0,Math.min(1,(time - start) / duration));
+      const handoff = .68;
+      if (t >= handoff && current !== id) showRoom(id, false, true);
       if (t === 1) {
         resetTunnel();
-        showRoom(id, true, id === "research");
+        if (!field.open && !robotLab.open) {
+          (id ? document.querySelector("#" + id + "-title") : ports.querySelector('[data-target="' + route + '"]'))?.focus({ preventScroll: true });
+        }
         return;
       }
       const fadeIn = Math.min(1, t / .13);
@@ -674,6 +691,11 @@
       const brightness = .72 + fadeIn * .30 - fadeOut ** 2 * .62;
       tunnel.style.setProperty("--tunnel-scale", zoom.toFixed(3));
       tunnel.style.setProperty("--tunnel-bright", brightness.toFixed(2));
+      tunnel.style.setProperty("--passage-opacity", (fadeIn * (1 - Math.max(0,(t - handoff) / (1 - handoff)))).toFixed(3));
+      if (t >= handoff) {
+        const hole = length * ((t - handoff) / (1 - handoff)) ** 1.4;
+        tunnel.style.setProperty("--passage-window",`radial-gradient(circle at 50% ${axis * 100}%,transparent ${hole * .84}px,#000 ${hole}px)`);
+      }
       if (ctx) {
         ctx.clearRect(0, 0, width, height);
         ctx.lineCap = "round";
@@ -689,6 +711,31 @@
           ctx.lineWidth = .6 + z * 1.1;
           ctx.stroke();
         }
+        ctx.globalAlpha = 1;
+        const pull = Math.min(1,t / .48);
+        const lock = pull * pull * (3 - 2 * pull);
+        const x = originX + (centerX - originX) * lock;
+        const y = originY + (centerY - originY) * lock;
+        const radius = base * (.03 + .76 * t ** 2.4);
+        const light = (1 - fadeOut) * fadeIn;
+        const glow = ctx.createRadialGradient(x,y,0,x,y,Math.max(1,radius * 1.3));
+        glow.addColorStop(0,palette[0] + "89");
+        glow.addColorStop(.46,palette[1] + "34");
+        glow.addColorStop(1,palette[1] + "00");
+        ctx.globalAlpha = light;
+        ctx.fillStyle = glow;
+        ctx.fillRect(0,0,width,height);
+        ctx.strokeStyle = palette[1];
+        ctx.lineWidth = 1.4;
+        ctx.shadowColor = palette[2];
+        ctx.shadowBlur = 14;
+        for (let i = 0; i < 3; i += 1) {
+          ctx.globalAlpha = light * (1 - i * .25);
+          ctx.beginPath();
+          ctx.ellipse(x,y,radius * (1 - i * .14),radius * (.69 + lock * .25 - i * .09),t * .55, t * 2.4 + i * 2,t * 2.4 + i * 2 + 4.1);
+          ctx.stroke();
+        }
+        ctx.shadowBlur = 0;
         ctx.globalAlpha = 1;
       }
       transitionFrame = requestAnimationFrame(frame);

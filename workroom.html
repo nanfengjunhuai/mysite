@@ -14,6 +14,7 @@
   <link rel="stylesheet" href="assets/css/story-room.css">
   <link rel="stylesheet" href="assets/css/robotics-study.css">
   <link rel="stylesheet" href="assets/css/collection-room.css">
+  <link rel="stylesheet" href="assets/css/spatial-scenes.css">
   <script defer src="content/site.js"></script>
   <script defer src="content/projects.js"></script>
   <script defer src="content/notes.js"></script>
@@ -52,6 +53,9 @@
         </div>
         <div class="opening-optics" id="opening-optics" aria-hidden="true" hidden>
           <canvas></canvas>
+          <div class="opening-channels">
+            <span>研究室</span><span>项目库</span><span>自叙帖</span><span>收藏室</span>
+          </div>
           <div class="opening-optics-name">
             <span>李银的个人空间</span>
             <strong lang="en">My Personal Space</strong>
@@ -82,7 +86,7 @@
       </div>
       <header class="room-header">
         <button class="back-button" type="button" data-desk>← 工作台</button>
-        <h1 id="research-title" tabindex="-1">研究室</h1>
+        <h1 id="research-title" tabindex="-1"><small lang="en">Research Lab</small><span>研究室</span></h1>
       </header>
       <div class="room-content research-console">
         <button class="research-screen" id="open-topic" type="button" aria-haspopup="dialog">
@@ -114,7 +118,7 @@
       <div class="room-environment" aria-hidden="true"><img src="assets/img/universe-projects.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low"></div>
       <header class="room-header">
         <button class="back-button" type="button" data-desk>← 工作台</button>
-        <h1 id="projects-title" tabindex="-1">项目库</h1>
+        <h1 id="projects-title" tabindex="-1"><small lang="en">Project Archive</small><span>项目库</span></h1>
       </header>
       <div class="project-console">
         <div class="project-screens" id="project-screens" role="region" aria-label="项目显示器"></div>
@@ -131,7 +135,7 @@
       <div class="room-environment" aria-hidden="true"><img src="assets/img/universe-story.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low"></div>
       <header class="room-header">
         <button class="back-button" type="button" data-desk>← 工作台</button>
-        <h1 id="story-title" tabindex="-1">自叙帖</h1>
+        <h1 id="story-title" tabindex="-1"><small lang="en">Personal Journal</small><span>自叙帖</span></h1>
       </header>
       <div class="room-content story-content">
         <div class="story-monitor" id="story-monitor">
@@ -167,7 +171,7 @@
       </div>
       <header class="room-header">
         <button class="back-button" type="button" data-desk>← 工作台</button>
-        <h1 id="collection-title" tabindex="-1">收藏室</h1>
+        <h1 id="collection-title" tabindex="-1"><small lang="en">Collection</small><span>收藏室</span></h1>
         <a class="back-button collection-edit" href="collection-editor.html">＋ 添加收藏</a>
       </header>
       <ul class="collection-shelf" id="collection-shelf" aria-label="收藏室陈列"></ul>
@@ -185,6 +189,7 @@
     <img data-passage="projects" src="assets/img/universe-tunnel-projects.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low" hidden>
     <img data-passage="story" src="assets/img/universe-tunnel-story.webp" width="1672" height="941" alt="" decoding="async" fetchpriority="low" hidden>
     <canvas id="tunnel-light"></canvas>
+    <span class="passage-title" id="passage-title"></span>
   </div>
 
   <dialog class="field-study" id="field-study" aria-labelledby="field-title">
