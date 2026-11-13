@@ -666,7 +666,7 @@
     const centerX = width * .5, centerY = height * axis;
     const length = Math.hypot(width, height);
     const base = Math.min(width,height);
-    const originRect = !current && lastEntrance?.querySelector(".monitor-tag,.desk-journal")?.getBoundingClientRect();
+    const originRect = !current && lastEntrance?.querySelector(".monitor-tag,.desk-journal,.desk-screen-copy")?.getBoundingClientRect();
     const originX = originRect ? Math.max(0,Math.min(width,originRect.x + originRect.width / 2)) : centerX;
     const originY = originRect ? Math.max(0,Math.min(height,originRect.y + originRect.height / 2)) : centerY;
     const rays = Array.from({ length: motion.rays }, (_, i) => {
@@ -1032,6 +1032,19 @@
   }
 
   const personalProjects = window.SITE_PROJECTS.filter((project) => project.sample === false);
+  const deskProject = personalProjects[0];
+  if (deskProject) {
+    document.querySelector("#desk-project-title").textContent = deskProject.title;
+    document.querySelector("#desk-project-category").textContent = deskProject.category;
+    const image = document.querySelector("#desk-project-image");
+    const preview = deskProject.deskPreview ?? deskProject.image?.url;
+    if (preview) {
+      const artwork = image.closest(".desk-project-art");
+      image.addEventListener("error",() => { artwork.hidden = true; }, { once: true });
+      image.src = preview;
+      artwork.hidden = false;
+    }
+  }
   window.mountProjectBay(personalProjects, (event, project) => openRecord(event, project, "project"), bindSwipe);
 
   const entries = document.querySelector("#story-entries");

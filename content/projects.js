@@ -7,6 +7,7 @@ window.SITE_PROJECTS = [
     category: "个人网站",
     description: "从一间工作台出发，进入研究室、自叙帖、项目库和收藏室。你现在正在浏览的就是这个项目。",
     tags: ["HTML", "CSS", "JavaScript", "Canvas"],
+    deskPreview: "assets/img/universe-projects.webp",
     image: {
       url: "assets/img/personal-space-project.webp",
       alt: "My Personal Space 实际工作台画面，程序员前方的显示器亮着，右侧桌上有通往收藏室的笔记本"

@@ -4,16 +4,68 @@
   background: radial-gradient(ellipse at 34% 37%,#60443f,#211f30 69%,#151c2b);
   opacity: .93; pointer-events: none;
 }
-.monitor--story::before { z-index: 1; }
+.monitor::before { z-index: 2; }
+.desk-screen-art {
+  position: absolute; z-index: 0; inset: var(--screen-inset);
+  overflow: hidden; clip-path: var(--screen-shape); pointer-events: none;
+  background: var(--screen-dark);
+}
+.desk-screen-art img {
+  display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--screen-subject);
+  filter: saturate(.82) brightness(.89);
+  transition: transform 550ms var(--ease),filter 420ms var(--ease);
+}
+.desk-screen-art::after {
+  position: absolute; inset: 0; content: "";
+  background: linear-gradient(0deg,var(--screen-dark) 2%,color-mix(in srgb,var(--screen-dark) 89%,transparent) 24%,transparent 71%),
+    linear-gradient(130deg,color-mix(in srgb,var(--halo) 15%,transparent),transparent 47%);
+}
+.desk-screen-art::before {
+  position: absolute; z-index: 1; inset: 0; content: "";
+  background: linear-gradient(112deg,transparent 33%,#d0f3ff29 48%,transparent 62%);
+  transform: translateX(-100%); opacity: 0;
+  transition: transform 540ms var(--ease),opacity 280ms ease;
+}
+.monitor:is(:hover,:focus-visible) .desk-screen-art::before { transform: translateX(20%); opacity: 1; }
+.monitor--research {
+  --screen-inset: 23% 56.7% 52% 22.5%;
+  --screen-shape: polygon(25% 0,99% 0,98.5% 98%,0 98%,0 56%,15% 27%);
+  --screen-subject: 56% 56%;
+  --screen-dark: #0b252d;
+  --copy-inset: auto 57.8% 54.1% 25.7%;
+}
+.monitor--projects {
+  --screen-inset: 16% 3.6% 47.6% 69.8%;
+  --screen-shape: polygon(4.5% 14%,99% 2%,94% 99%,0 88%);
+  --screen-subject: 50% 43%;
+  --screen-dark: #242138;
+  --copy-inset: auto 8% 54.3% 73%;
+}
+.monitor:is(:hover,:focus-visible) .desk-screen-art img {
+  transform: scale(1.035); filter: saturate(1) brightness(1.06);
+}
+.desk-screen-copy {
+  position: absolute; z-index: 3; inset: var(--copy-inset);
+  display: grid; justify-items: start; gap: clamp(3px,.67dvh,8px);
+  text-align: left; color: #f4fbff; line-height: 1.16; text-shadow: 0 1px 7px #09121d;
+}
+.desk-screen-copy strong {
+  font-size: clamp(16px,3.15dvh,39px); font-weight: 630; letter-spacing: -.025em;
+  max-width: 100%; overflow-wrap: anywhere;
+}
+.desk-screen-caption { font-size: clamp(11px,1.55dvh,17px); color: #e1edf3; }
+.desk-screen-caption:empty, .desk-screen-copy strong:empty { display: none; }
 .desk-journal {
-  position: absolute; z-index: 2; left: 47%; top: 24.9%; right: 32.8%;
+  position: absolute; z-index: 3; left: 47%; top: 24.9%; right: 32.8%;
   display: grid; gap: clamp(5px,1dvh,12px); justify-items: start;
   text-align: left; color: #fff1df; line-height: 1.1;
 }
-.desk-journal-label {
+.desk-screen-label {
   display: inline-flex; gap: .65em; align-items: center; font-size: clamp(12px,1.48dvh,17px);
-  color: #ffdaa9; letter-spacing: .14em;
+  color: var(--halo); letter-spacing: .14em;
 }
+.desk-screen-label > span { transition: transform 250ms var(--ease); }
+.monitor:is(:hover,:focus-visible) .desk-screen-label > span { transform: translate(2px,-2px); }
 .desk-journal strong {
   font: 650 clamp(29px,6.8dvh,82px)/1.05 "Songti SC",SimSun,serif; letter-spacing: .11em;
 }
@@ -21,8 +73,8 @@
   max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   padding-top: .5em; border-top: 1px solid #ffd9ad5c; color: #ffeddd; font-size: clamp(12px,1.65dvh,20px);
 }
-.monitor--story:focus-visible .desk-journal-label { outline: 2px solid #fff4e1; outline-offset: 4px; }
-.monitor--story:is(:hover,:focus-visible) .desk-journal-label { color: #fff6e8; }
+.monitor:focus-visible .desk-screen-label { outline: 2px solid #f8faff; outline-offset: 4px; }
+.monitor:is(:hover,:focus-visible) .desk-screen-label { color: #fff6e8; }
 .monitor--collection:is(:hover,:focus-visible) .monitor-tag::before { box-shadow: 0 0 11px 3px #9effdb; }
 .workroom-stage:has(.monitor--collection:is(:hover,:focus-visible)) .workroom-robot-light {
   animation: none;
@@ -82,6 +134,11 @@
   .story-intro { gap: 7px; }
   .collection-shelf[data-expanded] { grid-template-columns: repeat(2,minmax(0,1fr)); }
   .collection-shelf[data-expanded] li:first-child .collection-exhibit { min-height: 160px; }
+}
+@media (max-width: 480px) and (orientation: portrait) {
+  .monitor--research { --copy-inset: auto 57.8% 54.5% 26.8%; }
+  .monitor--projects { --copy-inset: auto 8% 55.4% 74%; }
+  .desk-screen-copy strong { font-size: clamp(19px,5.5vw,27px); }
 }
 @media (max-height: 460px) and (min-aspect-ratio: 5/4) {
   .research-console { width: min(70vw,690px); }
