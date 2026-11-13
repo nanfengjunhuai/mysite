@@ -218,10 +218,13 @@
   document.addEventListener("visibilitychange", syncPageAudio);
 
   function finishOpening() {
+    const animateArrival = !reduced.matches && !desk.hidden && !urlRoom() && scene.dataset.phase !== "ready";
     mediaAttempt += 1;
     clearTimeout(mediaTimeout);
+    window.workroomOpening.stop();
     opening.pause();
     scene.dataset.phase = "ready";
+    if (animateArrival) scene.dataset.arrival = "";
     ports.inert = false;
     syncPageAudio();
   }
@@ -236,19 +239,37 @@
     ports.inert = true;
     syncPageAudio();
     opening.currentTime = 0;
+    let revealed = false;
+    let ended = false;
+    const reveal = () => {
+      if (attempt !== mediaAttempt) return;
+      revealed = true;
+      if (ended) finishOpening();
+    };
     clearTimeout(mediaTimeout);
     mediaTimeout = setTimeout(() => {
       if (attempt === mediaAttempt) finishOpening();
-    }, 5000);
+    }, 3350);
+    window.workroomOpening.play(reveal);
     opening.play().then(() => {
       if (attempt === mediaAttempt) scene.dataset.phase = "playing";
     }).catch(() => {
-      if (attempt === mediaAttempt) finishOpening();
+      if (attempt !== mediaAttempt) return;
+      ended = true;
+      if (revealed) finishOpening();
     });
+    opening.onended = opening.onerror = () => {
+      if (attempt !== mediaAttempt) return;
+      ended = true;
+      if (revealed) finishOpening();
+    };
   }
 
-  opening.addEventListener("ended", finishOpening);
-  opening.addEventListener("error", finishOpening);
+  ports.addEventListener("animationend", (event) => {
+    if (event.animationName === "workroom-monitor-arrive" && event.target.closest(".monitor--collection")) {
+      delete scene.dataset.arrival;
+    }
+  });
 
   function unlockTypingAudio() {
     if (!window.AudioContext) return;

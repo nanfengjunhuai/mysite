@@ -8,6 +8,7 @@
   <meta name="description" content="李银的个人空间。由工作台进入研究室、项目库和自叙帖。">
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/css/workroom.css">
+  <link rel="stylesheet" href="assets/css/workroom-opening.css">
   <link rel="stylesheet" href="assets/css/field-study.css">
   <link rel="stylesheet" href="assets/css/project-bay.css">
   <link rel="stylesheet" href="assets/css/story-room.css">
@@ -21,6 +22,7 @@
   <script defer src="content/collection.js"></script>
   <script defer src="assets/js/robotics-study.js"></script>
   <script defer src="assets/js/project-bay.js"></script>
+  <script defer src="assets/js/workroom-opening.js"></script>
   <script defer src="assets/js/workroom.js"></script>
 </head>
 <body>
@@ -47,6 +49,14 @@
             <button class="monitor monitor--story" type="button" data-target="story"><span class="monitor-tag">自叙帖<b aria-hidden="true">↗</b></span></button>
             <button class="monitor monitor--collection" type="button" data-target="collection"><span class="monitor-tag">收藏室<b aria-hidden="true">↗</b></span></button>
           </div>
+        </div>
+        <div class="opening-optics" id="opening-optics" aria-hidden="true" hidden>
+          <canvas></canvas>
+          <div class="opening-optics-name">
+            <span>李银的个人空间</span>
+            <strong lang="en">My Personal Space</strong>
+          </div>
+          <span class="opening-optics-rule"></span>
         </div>
         <div class="view-controls" id="view-controls" role="group" aria-label="切换工作台视角" hidden>
           <div class="view-panorama" id="view-panorama" aria-hidden="true">
