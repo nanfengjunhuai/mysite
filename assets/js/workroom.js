@@ -1055,8 +1055,12 @@
   if (feature) {
     document.querySelector("#desk-journal-note").textContent = feature.title;
     const featureLink = document.querySelector("#story-feature");
+    const featureDate = featureLink.querySelector("time");
     featureLink.href = "article.html?id=" + encodeURIComponent(feature.id);
     featureLink.querySelector("strong").textContent = feature.title;
+    featureDate.dateTime = feature.date;
+    featureDate.textContent = feature.date.replaceAll("-",".");
+    featureLink.querySelector(".story-feature-excerpt").textContent = feature.excerpt ?? feature.summary;
     featureLink.addEventListener("click",event => openRecord(event,feature,"story"));
     featureLink.hidden = false;
   }
