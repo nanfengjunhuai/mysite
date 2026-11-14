@@ -1,0 +1,106 @@
+.desk-projection {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  mix-blend-mode: screen; overflow: visible;
+  opacity: var(--desk-light, .81); transition: opacity 270ms ease;
+}
+.desk-data-flow {
+  fill: none; stroke: url(#desk-data-light); stroke-width: 2.1; stroke-dasharray: 2 9 4 17;
+  animation: desk-data-rise 5.8s linear infinite;
+}
+.desk-data-pulse {
+  fill: #56cfff2b; stroke: #a2eeff9c; stroke-width: 1.3;
+  animation: desk-data-rise-plane 5.8s ease-out infinite;
+}
+.desk-receiving-light { animation: desk-light-response 5.8s ease-in-out infinite; }
+@keyframes desk-data-rise {
+  0% { stroke-dashoffset: 0; opacity: .1; }
+  28%,65% { opacity: .72; }
+  100% { stroke-dashoffset: 64; opacity: .1; }
+}
+@keyframes desk-data-rise-plane {
+  0%,9% { transform: translateY(8px); opacity: 0; }
+  24% { opacity: .76; }
+  55%,100% { transform: translateY(-66px); opacity: 0; }
+}
+@keyframes desk-light-response {
+  0%,28%,100% { opacity: .14; }
+  47% { opacity: .8; }
+  69% { opacity: .25; }
+}
+
+.coast-route-light {
+  position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%;
+  pointer-events: none; mix-blend-mode: screen;
+}
+.coast-route-trail {
+  fill: none; stroke: #c5fcf1; stroke-width: 5; stroke-linecap: round;
+  stroke-dasharray: 24 76; stroke-dashoffset: 100;
+  filter: drop-shadow(0 0 8px #39e0f5);
+  animation: coast-route-reveal 7.8s ease-in-out infinite;
+}
+.coast-route-beacon {
+  fill: #ffefc2; transform-box: fill-box; transform-origin: center;
+  filter: drop-shadow(0 0 10px #ffd481);
+  animation: coast-beacon-glow 7.8s ease-in-out infinite;
+}
+@keyframes coast-route-reveal {
+  0%,11% { stroke-dashoffset: 24; opacity: 0; }
+  16% { opacity: .82; }
+  46% { opacity: 1; }
+  55%,100% { stroke-dashoffset: -95; opacity: 0; }
+}
+@keyframes coast-beacon-glow {
+  0%,48%,100% { opacity: 0; scale: .3; }
+  56% { opacity: .8; scale: .6; }
+  71% { opacity: .14; scale: 1.3; }
+}
+.project-rack-lights {
+  position: absolute; width: max(100cqw,177.68cqh); height: max(100cqh,56.28cqw);
+  left: var(--room-x); top: var(--room-y);
+  translate: calc(-1 * var(--room-x)) calc(-1 * var(--room-y));
+  fill: none; stroke: #f3c8ff; stroke-width: 4; stroke-linecap: round;
+  mix-blend-mode: screen; filter: drop-shadow(0 0 6px #da85ff);
+}
+.project-rack-lights g { animation: rack-light-activity 6.6s ease-in-out infinite; }
+.project-rack-lights g:nth-child(2) { animation-delay: .32s; }
+.project-rack-lights g:nth-child(3) { animation-delay: .64s; }
+.project-rack-lights g:nth-child(4) { animation-delay: .96s; }
+@keyframes rack-light-activity {
+  0%,100% { opacity: .07; }
+  12%,21% { opacity: .88; }
+  38% { opacity: .19; }
+}
+.project-screen[data-direction] .project-demo::after {
+  position: absolute; inset: 0; content: ""; pointer-events: none;
+  background: linear-gradient(105deg,transparent 25%,#e7c3ff30 54%,transparent 75%);
+  animation: project-display-sweep 530ms var(--ease) both;
+}
+.project-screen[data-direction="-1"] .project-demo::after { animation-name: project-display-sweep-left; }
+@keyframes project-display-sweep {
+  from { transform: translateX(-85%); opacity: 1; }
+  to { transform: translateX(85%); opacity: 0; }
+}
+@keyframes project-display-sweep-left {
+  from { transform: translateX(85%); opacity: 1; }
+  to { transform: translateX(-85%); opacity: 0; }
+}
+
+.story-reel-preview {
+  position: absolute; z-index: -2; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 51% center; visibility: hidden;
+}
+.story-reel[data-preview] img { visibility: hidden; }
+.story-reel[data-preview] .story-reel-preview { visibility: visible; }
+
+@media (any-pointer: fine) {
+  .workroom-scene[data-phase="ready"],
+  .room { cursor: url("../img/spatial-cursor.svg") 6 4,auto; }
+  :is(.workroom-scene[data-phase="ready"],.room) :is(a,button):not(:disabled) {
+    cursor: url("../img/spatial-cursor-action.svg") 6 4,pointer;
+  }
+  .workroom-scene[data-pan][data-phase="ready"] .workroom-stage { cursor: grab; }
+  .workroom-scene[data-dragging][data-phase="ready"] :is(.workroom-stage,.monitor) { cursor: grabbing; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.desk-projection,.coast-route-light,.project-rack-lights), .project-screen[data-direction] .project-demo::after { display: none; }
+}

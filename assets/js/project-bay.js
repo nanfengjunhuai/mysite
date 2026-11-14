@@ -135,6 +135,7 @@
         button.setAttribute("aria-pressed", String(i === selected));
       });
       const active = entries[selected];
+      if (direction) active.panel.dataset.direction = String(direction);
       status.textContent = active.button.textContent + "，" + (selected+1) + " / " + entries.length;
       if (focus) active.button.focus({ preventScroll:true });
     }
