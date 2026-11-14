@@ -82,6 +82,53 @@
 .workroom-stage:has(.monitor--story:is(:hover,:focus-visible)) { --screen-x: 58%; --screen-glow: #fbd4a872; }
 .workroom-stage:has(.monitor--projects:is(:hover,:focus-visible)) { --screen-x: 83%; --screen-glow: #d2b0ff73; }
 .workroom-stage:has(.monitor--collection:is(:hover,:focus-visible)) { --screen-x: 92%; --screen-y: 68%; --screen-glow: #9ce7cb66; }
+.screen-signal {
+  position: absolute; z-index: 4; left: var(--signal-x); top: var(--signal-y);
+  width: clamp(13px,2.4dvh,24px); aspect-ratio: 1; translate: -50% -50%;
+  border-radius: 50%; pointer-events: none;
+  color: var(--halo); opacity: .78;
+  background: radial-gradient(circle at 32% 28%,#fff 2%,currentColor 12%,transparent 47%);
+  box-shadow: inset 0 0 7px currentColor,0 0 9px color-mix(in srgb,currentColor 65%,transparent);
+  transition: opacity 230ms ease,scale 320ms var(--ease);
+}
+.screen-signal::before, .screen-signal::after {
+  position: absolute; content: ""; border-radius: 50%; pointer-events: none;
+}
+.screen-signal::before {
+  inset: -31% -56%; border: 1px solid currentColor; border-block-start-color: transparent;
+  transform: rotate(-31deg) scaleY(.59);
+  opacity: .7; animation: signal-orbit 5.4s ease-in-out infinite alternate;
+}
+.screen-signal::after {
+  inset: -80%; background: radial-gradient(circle,currentColor,transparent 59%);
+  opacity: .24; animation: signal-breathe 3.8s ease-in-out infinite alternate;
+}
+.monitor--research { --signal-x: 40.2%; --signal-y: 28%; }
+.monitor--story { --signal-x: 64.5%; --signal-y: 30%; }
+.monitor--story .screen-signal {
+  width: clamp(20px,3.6dvh,36px);
+  background: radial-gradient(circle at 35% 29%,#fffce9,currentColor 15%,#955b60 40%,#241d2e 73%);
+}
+.monitor--projects { --signal-x: 91%; --signal-y: 26%; }
+.monitor--collection { --signal-x: 92.7%; --signal-y: 69.6%; }
+.monitor--collection .screen-signal { width: clamp(8px,1.45dvh,14px); }
+.monitor:is(:hover,:focus-visible,:active) .screen-signal { opacity: 1; scale: 1.32; }
+.monitor--research .screen-signal::after { animation-delay: -1.2s; }
+.monitor--projects .screen-signal::after { animation-delay: -2.6s; }
+@keyframes signal-orbit {
+  from { transform: rotate(-31deg) scaleY(.59); }
+  to { transform: rotate(30deg) scaleY(.84); }
+}
+@keyframes signal-breathe { from { opacity: .16; } to { opacity: .44; } }
+.room[data-passage-arrival]::before {
+  content: ""; position: absolute; z-index: 1; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 50% 44%,color-mix(in srgb,var(--secondary) 37%,transparent),transparent 67%);
+  mix-blend-mode: screen; animation: room-signal-settle 540ms var(--ease) both;
+}
+@keyframes room-signal-settle {
+  from { opacity: .32; transform: scale(.76); }
+  to { opacity: 0; transform: scale(1.28); }
+}
 @keyframes workroom-refract {
   from { opacity: .14; }
   to { opacity: .74; }
@@ -118,4 +165,6 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .workroom-refractions::before { display: none; }
+  .room[data-passage-arrival]::before { display: none; }
+  .monitor:is(:hover,:focus-visible,:active) .screen-signal { scale: none; }
 }

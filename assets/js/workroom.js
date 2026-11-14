@@ -666,7 +666,7 @@
     const centerX = width * .5, centerY = height * axis;
     const length = Math.hypot(width, height);
     const base = Math.min(width,height);
-    const originRect = !current && lastEntrance?.querySelector(".monitor-tag,.desk-journal,.desk-screen-copy")?.getBoundingClientRect();
+    const originRect = !current && lastEntrance?.querySelector(".screen-signal")?.getBoundingClientRect();
     const originX = originRect ? Math.max(0,Math.min(width,originRect.x + originRect.width / 2)) : centerX;
     const originY = originRect ? Math.max(0,Math.min(height,originRect.y + originRect.height / 2)) : centerY;
     const rays = Array.from({ length: motion.rays }, (_, i) => {
@@ -719,7 +719,7 @@
         const lock = pull * pull * (3 - 2 * pull);
         const x = originX + (centerX - originX) * lock;
         const y = originY + (centerY - originY) * lock;
-        const radius = base * (.03 + .76 * t ** 2.4);
+        const radius = Math.max(5,base * (.018 + .78 * t ** 2.4));
         const light = (1 - fadeOut) * fadeIn;
         const glow = ctx.createRadialGradient(x,y,0,x,y,Math.max(1,radius * 1.3));
         glow.addColorStop(0,palette[0] + "b5");
@@ -729,6 +729,20 @@
         ctx.globalAlpha = light;
         ctx.fillStyle = glow;
         ctx.fillRect(0,0,width,height);
+        if (originRect && pull < 1) {
+          const ribbon = ctx.createLinearGradient(originX,0,x === originX ? x + 1 : x,0);
+          ribbon.addColorStop(0,palette[2] + "00");
+          ribbon.addColorStop(1,palette[1]);
+          ctx.strokeStyle = ribbon;
+          ctx.lineWidth = 1.2;
+          ctx.globalAlpha = light * (1 - lock);
+          for (const bend of [-1,1]) {
+            ctx.beginPath();
+            ctx.moveTo(originX,originY);
+            ctx.quadraticCurveTo((originX + x) / 2,(originY + y) / 2 + radius * 2.2 * bend,x,y);
+            ctx.stroke();
+          }
+        }
         ctx.strokeStyle = palette[1];
         ctx.lineWidth = 1.4;
         ctx.shadowColor = palette[2];
