@@ -10,9 +10,29 @@
   const link = document.querySelector("#room-link");
   const back = document.querySelector("#room-back");
   const controls = document.querySelector(".orbit-controls");
+  const reader = document.querySelector("#world-journal");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
   const notes = window.SITE_NOTES ?? [];
   const featured = notes.find(note => note.id === "cause-or-fate");
+  if (featured) {
+    document.querySelector("#world-journal-title").textContent = featured.title;
+    const date = reader.querySelector("time");
+    date.textContent = featured.date;
+    date.dateTime = featured.date;
+    for (const section of featured.sections ?? []) {
+      for (const block of section.blocks ?? []) {
+        if (typeof block !== "string") continue;
+        const paragraph = document.createElement("p");
+        paragraph.textContent = block;
+        document.querySelector("#world-journal-body").append(paragraph);
+      }
+    }
+    link.addEventListener("click",event => {
+      if (selected !== "story" || !reader.showModal || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
+      event.preventDefault();
+      reader.showModal();
+    });
+  }
   const destinations = {
     story: { detail: featured?.title ?? "", tint: "#ffcf94", angle: .12 },
     research: { detail: "世界模型、海岸城与机器人训练。", tint: "#b1edd7", angle: -.08 },
@@ -31,13 +51,13 @@
     }
   }
   const scene = renderer ? new T.Scene() : null;
-  const model = scene ? window.buildStation(scene) : null;
+  const model = scene ? window.buildStation(scene,featured) : null;
   const camera = renderer ? new T.OrthographicCamera(-10,10,6,-6,.1,90) : null;
   const focus = renderer ? new T.Vector3() : null;
   const desiredFocus = focus?.clone();
   const projected = focus?.clone();
   let selected = "";
-  let angle = -.32;
+  let angle = -.68;
   let desiredAngle = -.32;
   let distance = 21;
   let desiredZoom = 1;
@@ -49,6 +69,7 @@
   let height = 0;
 
   function updateScene(moveFocus) {
+    if (reader.open) reader.close();
     const id = location.hash.slice(1);
     selected = Object.hasOwn(destinations,id) ? id : "";
     world.dataset.room = selected;
@@ -62,6 +83,7 @@
       detail.textContent = item.detail;
       consolePanel.style.setProperty("--room-tint",item.tint);
       link.href = "workroom.html?from=station#" + selected;
+      link.firstChild.textContent = selected === "story" && featured ? "读全文 " : "进入 ";
       desiredAngle = item.angle;
       if (moveFocus) back.focus();
     } else {
@@ -115,10 +137,13 @@
     model.iris.rotation.x = t * .55;
     model.dishPivot.rotation.y = .18 + .28 * Math.sin(t*.46);
     aperture += ((selected === "story" ? 1 : 0) - aperture) * follow;
+    model.iris.scale.setScalar(Math.max(.015,1 - aperture * 1.08));
+    model.journalScreen.visible = aperture > .48;
+    model.journalScreen.material.opacity = Math.min(1,Math.max(0,(aperture - .48) * 2.8));
     model.shutters.forEach((shutter,index) => {
       const side = index ? 1 : -1;
-      shutter.position.x = -.1 + side * (.355 + aperture * .55);
-      shutter.rotation.y = side * aperture * -.32;
+      shutter.position.x = -.1 + side * (.355 + aperture * .81);
+      shutter.rotation.y = side * aperture * -1.18;
     });
     renderer.render(scene,camera);
     for (const port of ports) {
@@ -147,7 +172,7 @@
     renderer.outputColorSpace = T.SRGBColorSpace;
     renderer.toneMapping = T.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.14;
-    camera.zoom = .92;
+    camera.zoom = .77;
     focus.set(0,1.5,0);
     new ResizeObserver(() => { updateFraming(); requestDraw(); }).observe(world);
     canvas.addEventListener("pointerdown",event => {
@@ -175,7 +200,7 @@
   back.addEventListener("click",() => { location.hash = ""; });
   window.addEventListener("hashchange",() => updateScene(true));
   window.addEventListener("keydown", event => {
-    if (event.key === "Escape" && selected) location.hash = "";
+    if (event.key === "Escape" && selected && !reader.open) location.hash = "";
   });
   updateScene(false);
 })();

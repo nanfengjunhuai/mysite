@@ -3,7 +3,7 @@
   if (!window.THREE) return;
   const T = window.THREE;
 
-  window.buildStation = scene => {
+  window.buildStation = (scene,featured) => {
     const station = new T.Group();
     scene.add(station);
     const standard = (color, roughness = .55, metalness = .22) => new T.MeshStandardMaterial({ color, roughness, metalness });
@@ -122,7 +122,7 @@
       const group = new T.Group();
       group.position.set(x,y,z);
       station.add(group);
-      const shell = mesh(group,bevel(w,h,depth,.26),ceramic,0,0,0);
+      mesh(group,bevel(w,h,depth,.26),ceramic,0,0,0);
       mesh(group,bevel(w-.29,h-.27,.07,.18),black,0,0,depth/2+.035);
       box(group,w-.38,.047,.05,0,h/2-.17,depth/2+.1,lightMaterial);
       for (let i = 0; i < 9; i += 1) {
@@ -147,7 +147,7 @@
         box(group,.14,.055,.12,w/2-.47,-h/2+.35+i*.11,depth/2+.13,i%3===0?lightMaterial:shaded);
       }
       anchors[id] = new T.Vector3(x,y-h/2+.16,z+depth/2+.18);
-      details[id] = { group,shell,depth,w,h };
+      details[id] = { group };
       return { group,z:depth/2+.14 };
     }
 
@@ -169,6 +169,34 @@
       box(shutter,.14,.028,.043,-side*.19,-.12,.05,amber);
       return shutter;
     });
+    const screenCanvas = document.createElement("canvas");
+    screenCanvas.width = 768;
+    screenCanvas.height = 512;
+    const screenContext = screenCanvas.getContext("2d");
+    const screenGradient = screenContext.createLinearGradient(0,0,768,512);
+    screenGradient.addColorStop(0,"#462a2b");
+    screenGradient.addColorStop(1,"#151a27");
+    screenContext.fillStyle = screenGradient;
+    screenContext.fillRect(0,0,768,512);
+    screenContext.strokeStyle = "#d69e69";
+    screenContext.lineWidth = 3;
+    screenContext.strokeRect(21,21,726,470);
+    screenContext.fillStyle = "#e3b285";
+    screenContext.font = '35px "Microsoft YaHei",sans-serif';
+    screenContext.fillText("自叙帖",68,144);
+    screenContext.fillStyle = "#fff1dd";
+    screenContext.font = '62px SimSun,serif';
+    screenContext.fillText(featured?.title ?? "李银的个人空间",62,278,650);
+    screenContext.fillStyle = "#e3b285";
+    screenContext.fillText("↗",637,432);
+    const screenMap = new T.CanvasTexture(screenCanvas);
+    screenMap.colorSpace = T.SRGBColorSpace;
+    const journalScreen = new T.Mesh(new T.PlaneGeometry(1.78,1.16),new T.MeshBasicMaterial({
+      map:screenMap,transparent:true,opacity:0,depthWrite:false,toneMapped:false
+    }));
+    journalScreen.position.set(-.1,.18,jz+.345);
+    journalScreen.visible = false;
+    j.add(journalScreen);
     for (let i = 0; i < 12; i += 1) {
       const a = i*Math.PI/6;
       const dash = box(j,.10,.024,.05,-.1+Math.cos(a)*.71,.18+Math.sin(a)*.71,jz+.17,i%3===0?amber:shaded);
@@ -269,6 +297,6 @@
     glow(scene,-4,-.325,-2,"#305f86",17,14,.23,true);
     glow(scene,3,-.323,3,"#9d653e",13,8,.16,true);
 
-    return { anchors,details,drone,iris,shutters,dishPivot };
+    return { anchors,details,drone,iris,shutters,journalScreen,dishPivot };
   };
 })();
