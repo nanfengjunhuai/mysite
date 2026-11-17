@@ -22,6 +22,7 @@
 [data-layered] .film-shuttle {
   transform-origin: var(--ship-origin,50% 74%);
   transform: translate(var(--ship-x,0%),var(--ship-y,0%)) rotate(var(--ship-bank,0deg)) scale(var(--ship-scale,1));
+  filter: brightness(var(--ship-exposure,1));
 }
 [data-shot="warp"][data-layered] .film-shuttle {
   clip-path: polygon(31.35% 77.9%,35.7% 74.2%,41.2% 71.6%,45.2% 68.7%,47.6% 65.2%,49.8% 62.3%,52% 61.8%,54% 62.3%,55.4% 65.2%,57.1% 68.7%,59.8% 71.6%,64% 75.5%,67.9% 79.6%,67.8% 82.2%,64.7% 81.4%,60.5% 80.3%,57.2% 81.2%,55% 83.5%,51% 83.4%,49.1% 84%,46.5% 84.1%,44.8% 81.5%,41.4% 82%,37.7% 80.1%,34.4% 79.5%,31.3% 79.4%);
@@ -61,7 +62,10 @@
   background: linear-gradient(180deg,#070911c9,transparent 18% 77%,#070911bc),
     radial-gradient(ellipse at center,transparent 48%,#04060c56);
 }
-.arrival-flash { z-index: 3; background: #e0dffa; opacity: var(--jump,0); }
+.arrival-flash {
+  z-index: 3; opacity: var(--jump,0);
+  background: radial-gradient(ellipse 66% 62% at 50% 44%,#e4e6ff,#aaa5d465 62%,transparent 100%);
+}
 .arrival-bridge {
   z-index: 3; opacity: 0;
   background: radial-gradient(ellipse 79% 68% at 50% 49%,#ffe6b9,#f8cfa26e 65%,#a16a3520 100%);

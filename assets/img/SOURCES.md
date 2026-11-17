@@ -120,6 +120,7 @@ Original AAA narrative sci-fi game environment cinematics, wide 16:9 1672x941 cr
 
 - `orbit-deep-space.webp` 是由 ImageGen 生成的 1672 × 941 轨道远景。程序将它投到三维观测站的背景球面。
 - 外部探索里的巡航飞船、观测站、泊位与可滑动的门使用 Three.js 模型。
+- 实时站体根据片头的环舱、玻璃穹顶和散热板重建。装甲表面的接缝、铆钉和磨损由 `assets/js/observatory.js` 生成，舷窗和轮廓反光来自场景灯光与环境贴图。工业材质参考 [《星空》的 NASA-Punk 美术访谈](https://news.microsoft.com/source/features/work-life/behind-the-scenes-of-starfield-where-you-can-explore-a-thousand-new-worlds-among-the-stars)。
 
 <details>
 <summary>轨道背景的 ImageGen 提示词</summary>

@@ -9,13 +9,13 @@
   const status = layer.querySelector("#flight-status");
   const workshop = document.querySelector("#experience");
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
-  const duration = 11.90;
+  const duration = 12.16;
   const sessionKey = "station-arrived-film";
   const shots = [
     {name:"warp", file:"flight-gravity-lens.webp", start:0, label:"穿越引力透镜", detail:""},
     {name:"orbit-wide", file:"flight-observatory.webp", start:3.08, label:"轨道观测站", detail:""},
-    {name:"orbit", file:"flight-orbit-approach.webp", start:4.78, label:"对准泊位", detail:"推进器减速"},
-    {name:"hatch", file:"flight-airlock.webp", start:7.12, label:"泊位已锁定", detail:"气闸均压中"}
+    {name:"orbit", file:"flight-orbit-approach.webp", start:4.96, label:"对准泊位", detail:"推进器减速"},
+    {name:"hatch", file:"flight-airlock.webp", start:7.52, label:"泊位已锁定", detail:"气闸均压中"}
   ];
 
   function alreadySeen() {
@@ -114,38 +114,40 @@
       plate.style.setProperty("--ship-y",(-1.5*Math.sin(t*1.2)-11.5*approach)+"%");
       plate.style.setProperty("--ship-scale",(w < h ? .66 : 1)*(1-.33*approach));
       plate.style.setProperty("--ship-bank",(Math.sin(t*1.85)*1.85-5.5*approach)+"deg");
-      layer.style.setProperty("--jump",ease(2.74,3.07,t)*.72);
+      layer.style.setProperty("--jump",ease(2.85,3.07,t)*.38);
       drawLens(t,approach);
       return;
     }
-    layer.style.setProperty("--jump",(1-ease(3.08,3.36,t))*.72);
+    layer.style.setProperty("--jump",(1-ease(3.08,3.33,t))*.38);
     if (index === 1) {
-      const approach = ease(3.08,4.78,t);
-      plate.style.setProperty("--camera-scale",1.045+approach*.12);
-      plate.style.setProperty("--camera-x",(1.15-approach*1.7)+"%");
-      plate.style.setProperty("--camera-y",(-.55+approach*.55)+"%");
+      const approach = (t-shots[1].start)/(shots[2].start-shots[1].start);
+      plate.style.setProperty("--camera-scale",1.045+approach*.145);
+      plate.style.setProperty("--camera-x",(1.10-approach*.65)+"%");
+      plate.style.setProperty("--camera-y",(-.4-approach*.62)+"%");
       return;
     }
     if (index === 2) {
-      const approach = ease(4.75,7.14,t);
-      plate.style.setProperty("--camera-scale",1.045+approach*.45);
-      plate.style.setProperty("--camera-x",(1.1-4.2*approach)+"%");
-      plate.style.setProperty("--camera-y",(1.0-1.05*approach)+"%");
-      plate.style.setProperty("--ship-x",(.8+approach*9.1)+"%");
-      plate.style.setProperty("--ship-y",(-.1-approach*12.1)+"%");
-      plate.style.setProperty("--ship-scale",(w < h ? .82 : 1)-approach*.45);
-      plate.style.setProperty("--ship-bank",(-1.2+approach*2.5)+"deg");
-      layer.style.setProperty("--burn",Math.sin(t*9)*.13+(1-approach)*.47);
+      const approach = 1-(1-(t-shots[2].start)/(shots[3].start-shots[2].start))**2;
+      // Match the orange opening and the shuttle silhouette across the wide and close views.
+      plate.style.setProperty("--camera-scale",1.175+approach*.40);
+      plate.style.setProperty("--camera-x",(-6.4-approach*1.15)+"%");
+      plate.style.setProperty("--camera-y",(-.94-approach*.65)+"%");
+      plate.style.setProperty("--ship-x",(8.5+approach*2.7)+"%");
+      plate.style.setProperty("--ship-y",(-9.5-approach*7.9)+"%");
+      plate.style.setProperty("--ship-scale",(w < h ? .49 : .56)-approach*.29);
+      plate.style.setProperty("--ship-bank",(-1.5+approach*1.5)+"deg");
+      plate.style.setProperty("--ship-exposure",1-ease(6.80,7.48,t)*.36);
+      layer.style.setProperty("--burn",Math.sin(t*9)*.07+(1-approach)*.22);
       return;
     }
-    const door = ease(7.82,10.15,t);
-    const inside = ease(9.58,11.82,t);
+    const door = ease(8.13,10.38,t);
+    const inside = ease(9.84,12.07,t);
     plate.style.setProperty("--camera-scale",1.015+inside*.87);
     plate.style.setProperty("--camera-y",(.8-inside*.80)+"%");
     plate.style.setProperty("--door",door);
-    plate.style.setProperty("--door-rim",ease(7.39,7.83,t));
-    bridge.style.opacity = ease(11.29,11.82,t)*.84;
-    if (t > 9.22 && caption.textContent !== "气闸已开启") caption.textContent = "气闸已开启";
+    plate.style.setProperty("--door-rim",ease(7.76,8.10,t));
+    bridge.style.opacity = ease(11.56,12.07,t)*.77;
+    if (door > .68 && caption.textContent !== "气闸已开启") caption.textContent = "气闸已开启";
   }
 
   function drawLens(t,approach) {
@@ -305,16 +307,16 @@
     air(0,3.25,150,470,.7,.41,-.16,.55);
     air(1.5,2.05,540,1720,1.7,.29,.21,.57);
     bell(2.69,.66,93,39,.61);
-    air(3.18,3.68,143,73,1.15,.35,-.18);
+    air(3.10,4.31,143,73,1.15,.35,-.18);
     bell(5.42,.19,770,756,.21,"sine",.14);
     bell(5.66,.29,885,863,.13,"sine",.14);
-    air(7.10,.25,864,115,.91,.59,.11,.14);
-    bell(7.14,.51,118,47,.46,"triangle");
-    air(7.55,.75,1310,451,1.2,.34,.23,.09);
-    air(7.90,2.28,239,151,2.4,.28,-.21,.36);
-    air(9.68,.62,882,373,2.7,.18,.10,.19);
-    bell(10.50,.95,261,260,.13);
-    bell(10.63,1.12,391,390,.10);
+    air(7.49,.25,864,115,.91,.59,.11,.14);
+    bell(7.54,.51,118,47,.46,"triangle");
+    air(7.93,.72,1310,451,1.2,.34,.23,.09);
+    air(8.14,2.26,239,151,2.4,.28,-.21,.36);
+    air(9.89,.62,882,373,2.7,.18,.10,.19);
+    bell(10.73,.95,261,260,.13);
+    bell(10.88,1.09,391,390,.10);
     master.gain.setTargetAtTime(0,Math.max(available,zero+duration-.38),.18);
   }
 

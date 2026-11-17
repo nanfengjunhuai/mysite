@@ -65,8 +65,8 @@
   let pointer = null;
 
   if (scene) {
-    O.stationsLights(scene);
-    O.backdrop(scene);
+    O.stationsLights(scene,renderer.capabilities.isWebGL2);
+    O.backdrop(scene,requestDraw);
     patrol.ship.scale.setScalar(.48);
   }
   function framing() {

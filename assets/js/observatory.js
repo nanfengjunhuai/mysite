@@ -46,6 +46,73 @@
   }
   hullFinish();
 
+  function finishPlates() {
+    const atlas = document.createElement("canvas");
+    atlas.width = 512;
+    atlas.height = 256;
+    const ctx = atlas.getContext("2d");
+    const base = ctx.createLinearGradient(0,0,0,256);
+    for (const [at,color] of [[0,"#888780"],[.07,"#cfcbc1"],[.60,"#b9bab4"],[.96,"#8c8d86"],[1,"#44484a"]]) base.addColorStop(at,color);
+    ctx.fillStyle = base;
+    ctx.fillRect(0,0,512,256);
+    let seed = 771;
+    function grain() { seed = (Math.imul(seed,1664525)+1013904223)>>>0; return seed/4294967296; }
+    for (let n=0;n<2600;n++) {
+      const x=grain()*512,y=grain()*256;
+      ctx.fillStyle = grain()>.59?"#e7e1d020":"#28272222";
+      ctx.fillRect(x,y,1+grain()*6,1+grain()*2.8);
+    }
+    for (const seam of [126,316,447]) {
+      const stain = ctx.createLinearGradient(seam-11,0,seam+16,2);
+      stain.addColorStop(0,"#77543300"); stain.addColorStop(.45,"#75543975"); stain.addColorStop(1,"#77543300");
+      ctx.fillStyle=stain; ctx.fillRect(seam-11,0,27,256);
+      ctx.fillStyle="#393d3c"; ctx.fillRect(seam,0,2,256);
+      ctx.fillStyle="#eef0dc9c"; ctx.fillRect(seam+2,0,1,256);
+      for (let y=15;y<248;y+=23) {
+        ctx.fillStyle="#343532b9"; ctx.fillRect(seam+6,y,3,3);
+        ctx.fillStyle="#e9e9d4bf"; ctx.fillRect(seam+7,y+3,2,1);
+      }
+    }
+    for (let x=15;x<500;x+=21) {
+      ctx.fillStyle="#303636ae"; ctx.fillRect(x,13,4,3); ctx.fillRect(x,234,4,3);
+      ctx.fillStyle="#e4e7d7"; ctx.fillRect(x,16,3,1);
+    }
+    for (let i=0;i<12;i++) {
+      const x=15+grain()*472,y=28+grain()*186;
+      ctx.fillStyle="#65493636"; ctx.fillRect(x,y,2+grain()*12,3+grain()*36);
+    }
+    const map = new T.CanvasTexture(atlas);
+    map.colorSpace = T.SRGBColorSpace;
+    map.anisotropy = 8;
+    return map;
+  }
+  const hullMap = finishPlates();
+  const ceramic = new T.MeshStandardMaterial({color:"#d0d5d7",map:hullMap,roughness:.56,metalness:.37});
+  const weathered = new T.MeshStandardMaterial({color:"#8999a3",map:hullMap,roughness:.47,metalness:.55});
+  const radiator = material("#313b51",.48,.65);
+
+  function reflections(scene) {
+    const width=256,height=128, data=new Uint16Array(width*height*4);
+    for (let y=0;y<height;y++) {
+      const latitude=(y/height-.5)*Math.PI;
+      for (let x=0;x<width;x++) {
+        const azimuth=(x/width-.5)*TAU;
+        const key=Math.exp(-((azimuth-.66)**2*22+(latitude-.62)**2*28))*3.8;
+        const bounce=Math.exp(-((azimuth+1.7)**2*.9+(latitude+.52)**2*4))*.84;
+        const horizon=Math.exp(-Math.abs(latitude+.23)*11)*.25;
+        const offset=(y*width+x)*4;
+        for (const [i,value] of [key*.98+bounce*.20+horizon*.39,key*.84+bounce*.45+horizon*.63,key*.71+bounce*.81+horizon].entries()) {
+          data[offset+i]=T.DataUtils.toHalfFloat(.025+value);
+        }
+        data[offset+3]=T.DataUtils.toHalfFloat(1);
+      }
+    }
+    const probe = new T.DataTexture(data,width,height,T.RGBAFormat,T.HalfFloatType);
+    probe.mapping = T.EquirectangularReflectionMapping;
+    probe.needsUpdate = true;
+    scene.environment = probe;
+  }
+
   function group(parent,x=0,y=0,z=0) {
     const result = new T.Group();
     result.position.set(x,y,z);
@@ -84,6 +151,14 @@
       shape.closePath();
       const geometry = new T.ExtrudeGeometry(shape,{depth:d,steps:1,bevelEnabled:true,bevelSize:.035,bevelThickness:.04,bevelSegments:2});
       geometry.translate(0,0,-d/2);
+      const points = geometry.getAttribute("position"), normals = geometry.getAttribute("normal");
+      const uv = geometry.getAttribute("uv");
+      for (let i=0;i<points.count;i++) {
+        const nx=Math.abs(normals.getX(i)),ny=Math.abs(normals.getY(i));
+        const u=nx>.58?points.getZ(i)/(d+.08):points.getX(i)/(w+.08);
+        const v=ny>.58?points.getZ(i)/(d+.08):points.getY(i)/(h+.08);
+        uv.setXY(i,.5+u,.5+v);
+      }
       faces.set(key,geometry);
     }
     return mesh(parent,faces.get(key),finish,x,y,z);
@@ -132,25 +207,37 @@
     return mesh(parent,new T.PlaneGeometry(width,height),new T.MeshBasicMaterial({map,transparent:true,depthWrite:false}),x,y,z);
   }
 
-  function stationsLights(scene) {
-    scene.add(new T.HemisphereLight("#d6e7ff","#344550",1.7));
-    const key = new T.DirectionalLight("#fff0d7",3.3);
-    key.position.set(12,18,11);
+  function stationsLights(scene,environment) {
+    if (environment) reflections(scene);
+    scene.add(new T.HemisphereLight("#d7e8f8","#293c52",.81));
+    const key = new T.DirectionalLight("#fff1db",3.35);
+    key.position.set(-13,15,9);
     scene.add(key);
-    const rim = new T.DirectionalLight("#5ca5ff",2.65);
-    rim.position.set(-13,-3,-12);
+    const rim = new T.DirectionalLight("#6c9bcc",1.65);
+    rim.position.set(9,-5,-13);
     scene.add(rim);
   }
 
   function makeDock(parent) {
     const dock = group(parent,0,-.77,3.05);
     for (const s of [-1,1]) {
-      section(dock,deep,s*1.43,0,0,1.07,2.90,1.86,.32);
-      section(dock,steel,s*1.44,0,.92,.8,2.70,.20,.33);
-      section(dock,steel,0,s*1.2,.24,2.43,.40,1.76,.16);
+      section(dock,weathered,s*1.43,0,0,1.07,2.90,1.86,.32);
+      section(dock,weathered,s*1.44,0,.92,.8,2.70,.20,.31);
+      section(dock,ceramic,0,s*1.2,.24,2.43,.40,1.76,.16);
+      for (let i=0;i<6;i++) {
+        const z=-.63+i*.30;
+        box(dock,graphite,s*1.99,0,z,.077,2.06,.073);
+        box(dock,i%3===0?honey:steel,s*1.91,.73,z,.13,.06,.13);
+        box(dock,oxide,s*1.82,-.47,z,.069,.24,.13);
+      }
     }
     section(dock,oxide,0,-1.05,1.30,2.48,.2,.16,.065);
     marking(dock,"OBS / 01",0,1.18,1.144,1.34,.26);
+    for (let n=0;n<7;n++) {
+      const x=(n-3)*.30;
+      box(dock,graphite,x,1.46,.86,.26,.09,.28);
+      box(dock,n%4===0?honey:oxide,x,1.40,1.17,.15,.023,.048);
+    }
     const runway = group(dock,0,-.94,1.53);
     box(runway,graphite,0,0,.60,2.35,.16,2.1);
     const tracks = [];
@@ -182,10 +269,14 @@
       const slide = group(dock,s*.545,0,1.16);
       slide.userData.movable = true;
       section(slide,graphite,0,0,0,1.08,1.89,.12,.15);
-      section(slide,alloy,0,.16,.081,.79,1.38,.035,.16);
-      section(slide,steel,0,-.1,.115,.71,1.11,.035,.14);
+      section(slide,weathered,0,.16,.081,.79,1.38,.035,.16);
+      section(slide,weathered,0,-.1,.115,.71,1.11,.035,.14);
       box(slide,oxide,s*.17,-.68,.14,.43,.079,.043);
       box(slide,honey,-s*.44,0,.127,.026,1.05,.02);
+      for (const y of [.61,.13,-.43]) {
+        box(slide,graphite,0,y,.143,.73,.069,.026);
+        for (let j=0;j<6;j++) box(slide,alloy,(j-2.5)*.109,y,.16,.024,.024,.019);
+      }
       for (let i=0;i<5;i++) box(slide,deep,s*.14,-.22-i*.064,.143,.43,.017,.019);
       for (let i=0;i<3;i++) {
         const slash = box(slide,oxide,s*.16+(i-1)*.07,-.64,.168,.026,.116,.016);
@@ -243,12 +334,113 @@
     }
   }
 
+  function shellSector(radius,start,span,profile) {
+    const positions=[],uv=[],indices=[];
+    const steps=14;
+    for (let face=0;face<profile.length;face++) {
+      const [r0,z0]=profile[face];
+      const [r1,z1]=profile[(face+1)%profile.length];
+      const base=positions.length/3;
+      for (let i=0;i<=steps;i++) {
+        const angle=start+span*i/steps;
+        for (const [r,z,t] of [[r0,z0,0],[r1,z1,1]]) {
+          positions.push(Math.cos(angle)*(radius+r),Math.sin(angle)*(radius+r),z);
+          uv.push(i/steps,t);
+        }
+        if (i) {
+          const k=base+i*2;
+          indices.push(k-2,k-1,k,k-1,k+1,k);
+        }
+      }
+    }
+    const geometry=new T.BufferGeometry();
+    geometry.setAttribute("position",new T.Float32BufferAttribute(positions,3));
+    geometry.setAttribute("uv",new T.Float32BufferAttribute(uv,2));
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    return geometry;
+  }
+
+  function habitat(halo,radius) {
+    const shell=ceramic.clone(), gray=weathered.clone();
+    shell.side=gray.side=T.DoubleSide;
+    const profile=[[-.68,-.53],[-.50,-.81],[.42,-.81],[.65,-.52],[.65,.54],[.42,.82],[-.50,.82],[-.68,.49]];
+    for (let n=0;n<24;n++) {
+      const angle=n*TAU/24;
+      if (n%8===3 || n%8===4) continue;
+      mesh(halo,shellSector(radius,angle+.013,TAU/24-.026,profile),n%4===0?gray:shell);
+      const panel=group(halo,Math.cos(angle+.13)*radius,Math.sin(angle+.13)*radius,.843);
+      panel.rotation.z=angle+.13-Math.PI/2;
+      box(panel,deep,0,-.24,.006,1.37,.145,.034);
+      box(panel,oxide,0,.39,.014,1.27,.068,.054);
+      for (let i=0;i<8;i++) {
+        const x=(i-3.5)*.153;
+        box(panel,i%5===0?cold:i%4===1?graphite:honey,x,-.24,.032,.105,.052,.022);
+        box(panel,steel,x,.21,.035,.07,.092,.034);
+      }
+      if (n%4===0) {
+        box(panel,steel,-.40,.11,.075,.44,.32,.15);
+        box(panel,deep,-.4,.11,.157,.32,.20,.014);
+        for (let slot=0;slot<5;slot++) box(panel,alloy,-.52+slot*.06,.11,.178,.018,.17,.017);
+      }
+    }
+  }
+
+  function observatoryCanopy(parent) {
+    const dome = group(parent,.35,2.46,-.40);
+    const radius = 1.87;
+    const canopy = new T.MeshPhysicalMaterial({color:"#193b55",roughness:.24,metalness:.52,clearcoat:.68,clearcoatRoughness:.26,emissive:"#131c28",emissiveIntensity:.33});
+    const shell = mesh(dome,new T.SphereGeometry(radius,38,17,0,TAU,0,Math.PI/2),canopy);
+    shell.scale.y=.84;
+    const foundation=mesh(dome,new T.CylinderGeometry(1.90,2.02,.47,48),weathered,0,-.24,0);
+    foundation.rotation.y=.13;
+    for (const [r,y,finish] of [[1.90,0,steel],[1.93,-.21,oxide],[2,-.44,graphite],[1.92,-.31,alloy]]) {
+      ring(dome,finish,r,.042,0,y,0).rotation.x=-Math.PI/2;
+    }
+    const ribPoint=(latitude,azimuth)=>v(radius*Math.sin(latitude)*Math.cos(azimuth),radius*.84*Math.cos(latitude),radius*Math.sin(latitude)*Math.sin(azimuth));
+    const ribs=18;
+    for (let i=0;i<ribs;i++) {
+      const azimuth=i*TAU/ribs;
+      for (let j=0;j<5;j++) {
+        const a=(j+.12)*Math.PI/10,b=(j+1)*Math.PI/10;
+        const start=ribPoint(a,azimuth),end=ribPoint(b,azimuth);
+        beam(dome,steel,start,end,.026);
+        if (j>0) beam(dome,alloy,start,ribPoint(b,azimuth+TAU/ribs),.016);
+      }
+      const window=group(dome,Math.cos(azimuth)*1.96,-.195,Math.sin(azimuth)*1.96);
+      window.rotation.y=-azimuth+Math.PI/2;
+      box(window,deep,0,0,.015,.42,.17,.063);
+      for (let slot=-2;slot<=2;slot++) box(window,(slot+i)%5===0?graphite:honey,slot*.068,.004,.051,.045,.070,.011);
+    }
+    for (const angle of [Math.PI*.18,Math.PI*.34,Math.PI*.45]) {
+      const brace=ring(dome,steel,radius*Math.sin(angle),.023,0,radius*.84*Math.cos(angle),0);
+      brace.rotation.x=-Math.PI/2;
+    }
+  }
+
   function buildStation(scene) {
     const station = group(scene);
     const core = group(station,0,0,-.4);
-    section(core,graphite,0,0,0,3.64,4.62,3.75,.63);
-    section(core,alloy,0,2.05,.10,3.1,1.02,2.8,.24);
+    section(core,weathered,0,0,0,3.64,4.62,3.75,.63);
+    section(core,ceramic,0,2.05,.10,3.35,.92,2.8,.24);
     section(core,deep,0,-2.0,-.05,2.7,1.08,3.3,.33);
+    observatoryCanopy(core);
+    for (const direction of [-1,1]) {
+      const deck = group(core,direction*2.83,.73,direction===1?-.38:.33);
+      section(deck,weathered,0,0,0,1.95,1.05,3.79,.32);
+      section(deck,ceramic,0,.54,.02,1.84,.23,3.46,.10);
+      section(deck,deep,0,-.19,1.91,1.40,.48,.095,.14);
+      for (const row of [-.31,-.22,-.13,-.04]) {
+        box(deck,steel,0,row,1.995,1.03,.024,.032);
+        box(deck,graphite,0,row-.026,2.011,1.02,.018,.019);
+      }
+      for (let segment=0;segment<13;segment++) {
+        const z=-1.68+segment*.27;
+        box(deck,graphite,direction*.99,.13,z,.051,.28,.217);
+        box(deck,segment%4===1?glass:honey,direction*1.022,.14,z,.027,.073,.123);
+        box(deck,steel,direction*.96,-.29,z,.114,.17,.14);
+      }
+    }
     for (let i=0;i<10;i++) {
       const z = -1.62+i*.36;
       section(core,i%3?steel:alloy,0,.69,z,3.83,1.58,.085,.32);
@@ -278,13 +470,12 @@
     }
 
     const halo = group(station,0,.21,-.55);
-    halo.rotation.set(-.38,.14,-.18);
+    halo.rotation.set(-.52,.32,-.18);
     const radius = 6.23;
     for (const z of [-.53,.53]) {
       ring(halo,graphite,radius,.24,0,0,z);
       ring(halo,alloy,radius+.16,.108,0,0,z);
       ring(halo,oxide,radius-.29,.052,0,0,z);
-      ring(halo,light("#5d829c"),radius+.36,.018,0,0,z);
     }
     const tracer = ring(halo,steel,5.64,.1,0,0,-1.32,TAU*.74);
     tracer.rotation.z = .67;
@@ -302,7 +493,8 @@
       box(segment,steel,0,.21,.522,.44,.057,.057);
       if (i%8===0) glow(segment,"#c1ddff",0,.08,.60,.46,.27);
     }
-    for (let i=0;i<6;i++) {
+    habitat(halo,radius);
+    for (const i of [0,1,2,4,5]) {
       const theta = (i+.26)*TAU/6;
       const axis = v(Math.cos(theta),Math.sin(theta),0);
       const tangent = v(-axis.y,axis.x,0);
@@ -318,7 +510,7 @@
           const q = a.clone().lerp(b,(k+.77)/8).addScaledVector(tangent,-side*.44);
           p.z += .07;
           q.z += .07;
-          beam(halo,oxide,p,q,.061,true);
+          beam(halo,k%3===0?oxide:steel,p,q,.066,true);
         }
       }
     }
@@ -346,12 +538,33 @@
       for (let unit=-1;unit<=1;unit++) {
         const tile = group(wing,unit*1.63,0,0);
         box(tile,graphite,0,0,0,1.49,.13,1.87);
-        box(tile,glass,0,.075,0,1.41,.029,1.77);
+        box(tile,radiator,0,.075,0,1.41,.029,1.77);
         for (let line=-4;line<=4;line++) box(tile,steel,line*.14,.099,0,.012,.017,1.74);
         for (let line=-3;line<=3;line++) box(tile,steel,0,.105,line*.24,1.4,.013,.013);
       }
       glow(wing,s===1?"#9fe4ff":"#ffa972",s*2.55,.12,0,.54,.61);
     }
+    const array = group(station,3.25,1.80,-1.46);
+    array.rotation.set(-.12,-.35,.18);
+    for (const y of [-.56,.56]) {
+      beam(array,steel,v(-.45,y,0),v(3.64,y,0),.16,true);
+      beam(array,graphite,v(-.2,y,-.22),v(3.4,y,-.22),.12,true);
+      for (let i=0;i<8;i++) {
+        const a=i*.46;
+        beam(array,oxide,v(a,y,-.22),v(a+.40,-y,0),.031);
+      }
+    }
+    for (const y of [-.93,.93]) {
+      for (let panel=0;panel<3;panel++) {
+        const x=1.17+panel*.87;
+        box(array,weathered,x,y,-.16,.812,.61,.074);
+        box(array,radiator,x,y,-.109,.755,.55,.032);
+        for (let line=-4;line<=4;line++) box(array,steel,x+line*.079,y,-.084,.011,.53,.014);
+        for (let line=-2;line<=2;line++) box(array,oxide,x,y+line*.107,-.082,.74,.010,.015);
+      }
+    }
+    box(array,oxide,3.43,0,-.06,.16,1.32,.24);
+    glow(array,"#ff976e",3.51,.60,.09,.37,.60);
     for (const s of [-1,1]) {
       const tower = group(station,s*2.38,2.48,-.36);
       beam(tower,steel,v(0,-1.5,0),v(s*1.02,1.57,-.45),.18,true);
@@ -362,6 +575,18 @@
         const fin = box(tower,i%2?oxide:graphite,s*.24,-.76+i*.21,.12,.74,.085,1.08);
         fin.rotation.z = s*.25;
       }
+    }
+    const dish = group(station,2.94,3.51,-.56);
+    beam(dish,steel,v(-.53,-.88,.18),v(0,.15,0),.13,true);
+    const reflector = group(dish,0,.18,0);
+    reflector.rotation.set(.63,.31,-.64);
+    const bowl = new T.LatheGeometry([new T.Vector2(0,0),new T.Vector2(.24,.035),new T.Vector2(.47,.116),new T.Vector2(.70,.235),new T.Vector2(.78,.29)],40);
+    const reflectorFinish = alloy.clone(); reflectorFinish.side=T.DoubleSide;
+    mesh(reflector,bowl,reflectorFinish);
+    mesh(reflector,new T.CylinderGeometry(.031,.038,.54,9),steel,0,.29,0);
+    for (let i=0;i<5;i++) {
+      const theta=i*TAU/5;
+      beam(reflector,graphite,v(Math.cos(theta)*.76,.27,Math.sin(theta)*.76),v(0,.52,0),.021);
     }
     const neck = group(station,0,-.62,1.22);
     section(neck,steel,0,0,0,2.24,1.9,1.6,.32);
@@ -429,7 +654,7 @@
     return { ship,drive };
   }
 
-  function backdrop(scene,withSky=true) {
+  function backdrop(scene,onReady) {
     const sphere = mesh(scene,new T.SphereGeometry(370,36,22),new T.ShaderMaterial({
       side:T.BackSide,depthWrite:false,
       uniforms:{image:{value:null},ready:{value:0}},
@@ -462,9 +687,10 @@
       `
     }));
     sphere.renderOrder = -2;
-    if (withSky) new T.TextureLoader().load("assets/img/orbit-deep-space.webp",texture => {
+    new T.TextureLoader().load("assets/img/orbit-deep-space.webp",texture => {
       sphere.material.uniforms.image.value = texture;
       sphere.material.uniforms.ready.value = 1;
+      onReady();
     },undefined,() => {});
     return sphere;
   }
