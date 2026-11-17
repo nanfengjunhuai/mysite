@@ -2,323 +2,348 @@
   "use strict";
 
   const layer = document.querySelector("#arrival");
-  const O = window.Observatory;
-  const T = window.THREE;
-  if (!layer || !O || !T) return;
-  const canvas = layer.querySelector("canvas");
+  if (!layer) return;
   const audioButton = layer.querySelector("#arrival-sound");
+  const access = layer.querySelector("#flight-access");
   const caption = layer.querySelector("#flight-caption");
   const status = layer.querySelector("#flight-status");
   const workshop = document.querySelector("#experience");
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
-  const length = 12.65;
-  const flightText = [
-    ["跃迁中", "正在前往观测站"],
-    ["已脱离跃迁", "观测站出现于前方"],
-    ["进近许可", "减速并对准泊位"],
-    ["已停靠", "正在开启观测站舱门"]
+  const duration = 11.90;
+  const sessionKey = "station-arrived-film";
+  const shots = [
+    {name:"warp", file:"flight-gravity-lens.webp", start:0, label:"穿越引力透镜", detail:""},
+    {name:"orbit-wide", file:"flight-observatory.webp", start:3.08, label:"轨道观测站", detail:""},
+    {name:"orbit", file:"flight-orbit-approach.webp", start:4.78, label:"对准泊位", detail:"推进器减速"},
+    {name:"hatch", file:"flight-airlock.webp", start:7.12, label:"泊位已锁定", detail:"气闸均压中"}
   ];
 
-  function sessionStatus() {
-    try { return sessionStorage.getItem("station-arrived") === "1"; }
+  function alreadySeen() {
+    try { return sessionStorage.getItem(sessionKey) === "1"; }
     catch { return false; }
   }
 
   const force = new URLSearchParams(location.search).get("arrival") === "1";
   const route = location.hash.slice(1);
-  if (motion.matches || (route && route !== "desk") || (!force && (route || sessionStatus()))) return;
+  if (motion.matches || (route && route !== "desk") || (!force && (route || alreadySeen()))) return;
 
-  let renderer;
-  try { renderer = O.rendererFor(canvas); }
-  catch { return; }
-  const scene = new T.Scene();
-  O.stationsLights(scene);
-  const station = O.buildStation(scene);
-  const ship = O.buildShip(scene);
-  const space = O.backdrop(scene);
-  const camera = new T.PerspectiveCamera(44,1,.08,710);
-  const tunnel = buildTunnel();
-  scene.add(tunnel);
-  const target = new T.Vector3();
-  const clock = { elapsed:0, last:0, frame:0, stage:-1, slow:0 };
-  let density = Math.min(devicePixelRatio || 1,1.55);
-  let sound;
+  const film = layer.querySelector(".arrival-film");
+  const optics = layer.querySelector("canvas");
+  const ctx = optics.getContext("2d");
+  const plates = shots.map(({name,file}) => {
+    const plate = document.createElement("div");
+    plate.className = "film-plate";
+    plate.dataset.shot = name;
+    const image = document.createElement("img");
+    image.alt = "";
+    image.decoding = "async";
+    if (name === "warp") image.fetchPriority = "high";
+    image.src = "assets/img/" + file;
+    plate.append(image);
+    let backdrop;
+    let doorTexture;
+    if (name === "warp" || name === "orbit") {
+      backdrop = document.createElement("img");
+      backdrop.alt = "";
+      backdrop.decoding = "async";
+      backdrop.src = name === "warp" ? "assets/img/flight-gravity-background.webp" : "assets/img/flight-berth-background.webp";
+      backdrop.className = "film-clean";
+      image.className = "film-shuttle";
+      plate.prepend(backdrop);
+    }
+    if (name === "hatch") {
+      doorTexture = new Image();
+      doorTexture.src = "assets/img/flight-airlock-leaves.webp";
+      const opening = document.createElement("div");
+      opening.className = "airlock-opening";
+      for (const side of ["left","right"]) {
+        const leaf = document.createElement("div");
+        leaf.className = "airlock-leaf";
+        leaf.dataset.leaf = side;
+        opening.append(leaf);
+      }
+      plate.append(opening);
+    }
+    film.append(plate);
+    const ready = Promise.all([image.decode(),...(doorTexture ? [doorTexture.decode()] : [])]);
+    return {plate,backdrop,ready};
+  });
+
+  const clock = {elapsed:0, last:0, frame:0, shot:-1};
+  const loadLimit = 3200;
+  const bridge = layer.querySelector(".arrival-bridge");
+  const resizeObserver = new ResizeObserver(resize);
+  let audio;
   let busy = false;
   let ended = false;
+  let started = false;
+  let w = 1;
+  let h = 1;
 
-  function smooth(a,b,x) {
-    const p = Math.max(0,Math.min(1,(x-a)/(b-a)));
-    return p*p*(3-2*p);
-  }
-
-  function buildTunnel() {
-    const lens = new T.ShaderMaterial({
-      depthTest:false,depthWrite:false,toneMapped:false,
-      uniforms:{time:{value:0},aspect:{value:1},exit:{value:0}},
-      vertexShader:`
-        varying vec2 screen;
-        void main(){screen=uv; gl_Position=vec4(position.xy,1.,1.);}
-      `,
-      fragmentShader:`
-        varying vec2 screen;
-        uniform float time;
-        uniform float aspect;
-        uniform float exit;
-        void main(){
-          vec2 p=(screen-.5)*vec2(aspect,1.0);
-          vec2 vanishing=vec2(-.075+.095*sin(time*1.21),.058*cos(time*.92));
-          p-=vanishing;
-          float r=length(p);
-          float a=atan(p.y,p.x), depth=.23/max(.051,r);
-          float bend=a+.17*sin(depth*.95-time*2.9)+time*.22+sin(depth*.31)*.57;
-          float angular=max(0.,cos(bend*6.+depth*1.6));
-          float fabric=.53+.47*cos(bend*3.-depth*1.8+time*.38);
-          float threads=pow(angular,10.)+pow(max(0.,cos(bend*13.1-depth*.82)),24.)*.39;
-          float shutters=pow(max(0.,cos(depth*4.4-time*12.)),16.);
-          float gates=shutters*(.09+pow(max(0.,cos(bend*3.)),8.)*.57);
-          float flux=sin(bend*18.+depth*1.3-time*12.)*sin(depth*11.-time*19.);
-          float dust=pow(max(0.,flux),26.)*smoothstep(.07,.41,r);
-          float contours=pow(max(0.,sin(16.*bend+sin(depth*7.4-time*4.3)*1.15-depth*2.)),8.);
-          float mist=(.5+.5*sin(bend*7.+depth*11.-time*2.1))*(.5+.5*cos(bend*3.6-depth*3.8));
-          vec3 violet=vec3(.105,.064,.27), teal=vec3(.040,.58,.73);
-          vec3 color=vec3(.018,.025,.080)+(threads*.52+gates)*mix(violet,teal,fabric);
-          color+=vec3(.54,.40,.77)*dust*.45;
-          color+=mix(vec3(.14,.07,.27),vec3(.033,.24,.33),fabric)*(contours*.35+mist*.26);
-          color*=1.-.48*smoothstep(.37,.96,r);
-          float core=exp(-r*(7.-exit*4.5));
-          color+=vec3(.61,.76,1.)*core*(.31+1.05*exit);
-          color+=vec3(.20,.36,.53)*pow(1.-smoothstep(.04,.16,r),2.)*(.38+exit);
-          gl_FragColor=vec4(color,1.);
-        }
-      `
-    });
-    const plane = new T.Mesh(new T.PlaneGeometry(2,2),lens);
-    plane.frustumCulled = false;
-    plane.renderOrder = -10;
-    return plane;
+  function ease(a,b,value) {
+    const x = Math.max(0,Math.min(1,(value-a)/(b-a)));
+    return x*x*(3-2*x);
   }
 
   function resize() {
-    const {clientWidth:w,clientHeight:h} = layer;
-    if (!w || !h) return;
-    camera.aspect = w/h;
-    camera.fov = camera.aspect < 1 ? 60 : 43;
-    camera.updateProjectionMatrix();
-    tunnel.material.uniforms.aspect.value = w/h;
-    renderer.setPixelRatio(density);
-    renderer.setSize(w,h,false);
+    w = Math.max(1,layer.clientWidth);
+    h = Math.max(1,layer.clientHeight);
+    const scatterScale = Math.min(devicePixelRatio || 1,1.15);
+    optics.width = Math.ceil(w*scatterScale);
+    optics.height = Math.ceil(h*scatterScale);
+    ctx?.setTransform(scatterScale,0,0,scatterScale,0,0);
   }
 
-  function place() {
-    const t = clock.elapsed;
-    const warp = t < 3.58;
-    space.visible = station.station.visible = !warp;
-    tunnel.visible = warp;
-    tunnel.material.uniforms.time.value = t;
-    tunnel.material.uniforms.exit.value = smooth(3.0,3.56,t);
-    const burst = smooth(3.22,3.54,t) * (1-smooth(3.56,4.13,t));
-    layer.style.setProperty("--jump",burst*.90);
-    const stage = t < 3.58 ? 0 : t < 6.12 ? 1 : t < 8.27 ? 2 : 3;
-    if (stage !== clock.stage) {
-      clock.stage = stage;
-      status.textContent = flightText[stage][0];
-      caption.textContent = flightText[stage][1];
-      layer.dataset.flightStage = String(stage);
+  function frameShot(t) {
+    const index = t < shots[1].start ? 0 : t < shots[2].start ? 1 : t < shots[3].start ? 2 : 3;
+    if (index !== clock.shot) {
+      clock.shot = index;
+      for (let i=0;i<plates.length;i++) plates[i].plate.toggleAttribute("data-active",i===index);
+      layer.dataset.flightStage = String(index);
+      status.textContent = shots[index].label;
+      caption.textContent = shots[index].detail;
+      if (index !== 0) ctx?.clearRect(0,0,w,h);
     }
-    if (warp) {
-      ship.ship.visible = true;
-      ship.ship.position.set(-.68+.32*Math.sin(t*1.9),-.49+.14*Math.sin(t*2.2),0);
-      ship.ship.scale.setScalar(.84);
-      ship.ship.rotation.set(.045*Math.sin(t),.09*Math.cos(t*.9),.21*Math.cos(t*1.35));
-      camera.position.set(2.1-.51*t,1.07+.14*t,5.9-.31*t);
-      target.set(-.28,.43,-.62);
-      ship.drive.forEach((light,i) => { light.material.opacity=.84+.12*Math.sin(t*8+i); });
-      camera.lookAt(target);
+    const plate = plates[index].plate;
+    if (index === 0) {
+      const approach = ease(.12,3.11,t);
+      plate.style.setProperty("--camera-scale",1.04+approach*.36);
+      plate.style.setProperty("--camera-x",(Math.sin(t*.87)*.84-approach*.92)+"%");
+      plate.style.setProperty("--camera-y",(-.2-approach*.57)+"%");
+      plate.style.setProperty("--ship-x",(.85*Math.sin(t*1.6)-1.1*approach)+"%");
+      plate.style.setProperty("--ship-y",(-1.5*Math.sin(t*1.2)-11.5*approach)+"%");
+      plate.style.setProperty("--ship-scale",(w < h ? .66 : 1)*(1-.33*approach));
+      plate.style.setProperty("--ship-bank",(Math.sin(t*1.85)*1.85-5.5*approach)+"deg");
+      layer.style.setProperty("--jump",ease(2.74,3.07,t)*.72);
+      drawLens(t,approach);
       return;
     }
-
-    const approach = 1-Math.pow(1-Math.max(0,Math.min(1,(t-3.58)/4.46)),2.18);
-    const settle = smooth(6.3,8.04,t);
-    const lean = smooth(8.04,9.56,t);
-    const move = smooth(9.62,11.96,t);
-    const x = 4.9*(1-approach);
-    const z = 6.63+26.7*(1-approach);
-    const y = -.89+1.44*(1-approach)-.60*settle;
-    ship.ship.scale.setScalar(.49);
-    ship.ship.position.set(x,y,z);
-    ship.ship.visible = t < 11.14;
-    ship.ship.rotation.set(.12*(1-approach),-.36*(1-approach),-.28*(1-approach));
-    ship.drive.forEach(light => { light.material.opacity=1-.91*settle; });
-    const mobile = camera.aspect < 1;
-    camera.position.set(
-      (mobile ? 2.1 : 8.2)*(1-approach)+.78*(1-lean),
-      1.13+2.46*(1-approach)-1.34*lean-.43*move,
-      z+T.MathUtils.lerp(8.4,3.6,approach)-2.50*lean-4.02*move
-    );
-    target.set(
-      (mobile ? .46 : -1.33)*(1-approach),
-      .88*(1-approach)-.55*lean-.10*move,
-      1.6+3.15*approach-2.23*move
-    );
-    camera.lookAt(target);
-    station.open(smooth(8.44,10.72,t));
-    station.guide(t,settle);
-    layer.style.setProperty("--bridge",smooth(11.64,12.55,t));
-  }
-
-  function tick(time) {
-    if (ended || document.hidden) return;
-    if (clock.last) {
-      const delta = (time-clock.last)*.001;
-      clock.elapsed += delta;
-      clock.slow = delta > .04 ? clock.slow+1 : 0;
-      if (clock.slow > 7 && density > .79) {
-        density = Math.max(.78,density*.82);
-        clock.slow = 0;
-        resize();
-      }
+    layer.style.setProperty("--jump",(1-ease(3.08,3.36,t))*.72);
+    if (index === 1) {
+      const approach = ease(3.08,4.78,t);
+      plate.style.setProperty("--camera-scale",1.045+approach*.12);
+      plate.style.setProperty("--camera-x",(1.15-approach*1.7)+"%");
+      plate.style.setProperty("--camera-y",(-.55+approach*.55)+"%");
+      return;
     }
-    clock.last = time;
-    place();
-    renderer.render(scene,camera);
-    if (clock.elapsed >= length) { finish(); return; }
-    clock.frame = requestAnimationFrame(tick);
+    if (index === 2) {
+      const approach = ease(4.75,7.14,t);
+      plate.style.setProperty("--camera-scale",1.045+approach*.45);
+      plate.style.setProperty("--camera-x",(1.1-4.2*approach)+"%");
+      plate.style.setProperty("--camera-y",(1.0-1.05*approach)+"%");
+      plate.style.setProperty("--ship-x",(.8+approach*9.1)+"%");
+      plate.style.setProperty("--ship-y",(-.1-approach*12.1)+"%");
+      plate.style.setProperty("--ship-scale",(w < h ? .82 : 1)-approach*.45);
+      plate.style.setProperty("--ship-bank",(-1.2+approach*2.5)+"deg");
+      layer.style.setProperty("--burn",Math.sin(t*9)*.13+(1-approach)*.47);
+      return;
+    }
+    const door = ease(7.82,10.15,t);
+    const inside = ease(9.58,11.82,t);
+    plate.style.setProperty("--camera-scale",1.015+inside*.87);
+    plate.style.setProperty("--camera-y",(.8-inside*.80)+"%");
+    plate.style.setProperty("--door",door);
+    plate.style.setProperty("--door-rim",ease(7.39,7.83,t));
+    bridge.style.opacity = ease(11.29,11.82,t)*.84;
+    if (t > 9.22 && caption.textContent !== "气闸已开启") caption.textContent = "气闸已开启";
   }
 
-  const resizeObserver = new ResizeObserver(resize);
-  const handleVisibility = () => {
+  function drawLens(t,approach) {
+    if (!ctx) return;
+    ctx.clearRect(0,0,w,h);
+    ctx.globalCompositeOperation = "screen";
+    const x = w*.5 + Math.sin(t*1.23)*w*.012;
+    const y = h*.437;
+    const reach = Math.hypot(w,h);
+    const compression = w<h ? .74 : .86;
+
+    // Sparse, curved reflections expand around the existing lens. The central silhouette stays clear.
+    for (let i=0;i<15;i++) {
+      const z = ((i*.153+t*.41+approach*.11)%1);
+      const radius = reach*(.064+z*z*.51);
+      const a = i*1.917+t*.175;
+      const alpha = Math.sin(z*Math.PI)*(.13+approach*.12);
+      const gradient = ctx.createLinearGradient(x-radius,y+radius*.38,x+radius,y-radius*.38);
+      gradient.addColorStop(0,"#27304f00");
+      gradient.addColorStop(.43,"rgba(98,139,192,"+alpha+")");
+      gradient.addColorStop(.58,"rgba(149,160,207,"+(alpha*.63)+")");
+      gradient.addColorStop(1,"#7197c900");
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = Math.max(.9,radius*.012);
+      ctx.beginPath();
+      ctx.ellipse(x,y,radius,radius*compression,.33,a,a+.35+z*.66);
+      ctx.stroke();
+    }
+    ctx.globalCompositeOperation = "source-over";
+  }
+
+  function draw(time) {
+    if (ended || document.hidden) return;
+    if (clock.last) clock.elapsed += (time-clock.last)*.001;
+    clock.last = time;
+    frameShot(clock.elapsed);
+    if (clock.elapsed >= duration) { finish(); return; }
+    clock.frame = requestAnimationFrame(draw);
+  }
+
+  function onVisibility() {
     cancelAnimationFrame(clock.frame);
     clock.last = 0;
-    if (document.hidden) {
-      closeSound();
-    } else if (!ended) clock.frame = requestAnimationFrame(tick);
-  };
+    if (document.hidden) closeSound();
+    else if (started && !ended) clock.frame = requestAnimationFrame(draw);
+  }
   function finish() {
     if (ended) return;
     ended = true;
+    const hadFocus = layer.contains(document.activeElement);
     cancelAnimationFrame(clock.frame);
-    closeSound();
     resizeObserver.disconnect();
-    document.removeEventListener("visibilitychange",handleVisibility);
+    document.removeEventListener("visibilitychange",onVisibility);
     window.removeEventListener("pagehide",closeSound);
+    window.removeEventListener("keydown",onKey);
     motion.removeEventListener("change",finish);
-    window.removeEventListener("keydown",escape);
-    canvas.removeEventListener("webglcontextlost",finish);
+    audioButton.removeEventListener("click",toggleSound);
+    access.removeEventListener("click",finish);
+    closeSound();
     workshop.inert = false;
-    if (layer.contains(document.activeElement)) workshop.querySelector(".home")?.focus({preventScroll:true});
-    document.querySelector("#flight-access")?.setAttribute("hidden","");
-    try { sessionStorage.setItem("station-arrived","1"); } catch {}
+    access.hidden = true;
+    if (hadFocus) workshop.querySelector(".home")?.focus({preventScroll:true});
+    if (started) {
+      try { sessionStorage.setItem(sessionKey,"1"); } catch {}
+    }
     layer.dataset.leaving = "";
     setTimeout(() => {
       layer.hidden = true;
-      renderer.dispose();
-      renderer.forceContextLoss();
+      film.replaceChildren();
+      optics.width = optics.height = 1;
     },motion.matches ? 0 : 520);
   }
-  function escape(event) { if (event.key === "Escape") finish(); }
+  function onKey(event) { if (event.key === "Escape") finish(); }
 
   async function toggleSound() {
-    if (busy || ended) return;
-    if (sound) { closeSound(); return; }
+    if (!started || busy || ended) return;
+    if (audio) { closeSound(); return; }
     const Context = window.AudioContext || window.webkitAudioContext;
     if (!Context) { audioButton.disabled = true; return; }
     busy = true;
     try {
-      const audio = new Context();
-      sound = audio;
-      await audio.resume();
-      if (sound !== audio || ended) return;
-      scheduleSound(audio,clock.elapsed);
+      const context = new Context();
+      audio = context;
+      await context.resume();
+      if (audio !== context || ended) return;
+      mixSound(context,clock.elapsed);
       audioButton.setAttribute("aria-pressed","true");
       audioButton.setAttribute("aria-label","关闭开场音效");
     } catch { closeSound(); }
     finally { busy = false; }
   }
-
   function closeSound() {
-    if (sound) sound.close().catch(() => {});
-    sound = undefined;
+    if (audio) audio.close().catch(() => {});
+    audio = undefined;
     audioButton.setAttribute("aria-pressed","false");
     audioButton.setAttribute("aria-label","开启开场音效");
   }
 
-  function scheduleSound(audio,elapsed) {
-    const master = audio.createGain();
-    master.gain.value = .24;
-    master.connect(audio.destination);
-    const startAt = audio.currentTime+.04;
-    const last = length-elapsed+.15;
-    const at = mark => startAt+mark-elapsed;
-    const buffer = audio.createBuffer(1,audio.sampleRate*2,audio.sampleRate);
+  function mixSound(context,elapsed) {
+    const master = context.createGain();
+    master.gain.value = .25;
+    master.connect(context.destination);
+    const zero = context.currentTime+.035-elapsed;
+    const available = zero+elapsed;
+    const buffer = context.createBuffer(1,context.sampleRate*3,context.sampleRate);
     const samples = buffer.getChannelData(0);
-    let low = 0;
+    let brown = 0;
     for (let i=0;i<samples.length;i++) {
-      low = (low+(Math.random()*2-1)*.12)/1.11;
-      samples[i] = low;
+      const white = Math.random()*2-1;
+      brown = (brown+white*.14)/1.12;
+      samples[i] = brown*.72+white*.28;
     }
 
-    function texture(mark,duration,frequency,resonance,volume) {
-      if (mark+duration <= elapsed) return;
-      const source = audio.createBufferSource();
+    function envelope(input,start,end,volume,attack,balance) {
+      const gain = context.createGain();
+      gain.gain.setValueAtTime(.001,start);
+      gain.gain.exponentialRampToValueAtTime(volume,start+(end-start)*attack);
+      gain.gain.exponentialRampToValueAtTime(.001,end);
+      input.connect(gain);
+      if (context.createStereoPanner && balance) {
+        const pan = context.createStereoPanner();
+        pan.pan.value = balance;
+        gain.connect(pan).connect(master);
+      } else gain.connect(master);
+    }
+
+    function air(mark,length,from,to,q,volume,balance=0,attack=.23) {
+      if (mark+length <= elapsed) return;
+      const start = Math.max(available,zero+mark);
+      const end = Math.max(start+.027,zero+mark+length);
+      const source = context.createBufferSource();
       source.buffer = buffer;
       source.loop = true;
-      const band = audio.createBiquadFilter();
-      band.type = "bandpass";
-      band.frequency.value = frequency;
-      band.Q.value = resonance;
-      const gain = audio.createGain();
-      const from = Math.max(startAt,at(mark));
-      const to = Math.max(from+.027,at(mark+duration));
-      gain.gain.setValueAtTime(.001,from);
-      gain.gain.exponentialRampToValueAtTime(volume,from+(to-from)*.23);
-      gain.gain.exponentialRampToValueAtTime(.001,to);
-      source.connect(band).connect(gain).connect(master);
-      source.start(from);
-      source.stop(to+.03);
+      const filter = context.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(from,start);
+      filter.frequency.exponentialRampToValueAtTime(to,end);
+      filter.Q.value = q;
+      source.connect(filter);
+      envelope(filter,start,end,volume,attack,balance);
+      source.start(start);
+      source.stop(end+.02);
     }
 
-    function pulse(mark,duration,lowHz,highHz,volume,shape="sine") {
+    function bell(mark,length,from,to,volume,type="sine",balance=0) {
       if (mark < elapsed) return;
-      const time = at(mark);
-      const oscillator = audio.createOscillator();
-      const gain = audio.createGain();
-      oscillator.type = shape;
-      oscillator.frequency.setValueAtTime(lowHz,time);
-      oscillator.frequency.exponentialRampToValueAtTime(highHz,time+duration);
-      gain.gain.setValueAtTime(.001,time);
-      gain.gain.exponentialRampToValueAtTime(volume,time+duration*.19);
-      gain.gain.exponentialRampToValueAtTime(.001,time+duration);
-      oscillator.connect(gain).connect(master);
-      oscillator.start(time);
-      oscillator.stop(time+duration+.025);
+      const start = zero+mark, end = start+length;
+      const oscillator = context.createOscillator();
+      oscillator.type = type;
+      oscillator.frequency.setValueAtTime(from,start);
+      oscillator.frequency.exponentialRampToValueAtTime(to,end);
+      envelope(oscillator,start,end,volume,.12,balance);
+      oscillator.start(start);
+      oscillator.stop(end+.02);
     }
-    texture(0,3.72,280,.58,.43);
-    texture(2.6,1.60,1120,.82,.28);
-    texture(3.62,4.6,159,1.1,.36);
-    texture(8.21,.53,266,.8,.6);
-    texture(8.47,2.13,478,3,.23);
-    texture(10.41,.56,1180,.78,.28);
-    pulse(3.5,.57,104,48,.53);
-    pulse(6.02,.34,825,798,.29);
-    pulse(6.32,.54,584,582,.23);
-    pulse(8.07,.6,140,54,.50,"triangle");
-    pulse(8.42,.17,250,96,.37);
-    pulse(10.57,.85,417,414,.16);
-    pulse(10.76,1.10,619,614,.1);
-    master.gain.setTargetAtTime(0,startAt+Math.max(0,last-.48),.18);
+
+    air(0,3.25,150,470,.7,.41,-.16,.55);
+    air(1.5,2.05,540,1720,1.7,.29,.21,.57);
+    bell(2.69,.66,93,39,.61);
+    air(3.18,3.68,143,73,1.15,.35,-.18);
+    bell(5.42,.19,770,756,.21,"sine",.14);
+    bell(5.66,.29,885,863,.13,"sine",.14);
+    air(7.10,.25,864,115,.91,.59,.11,.14);
+    bell(7.14,.51,118,47,.46,"triangle");
+    air(7.55,.75,1310,451,1.2,.34,.23,.09);
+    air(7.90,2.28,239,151,2.4,.28,-.21,.36);
+    air(9.68,.62,882,373,2.7,.18,.10,.19);
+    bell(10.50,.95,261,260,.13);
+    bell(10.63,1.12,391,390,.10);
+    master.gain.setTargetAtTime(0,Math.max(available,zero+duration-.38),.18);
   }
 
   audioButton.addEventListener("click",toggleSound);
-  document.querySelector("#flight-access").addEventListener("click",finish);
-  canvas.addEventListener("webglcontextlost",finish);
+  access.addEventListener("click",finish);
   workshop.inert = true;
   layer.hidden = false;
-  resize();
-  renderer.compile(scene,camera);
   resizeObserver.observe(layer);
-  motion.addEventListener("change",finish);
-  document.addEventListener("visibilitychange",handleVisibility);
+  document.addEventListener("visibilitychange",onVisibility);
   window.addEventListener("pagehide",closeSound);
-  window.addEventListener("keydown",escape);
-  clock.frame = requestAnimationFrame(tick);
+  window.addEventListener("keydown",onKey);
+  motion.addEventListener("change",finish);
+
+  // A missing plate should never keep a visitor out of the site.
+  const ready = Promise.all(plates.map(plate => plate.ready)).then(() => true,() => false);
+  const clean = plates.map(({backdrop,plate},index) => backdrop?.decode().then(() => {
+    if (clock.shot < index && !ended) plate.dataset.layered = "";
+  }).catch(() => {}));
+  Promise.all([plates[0].ready,clean[0]]).then(() => {
+    if (!started && !ended) { resize(); frameShot(0); }
+  }).catch(() => {});
+  const deadline = new Promise(resolve => setTimeout(() => resolve(false),loadLimit));
+  Promise.race([ready,deadline]).then(ok => {
+    if (ended) return;
+    if (!ok) { finish(); return; }
+    started = true;
+    resize();
+    layer.dataset.initialized = "";
+    frameShot(0);
+    if (!document.hidden) clock.frame = requestAnimationFrame(draw);
+  });
 })();
