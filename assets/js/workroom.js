@@ -796,7 +796,9 @@
   });
   document.querySelectorAll("[data-desk]").forEach((button) => {
     button.addEventListener("click", () => {
-      if (!transitionFrame) go("");
+      if (transitionFrame) return;
+      if (new URLSearchParams(location.search).get("from") === "station") location.href = "world.html";
+      else go("");
     });
   });
   window.addEventListener("popstate", () => {

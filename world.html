@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0a1017">
+  <title>李银的个人空间 · My Personal Space</title>
+  <meta name="description" content="李银的个人空间。一座可以转动观察的观测站，通往自叙帖、研究室、项目库和收藏室。">
+  <link rel="icon" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="assets/css/world.css">
+  <script defer src="content/site.js"></script>
+  <script defer src="content/notes.js"></script>
+  <script defer src="assets/vendor/three-r159.min.js"></script>
+  <script defer src="assets/js/world-model.js"></script>
+  <script defer src="assets/js/world.js"></script>
+</head>
+<body>
+  <main id="world">
+    <canvas id="station" aria-hidden="true"></canvas>
+    <header class="identity">
+      <div class="identity-symbol" aria-hidden="true"></div>
+      <h1><span id="station-owner">李银</span><small lang="en">My Personal Space</small></h1>
+    </header>
+    <div class="station-ports" aria-label="观测站舱室">
+      <button type="button" class="port" data-room="story" data-color="amber"><span>自叙帖</span></button>
+      <button type="button" class="port" data-room="research" data-color="mint"><span>研究室</span></button>
+      <button type="button" class="port" data-room="projects" data-color="lilac"><span>项目库</span></button>
+      <button type="button" class="port" data-room="collection" data-color="blue"><span>收藏室</span></button>
+    </div>
+    <div class="orbit-controls" aria-label="观察视角">
+      <button type="button" id="orbit-left" aria-label="向左观察">‹</button>
+      <span id="orbit-hint">拖动观察</span>
+      <button type="button" id="orbit-right" aria-label="向右观察">›</button>
+    </div>
+    <section class="room-console" id="room-console" aria-labelledby="room-name" hidden>
+      <button type="button" class="room-back" id="room-back">‹ 全景</button>
+      <h2 id="room-name"></h2>
+      <p id="room-detail"></p>
+      <a id="room-link" href="workroom.html">进入 <span aria-hidden="true">↗</span></a>
+    </section>
+    <noscript><p class="no-script"><a href="workroom.html">进入静态工作台</a></p></noscript>
+  </main>
+</body>
+</html>
