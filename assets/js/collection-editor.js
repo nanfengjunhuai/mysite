@@ -1,6 +1,10 @@
 (() => {
   "use strict";
 
+  if (new URLSearchParams(location.search).get("from") === "experience") {
+    for (const link of document.querySelectorAll(".back,#editor-result")) link.href = "experience.html#collection";
+  }
+
   const form = document.querySelector("#collection-editor");
   const fields = form.elements;
   const status = document.querySelector("#editor-status");

@@ -1,9 +1,5 @@
-(() => {
+window.mountRobotStudy = ({ controls,map,result,note }) => {
   const { columns,rows,start,goal,shelves,conditions } = window.ROBOTICS_STUDY;
-  const controls = document.querySelector("#robot-conditions");
-  const map = document.querySelector("#robot-map");
-  const result = document.querySelector("#robot-result");
-  const note = document.querySelector("#robot-note");
   const context = map.getContext("2d");
   const cell = Math.min((map.width-40)/columns,(map.height-30)/rows);
   const marginX = (map.width-columns*cell)/2;
@@ -100,4 +96,12 @@
     buttons.push(button);
   }
   selectCondition(0);
+};
+
+(() => {
+  const controls = document.querySelector("#robot-conditions");
+  if (controls) window.mountRobotStudy({
+    controls,map:document.querySelector("#robot-map"),
+    result:document.querySelector("#robot-result"),note:document.querySelector("#robot-note")
+  });
 })();

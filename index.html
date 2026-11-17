@@ -6,11 +6,12 @@
   <title>My Personal Space</title>
   <meta name="description" content="李银的个人空间。由工作台进入研究室、项目库和自叙帖。">
   <script>
-    const entry = location.hash.startsWith("#relay-") ? "nearshore.html" : location.hash ? "workroom.html" : "world.html";
+    const rooms = ["", "#desk", "#story", "#research", "#projects", "#collection", "#coast", "#harbor", "#ridge"];
+    const entry = location.hash.startsWith("#relay-") ? "nearshore.html" : rooms.includes(location.hash) ? "experience.html" : "workroom.html";
     location.replace(entry + location.search + location.hash);
   </script>
 </head>
 <body>
-  <main><a href="world.html">进入个人空间</a></main>
+  <main><a href="experience.html">进入个人空间</a></main>
 </body>
 </html>

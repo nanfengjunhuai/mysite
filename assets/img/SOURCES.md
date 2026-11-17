@@ -81,3 +81,37 @@ Wide horizontal 16:9 1672x941 high quality anime cinematic 3D environment concep
 Horizontal widescreen 16:9, cinematic premium anime 3D environment concept art for a small personal collection room in a futuristic digital home. A quiet circular room built from teal smoked glass, dark blue-green glazed tile and brushed champagne metal. A huge rounded observation window opens on a dark deep-blue night sky with subtle stars; no major planets. A long floating low exhibition plinth of dark glass and brass sits in the center at mid height, and three subtly illuminated glass alcoves in the back, empty so the website can lay photographic exhibits in front. Near-left foreground has an angled unlit glass railing, near-right floor reflects a soft warm bronze lamp. Light has convincing falloff, textured material, architectural layering, a strong silhouette. Cool cyan and midnight atmosphere with just a few amber practicals. Carefully composed at standing eye level with central scene kept clear and readable, distinct edges and shadows, no fog wash. No labels, lettering, branding, watermarks, people, graphic overlays or interface.
 
 </details>
+
+## 海边观测站
+
+场景以 1672 × 941 的 ImageGen 关键帧为底，压缩为 WebP。网页按画面内的实际物件定位入口。工作台主屏、研究台和项目放映墙的灯光使用独立动画层，自叙帖的放映窗使用站内短片。
+
+- `station-workshop.webp` 选用工作台的第二次构图。将戴蓝色眼镜的程序员置于右侧，左侧和中央留出三个无遮挡的透明屏幕，桌上放小机器人，从狭长窗缝引入傍晚斜光。
+
+<details>
+<summary>自叙帖的 ImageGen 提示词</summary>
+
+Original AAA narrative sci-fi game environment cinematics, wide 16:9 1672x941 crisp, detailed cinematic polished production art, physically credible ceramic, brushed titanium, glass, obsidian, warm apricot practicals, cool glacial blue atmospheric light, luminous rather than dark. An inhabited coastal science observatory built into a cliff at dusk. No words, captions, letters, logos, watermarks, UI, diagrams overlaid, or fantasy magic. Exact perspective as described. In the adjoining private journal room, warm apricot and tea pink. Shoulder-height view into a curved reading alcove, large illuminated paper notebook on a dark oval work surface in the center foreground at x 49%, y 69%, no writing or symbols. Soft amber light from a narrow clerestory. To its right at x 72%, y 53%, a translucent glass playback display with a still photographic dark green aurora over hills, sitting on the desk surface. Cabinet at left with physical drawers. Framed warm sunset light and what feels like life in this place, camera facing the notebook. Dramatic foreground / midground / background, clean and high detail.
+
+</details>
+
+<details>
+<summary>研究室的 ImageGen 提示词</summary>
+
+Original AAA narrative sci-fi game environment cinematics, wide 16:9 1672x941 crisp, detailed cinematic polished production art, physically credible ceramic, brushed titanium, glass, obsidian, warm apricot practicals, cool glacial blue atmospheric light, luminous rather than dark. An inhabited coastal science observatory built into a cliff at dusk. No words, captions, letters, logos, watermarks, UI, diagrams overlaid, or fantasy magic. Exact perspective as described. Deep sea-green research gallery of the same coastal building, camera at eye height. A large central holographic terrain model of a small coastal city with mountain and lighthouse, realistic architectural detail, at x 48%, y 56%, visibly resting above a shallow elliptic dais. Right-side smaller compact working white robot test object and neat geometric equipment at x 72%, y 64%. Back stairs and vertical translucent observation tank produce depth, clear aqua laboratory lights and a trace of reflected warm dusk. Architectural interactive game scene, little clutter, compelling view into a connected world.
+
+</details>
+
+<details>
+<summary>项目库的 ImageGen 提示词</summary>
+
+Original AAA narrative sci-fi game environment cinematics, wide 16:9 1672x941 crisp, detailed cinematic polished production art, physically credible ceramic, brushed titanium, glass, obsidian, warm apricot practicals, cool glacial blue atmospheric light, luminous rather than dark. An inhabited coastal science observatory built into a cliff at dusk. No words, captions, letters, logos, watermarks, UI, diagrams overlaid, or fantasy magic. Exact perspective as described. Archive gallery of the same building, a working computer installation with sculptural deep racks along both sides, warm-white ceramic with low-saturation pale-lilac accents and pink silver reflections in the floor. At x 49%, y 52% a full-width hero playback panel hovering within a plausible physical frame, illuminated dark lavender with abstract circuit readings. Camera near corridor entrance at shoulder height, architecture narrows toward center with high depth, ceiling has credible conduit, polished studio sci-fi game art, no posters or words.
+
+</details>
+
+<details>
+<summary>收藏室的 ImageGen 提示词</summary>
+
+Original AAA narrative sci-fi game environment cinematics, wide 16:9 1672x941 crisp, detailed cinematic polished production art, physically credible ceramic, brushed titanium, glass, obsidian, warm apricot practicals, cool glacial blue atmospheric light, luminous rather than dark. An inhabited coastal science observatory built into a cliff at dusk. No words, captions, letters, logos, watermarks, UI, diagrams overlaid, or fantasy magic. Exact perspective as described. Small specimen gallery of the observatory. Multiple tiers of built-in glass shelving whose frames are in cream ceramic and brushed bronze, a curved glass display on a table at x 48%, y 60%, containing a little mineral object and an object resembling a small star in glass. At left x 32% y 50% an illuminated photographic slide of coast and sky. Warm honey foreground highlights layered with blue-green window light. Deep intimate and expensive exhibition design, cinematic chiaroscuro but visible, impressive depth.
+
+</details>

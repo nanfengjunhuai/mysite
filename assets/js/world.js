@@ -82,7 +82,7 @@
       heading.textContent = port.textContent.trim();
       detail.textContent = item.detail;
       consolePanel.style.setProperty("--room-tint",item.tint);
-      link.href = "workroom.html?from=station#" + selected;
+      link.href = "experience.html#" + selected;
       link.firstChild.textContent = selected === "story" && featured ? "读全文 " : "进入 ";
       desiredAngle = item.angle;
       if (moveFocus) back.focus();

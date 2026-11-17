@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101b22">
+  <meta name="description" content="李银的个人空间。走进海边观测站，打开自叙帖，探索研究、项目和收藏。">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="李银 · My Personal Space">
+  <meta property="og:description" content="走进海边观测站，打开自叙帖，探索研究、项目和收藏。">
+  <meta property="og:image" content="https://nanfengjunhuai.github.io/mysite/assets/img/station-workshop.webp">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>李银 · My Personal Space</title>
+  <link rel="icon" href="assets/img/favicon.svg">
+  <link rel="stylesheet" href="assets/css/experience.css">
+  <link rel="preload" href="assets/img/station-workshop.webp" as="image">
+  <script defer src="content/site.js"></script>
+  <script defer src="content/notes.js"></script>
+  <script defer src="content/projects.js"></script>
+  <script defer src="content/collection.js"></script>
+  <script defer src="content/field-study.js"></script>
+  <script defer src="content/robotics-study.js"></script>
+  <script defer src="assets/js/robotics-study.js"></script>
+  <script defer src="assets/js/experience.js"></script>
+</head>
+<body>
+  <main id="experience" aria-label="李银的个人空间">
+    <div id="scenes" class="scenes"></div>
+    <div class="vignette" aria-hidden="true"></div>
+    <div class="shutter" aria-hidden="true"><div class="passage"></div></div>
+    <header class="signature">
+      <a class="home" href="#desk" aria-label="李银的个人空间，回工作台"><span class="orbit-mark" aria-hidden="true"></span><span><strong lang="en">My Personal Space</strong><small id="owner">李银</small></span></a>
+    </header>
+    <footer class="scene-controls">
+      <div class="scene-location" aria-live="polite"><span id="location-kicker">观测站</span><strong id="location-name">工作台</strong></div>
+      <div class="scene-buttons">
+        <button type="button" id="look-left" class="look" aria-label="向左看">‹</button>
+        <button type="button" id="atlas" aria-haspopup="dialog"><span aria-hidden="true">◇</span> 舱室</button>
+        <button type="button" id="look-right" class="look" aria-label="向右看">›</button>
+      </div>
+    </footer>
+    <noscript><p class="no-script"><a href="workroom.html">打开工作台</a></p></noscript>
+  </main>
+  <dialog class="visor" id="visor" aria-labelledby="visor-title">
+    <div class="visor-head">
+      <h2 id="visor-title"></h2>
+      <form method="dialog"><button type="submit" aria-label="关闭">×</button></form>
+    </div>
+    <div id="visor-content" class="visor-content"></div>
+  </dialog>
+</body>
+</html>
