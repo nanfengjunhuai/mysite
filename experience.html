@@ -13,6 +13,7 @@
   <title>李银 · My Personal Space</title>
   <link rel="icon" href="assets/img/favicon.svg">
   <link rel="stylesheet" href="assets/css/experience.css">
+  <link rel="stylesheet" href="assets/css/arrival.css">
   <link rel="preload" href="assets/img/station-workshop.webp" as="image">
   <script defer src="content/site.js"></script>
   <script defer src="content/notes.js"></script>
@@ -22,8 +23,28 @@
   <script defer src="content/robotics-study.js"></script>
   <script defer src="assets/js/robotics-study.js"></script>
   <script defer src="assets/js/experience.js"></script>
+  <script defer src="assets/vendor/three-r159.min.js"></script>
+  <script defer src="assets/js/observatory.js"></script>
+  <script defer src="assets/js/arrival.js"></script>
 </head>
 <body>
+  <section id="arrival" aria-label="抵达观测站" hidden>
+    <canvas aria-hidden="true"></canvas>
+    <div class="arrival-grade" aria-hidden="true"></div>
+    <div class="arrival-flash" aria-hidden="true"></div>
+    <div class="arrival-frame">
+      <div class="arrival-heading"><strong lang="en">My Personal Space</strong><span>李银 · 观测站</span></div>
+      <button id="arrival-sound" type="button" aria-pressed="false" aria-label="开启开场音效">
+        <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none">
+          <path d="M3 8h3l4-3v10l-4-3H3zM13 7a4 4 0 010 6m2-8a7 7 0 010 10" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M4 16 16 4" class="mute-line" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <span>音效</span>
+      </button>
+      <button type="button" id="flight-access">进入工作台</button>
+      <div class="flight-readout" role="status"><strong id="flight-status">跃迁中</strong><span id="flight-caption">正在前往观测站</span></div>
+    </div>
+  </section>
   <main id="experience" aria-label="李银的个人空间">
     <div id="scenes" class="scenes"></div>
     <div class="vignette" aria-hidden="true"></div>

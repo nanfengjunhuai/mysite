@@ -47,6 +47,19 @@ button { cursor: pointer; }
   filter: brightness(.8) saturate(.9);
 }
 .reading-reel[data-playing] { visibility: visible; }
+.desk-projection {
+  position: absolute; pointer-events: none; background: var(--projection) center / cover;
+  opacity: 0; transition: opacity 290ms ease;
+}
+.desk-projection[data-screen="research"] {
+  left: 7.1%; top: 19.8%; width: 23.2%; height: 32.7%;
+  clip-path: polygon(0 0,100% 11%,100% 88%,0 100%); filter: saturate(.64) sepia(.13) brightness(.84);
+}
+.desk-projection[data-screen="projects"] {
+  left: 65.6%; top: 30.3%; width: 11.5%; height: 18.3%;
+  clip-path: polygon(0 0,100% 8%,100% 100%,0 93%); filter: saturate(.74) brightness(.76);
+}
+.desk-projection[data-lit] { opacity: .91; }
 .practical {
   position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
   background: radial-gradient(ellipse 11% 7% at var(--light-x) var(--light-y),var(--light-color),transparent 78%);
@@ -95,6 +108,11 @@ button { cursor: pointer; }
 .focus-point:is(:hover,:focus-visible,[data-primary])::before { inset: 23%; }
 .focus-point:is(:hover,:focus-visible)::before { background: #183041cf; }
 .focus-point[data-primary]::after { width: 7px; height: 7px; }
+.focus-point[data-desk-screen] { border-radius: 5px; }
+.focus-point[data-desk-screen="research"] { width: 22%; height: 27%; top: 36.7%; }
+.focus-point[data-desk-screen="projects"] { width: 11%; height: 15.5%; }
+.focus-point[data-desk-screen]::before { width: 23px; height: 23px; inset: auto; }
+.focus-point[data-desk-screen] .point-title { top: calc(50% + 14px); }
 .point-title {
   position: absolute; left: 50%; top: calc(100% - 3px); transform: translateX(-50%);
   padding: 4px 9px; border-radius: 3px; background: #111a23ef;
@@ -134,6 +152,8 @@ button { cursor: pointer; }
   display: block; padding-top: 7px; border-top: 1px solid #f6d49d91;
   color: #fff0d6; font-size: clamp(11px,1.45dvh,15px); line-height: 1.4;
 }
+#experience:not([inert]) .scene[data-active] .console-intro { animation: screen-message 900ms steps(16,end) 180ms both; }
+@keyframes screen-message { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0); } }
 .focus-point[data-style="display"] {
   width: min(260px,72vw); height: auto; min-height: 65px; padding: 10px; gap: 4px;
   border-radius: 4px; background: radial-gradient(ellipse,#21162def 18%,#21162d78 60%,transparent 78%);
@@ -196,12 +216,14 @@ button { cursor: pointer; }
 }
 .passage {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at center,transparent 16%,#091723c5 94%),var(--transit-image) center / cover;
+  background: radial-gradient(ellipse at center,transparent 16%,var(--transit-shadow,#091723c5) 94%),var(--transit-image) center / cover;
   transform-origin: 50% 48%;
 }
 #experience { --transit-image: url("../img/universe-tunnel.webp"); }
 #experience[data-transit="story"] { --transit-image: url("../img/universe-tunnel-story.webp"); }
 #experience[data-transit="projects"] { --transit-image: url("../img/universe-tunnel-projects.webp"); }
+#experience[data-transit="collection"] { --transit-shadow: #2a181dc8; }
+#experience[data-transit="research"] { --transit-shadow: #071e24c8; }
 #experience[data-cut] .shutter { animation: passage-cut 690ms var(--ease) both; }
 #experience[data-cut] .passage { animation: passage-flight 690ms cubic-bezier(.44,.13,.69,.95) both; }
 @keyframes passage-cut {

@@ -11,7 +11,7 @@
   <script defer src="content/site.js"></script>
   <script defer src="content/notes.js"></script>
   <script defer src="assets/vendor/three-r159.min.js"></script>
-  <script defer src="assets/js/world-model.js"></script>
+  <script defer src="assets/js/observatory.js"></script>
   <script defer src="assets/js/world.js"></script>
 </head>
 <body>
@@ -19,8 +19,9 @@
     <canvas id="station" aria-hidden="true"></canvas>
     <header class="identity">
       <div class="identity-symbol" aria-hidden="true"></div>
-      <h1><span id="station-owner">李银</span><small lang="en">My Personal Space</small></h1>
+      <h1><span>观测站</span><small lang="en">My Personal Space · <span id="station-owner" lang="zh-CN">李银</span></small></h1>
     </header>
+    <a class="world-return" href="experience.html#desk">返回工作台 <span aria-hidden="true">↗</span></a>
     <div class="station-ports" aria-label="观测站舱室">
       <button type="button" class="port" data-room="story" data-color="amber"><span>自叙帖</span></button>
       <button type="button" class="port" data-room="research" data-color="mint"><span>研究室</span></button>
@@ -36,7 +37,7 @@
       <button type="button" class="room-back" id="room-back">‹ 全景</button>
       <h2 id="room-name"></h2>
       <p id="room-detail"></p>
-      <a id="room-link" href="workroom.html">进入 <span aria-hidden="true">↗</span></a>
+      <a id="room-link" href="experience.html#desk">进入 <span aria-hidden="true">↗</span></a>
     </section>
     <noscript><p class="no-script"><a href="workroom.html">进入静态工作台</a></p></noscript>
   </main>

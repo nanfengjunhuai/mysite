@@ -115,3 +115,15 @@ Original AAA narrative sci-fi game environment cinematics, wide 16:9 1672x941 cr
 Original AAA narrative sci-fi game environment cinematics, wide 16:9 1672x941 crisp, detailed cinematic polished production art, physically credible ceramic, brushed titanium, glass, obsidian, warm apricot practicals, cool glacial blue atmospheric light, luminous rather than dark. An inhabited coastal science observatory built into a cliff at dusk. No words, captions, letters, logos, watermarks, UI, diagrams overlaid, or fantasy magic. Exact perspective as described. Small specimen gallery of the observatory. Multiple tiers of built-in glass shelving whose frames are in cream ceramic and brushed bronze, a curved glass display on a table at x 48%, y 60%, containing a little mineral object and an object resembling a small star in glass. At left x 32% y 50% an illuminated photographic slide of coast and sky. Warm honey foreground highlights layered with blue-green window light. Deep intimate and expensive exhibition design, cinematic chiaroscuro but visible, impressive depth.
 
 </details>
+
+## 轨道抵达
+
+- `orbit-deep-space.webp` 是由 ImageGen 生成的 1672 × 941 轨道远景。程序将它投到背景球面，供飞船抵达和三维观测站共用。
+- 飞船、观测站、泊位与可滑动的门使用共享的 Three.js 模型。隧道使用实时着色器，开场音效由 Web Audio 合成。
+
+<details>
+<summary>轨道背景的 ImageGen 提示词</summary>
+
+Create a wide 16:9 deep space environment backdrop for a premium near-future cinematic spaceflight game. This is the distant SKY AND PLANET ONLY behind a real 3D station we will render separately. It must feel like a cleaned up expensive NASA photograph fused with restrained hard sci-fi cinematography. A giant dark indigo ocean planet's curved horizon, with small-scale oceans and atmospheric pearl-blue scattering, is cropped primarily in the bottom right, rim of upper curvature rises no more than halfway up on the right and runs toward the lower quarter on the left. Midnight blue and black space upper half with sparse precise stars, a faint diagonal slate blue gaseous structure that dissolves softly. The center and central left are open calm nearly black/navy with no dominant stars or distracting glowing rings, so detailed station geometry placed over it reads well. Light from upper right outside the frame like cool white moonlight with the faintest champagne rim. Strong blacks and subtle tonal gradation. Landscape 16:9, clean crisp dark cinematic render, no space station, no spacecraft, no buildings, no words, no logos, no watermark, no giant bright sun or lens flare.
+
+</details>

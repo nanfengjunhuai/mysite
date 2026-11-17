@@ -20,8 +20,8 @@
       alt: "傍晚的海边观测站工作台，程序员佩戴蓝色科技眼镜，桌上有三块显示器和一个小机器人。",
       points: [
         { title:"自叙帖", at:[.484,.364], room:"story", primary:true, style:"console" },
-        { title:"研究室", at:[.18,.385], room:"research", tint:"#a9ebd9" },
-        { title:"项目库", at:[.716,.394], room:"projects", tint:"#e4c8f3" },
+        { title:"研究室", at:[.18,.385], room:"research", tint:"#a9ebd9", screen:"research" },
+        { title:"项目库", at:[.716,.394], room:"projects", tint:"#e4c8f3", screen:"projects" },
         { title:"收藏室", at:[.961,.459], room:"collection", tint:"#bfeaff" }
       ]
     },
@@ -338,6 +338,23 @@
       if (point.style === "console") target.append(node("span",window.SITE_CONTENT.workroom.intro,"console-intro"));
       if (point.style === "display" && projects.length) target.append(node("span",projects[0].title,"display-title"));
       plate.append(target);
+      if (point.screen) {
+        target.dataset.deskScreen = point.screen;
+        const preview = node("span",null,"desk-projection");
+        preview.dataset.screen = point.screen;
+        preview.setAttribute("aria-hidden","true");
+        const source = point.screen === "research" ? field?.start.image : sceneImage(data.projects);
+        const show = () => {
+          if (source) preview.style.setProperty("--projection",'url("'+source+'")');
+          preview.dataset.lit = "";
+        };
+        const hide = () => { delete preview.dataset.lit; };
+        target.addEventListener("focus",show);
+        target.addEventListener("blur",() => { if (!target.matches(":hover")) hide(); });
+        target.addEventListener("pointerenter",show);
+        target.addEventListener("pointerleave",() => { if (!target.matches(":focus-visible")) hide(); });
+        plate.append(preview);
+      }
       if (point.preview) mountReel(plate,target);
     }
     if (id === "collection") arrangeExhibits(plate);
