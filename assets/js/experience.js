@@ -4,6 +4,7 @@
   const stage = document.querySelector("#experience");
   const scenes = document.querySelector("#scenes");
   const visor = document.querySelector("#visor");
+  const survey = document.querySelector("#coast-survey");
   const body = document.querySelector("#visor-content");
   const name = document.querySelector("#location-name");
   const kicker = document.querySelector("#location-kicker");
@@ -38,7 +39,10 @@
       name:"研究室", image:"research", color:"#bde9d8", center:[.50,.51],
       alt:"研究室中央是一座海岸城地形模型，右侧放着机器人训练设备。",
       points:[
-        { title:"海岸城", at:[.48,.56], room:"coast", primary:true },
+        { title:"海岸城", at:[.48,.56], action:() => {
+          if (window.openCoastSurvey) window.openCoastSurvey();
+          else location.hash="coast";
+        }, primary:true },
         { title:"机器人训练", at:[.776,.496], action:showRobotLab }
       ]
     },
@@ -119,6 +123,7 @@
   function openVisor(title,...blocks) {
     if (!visor.open) visorReturn = document.activeElement;
     stopReel();
+    delete visor.dataset.surface;
     document.querySelector("#visor-title").textContent = title;
     body.replaceChildren(...blocks);
     body.closest("dialog").scrollTop = 0;
@@ -157,25 +162,56 @@
     const date = node("time",note.date);
     date.dateTime = note.date;
     openVisor(note.title,date,...textBlocks(note),button("全部记录 ›",openNotes));
+    visor.dataset.surface = "paper";
   }
   function openNotes() {
     openVisor("生活记录",node("p",window.SITE_CONTENT.workroom.intro),...notes.map(note => button(note.title + " ↗",() => readNote(note))));
+    visor.dataset.surface = "paper";
   }
   function showFilm() {
     const video = node("video");
     video.src = "assets/video/story-night-sky.mp4";
     video.poster = "assets/img/story-night-poster.webp";
     video.controls = true; video.playsInline = true; video.preload = "metadata";
-    const branches = node("div",null,"visor-secondary");
-    for (const chapter of window.SITE_CONTENT.workroom.nightFilmChapters) {
-      const pick = button(chapter.title,() => {
+    const branches = node("div",null,"reel-chapters");
+    branches.setAttribute("aria-label","短片章节");
+    const chapters = window.SITE_CONTENT.workroom.nightFilmChapters;
+    let pendingTime;
+    function markChapter(time) {
+      const active = chapters.findLastIndex(chapter=>chapter.time <= time+.02);
+      [...branches.children].forEach((pick,index)=>pick.setAttribute("aria-pressed",String(index===active)));
+    }
+    video.addEventListener("loadedmetadata",()=>{
+      if (pendingTime !== undefined) video.currentTime = pendingTime;
+      pendingTime = undefined;
+    });
+    video.addEventListener("timeupdate",()=>markChapter(video.currentTime));
+    for (const chapter of chapters) {
+      const pick = button("",() => {
         if (video.readyState > 0) video.currentTime = chapter.time;
-        else video.addEventListener("loadedmetadata",() => { video.currentTime = chapter.time; },{ once:true });
+        else pendingTime = chapter.time;
+        markChapter(chapter.time);
         video.play().catch(() => {});
       });
+      pick.classList.add("reel-chapter");
+      const cover=safeUrl(chapter.image);
+      if (cover) {
+        const image=node("img");
+        image.src=cover;
+        image.alt="";
+        image.loading="lazy";
+        pick.append(image);
+      }
+      const seconds=Math.floor(chapter.time);
+      const duration=[Math.floor(seconds/60),seconds%60].map(part=>String(part).padStart(2,"0")).join(":");
+      const label=node("span",null,"chapter-label");
+      label.append(node("span",chapter.title),node("small",duration));
+      pick.append(label);
       branches.append(pick);
     }
+    markChapter(0);
     openVisor("夜空短片",video,branches);
+    visor.dataset.surface = "reel";
   }
   function stopReel() {
     reel?.pause();
@@ -220,9 +256,16 @@
     const media = cover ? node("img") : null;
     if (media) { media.src = cover; media.alt = project.image.alt ?? ""; }
     const parts = [node("p",project.description),...textBlocks(project)];
+    if (project.tags?.length) {
+      const stack=node("ul",null,"project-stack");
+      stack.setAttribute("aria-label","项目技术");
+      stack.append(...project.tags.map(tag=>node("li",tag)));
+      parts.unshift(stack);
+    }
     if (media) parts.unshift(media);
     if (projects.length > 1) parts.push(button("返回作品列表",showProjects));
     openVisor(project.title,...parts);
+    visor.dataset.surface = "projection";
   }
   function showProjects() {
     if (projects.length === 1) showProject(projects[0]);
@@ -432,6 +475,7 @@
     const next = mount(id);
     stopReel();
     if (visor.open) visor.close();
+    if (survey.open) survey.close();
     if (active === id) {
       delete stage.dataset.cut;
       delete next.frame.dataset.departing;
@@ -463,6 +507,7 @@
       delete old.dataset.departing;
     }
     active = id;
+    if (id === "research") window.prepareCoastSurvey?.();
     offset = 0;
     const room = data[id];
     align(next,room.center);
@@ -478,6 +523,7 @@
   const route = () => Object.hasOwn(data,location.hash.slice(1)) ? location.hash.slice(1) : "desk";
   window.addEventListener("hashchange",() => openScene(route(),true));
   window.addEventListener("keydown",event => {
+    if (survey.open) return;
     if (event.key === "Escape" && !visor.open && active !== "desk") location.hash = "desk";
     if (!visor.open && event.key === "ArrowLeft") look(stage.clientWidth*.3);
     if (!visor.open && event.key === "ArrowRight") look(-stage.clientWidth*.3);

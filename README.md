@@ -22,6 +22,15 @@ python -m http.server 8000
 - `experience.html` 是观测站室内体验，热点与取景坐标在 `assets/js/experience.js` 的 `data` 中。更换 `assets/img/station-*.webp` 后，需要按新图片的宽高比例重新确定热点坐标。美术素材说明见 `assets/img/SOURCES.md`。
 - `world.html` 是三维观测站，`workroom.html` 和 `nearshore.html` 是之前的入口版本。
 
+## 本地走查
+
+每轮美化先看浏览器实屏，选出最明显的断点。改完后，用同样的设备尺寸和路线对照前后画面，再补测实际点击、拖动、键盘关闭和回到房间的状态。
+
+- 从 `experience.html?arrival=1` 播放完整片头。检查飞船、泊位、开门与工作台的接入。
+- 从工作台进入研究室，打开海岸城地形台。旋转模型，分别点灯塔和山脊，进入路线后再回到研究室。
+- 打开自叙帖和项目放映。检查正文是否可读、短片是否可控、关闭后焦点是否回到原来的物件。
+- 在手机竖屏、横屏和平板重复关键操作。打开减弱动效后检查内容入口，用禁用 WebGL 的环境检查地图的路线备用入口。
+
 ## GitHub Pages
 
 发布来源选 `Deploy from a branch`，分支选 `main`，目录选 `/(root)`。仓库根目录的 `.nojekyll` 允许 Pages 直接发布静态文件。

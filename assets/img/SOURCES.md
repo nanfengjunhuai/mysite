@@ -148,6 +148,17 @@ Cinematic widescreen landscape 16:9 1672x941 feature film high resolution realis
 
 </details>
 
+## 海岸城地形台
+
+`survey-terrain.js` 内含内置 ImageGen 制作的 1672 × 941 WebP 地表色彩图。贴图以数据形式保存，直接打开本地 HTML 时也可用于 WebGL。海岸边界、地形起伏、水面、灯塔及两条路线由 `assets/js/survey.js` 实时绘制。图面是海岸城的虚构设定。
+
+<details>
+<summary>海岸城地表的 ImageGen 提示词</summary>
+
+Create a premium strategy video game terrain albedo texture for an interactive tiny coastal terrain model called Seacliff, exactly orthographic TOP DOWN satellite photograph with NO perspective tilt, horizontal landscape 16:9 1672 by 941. Depict an old Mediterranean-inspired limestone city built around a curving bay with green and charcoal rocky mountain ridges visible from above. Use coherent, physically plausible shapes, sharp rock and roof detail. Layout is important: land occupies UPPER and LEFT of the image from x0 to about x63% around y50%, and sea occupies LOWER RIGHT. The shoreline runs down from the top/right at (82%,0%) towards (64%,32%), passes a broad seafront crescent at (58%,58%), then curves to (36%,73%) and ends near (16%,100%). Inland peak around (37%,28%), multi-level old town with honey limestone and slate roofs around (50%,52%), sparse road branching to a small lighthouse jetty at (66%,61%), thin aqua shallow water at shoreline and deeper desaturated blue ocean toward bottom right. Restrained high quality colors, desert silver cliffs, forest pines, complex topographic details like real geospatial terrain texture, zero horizon, flat overhead evenly lit for applying to geometry, not a card illustration. No captions, no map pins, no compass, no symbols, no text, no graphic borders, no logos, no watermark.
+
+</details>
+
 ## 观测站开场短片
 
 `flight-*.webp` 是为本站制作的 ImageGen 画面，原始比例为 1672 × 941。片头在同一条运动轨迹上投影虫洞、外部泊位和廊道。轨道画面通过虫洞口露出，廊道通过与站体同步移动的舱口露出，再通过远处开口接入真实工作台。飞船、两扇门和光学层各自运动。

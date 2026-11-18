@@ -1,0 +1,97 @@
+#coast-survey {
+  width: 100%; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: 0; overflow: hidden;
+  isolation: isolate; color: #edf9f4; background: #0d1920;
+  border: 0;
+}
+#coast-survey::backdrop { background: #071219c9; backdrop-filter: blur(8px); }
+#coast-survey::before {
+  content: ""; position: absolute; z-index: -1; inset: -18px;
+  background: linear-gradient(160deg,#0d262bc9,#08151ce8),url("../img/station-research.webp") center 39% / cover;
+  filter: blur(11px);
+}
+.survey-viewport { position: absolute; inset: 0; overflow: hidden; }
+#coast-survey[open] .survey-viewport { animation: survey-arrive 360ms cubic-bezier(.16,.67,.26,1) both; }
+@keyframes survey-arrive { from { opacity: .5; transform: scale(.975); } to { opacity: 1; transform: scale(1); } }
+.survey-viewport canvas { display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+.survey-viewport canvas:active { cursor: grabbing; }
+.survey-pins { position: absolute; inset: 0; pointer-events: none; }
+.survey-pin {
+  position: absolute; left: 0; top: 0; translate: -50% calc(-100% - 14px); pointer-events: auto;
+  display: inline-flex; gap: 8px; align-items: center; min-height: 44px; padding: 5px 11px;
+  border: 1px solid #a8d4ce78; border-radius: 3px 9px 3px 9px;
+  color: #e1f8f2; background: #101d23ec; white-space: nowrap; font-size: 12px;
+  box-shadow: 0 4px 14px #06111694;
+}
+.survey-pin::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: #b8f0dc; box-shadow: 0 0 8px #87d6c5; }
+.survey-pin::after { content: ""; position: absolute; left: 50%; top: 100%; width: 1px; height: 14px; background: #a8e9d6b3; }
+.survey-pin[aria-pressed="true"] { color: #ffe5b9; border-color: #ffd296bb; background: #291e17f5; }
+.survey-pin[aria-pressed="true"]::before { background: #ffe0a7; box-shadow: 0 0 12px #ffc57b; }
+.survey-pin:is(:hover,:focus-visible) { border-color: #fff2d3; }
+.survey-header {
+  position: absolute; left: clamp(16px,3.5vw,39px); right: clamp(13px,3.1vw,33px); top: max(clamp(13px,3.2vw,34px),env(safe-area-inset-top));
+  display: flex; justify-content: space-between; align-items: flex-start;
+  pointer-events: none; text-shadow: 0 5px 17px #06111b;
+}
+.survey-header form { pointer-events: auto; }
+.survey-header span { font-size: 11px; letter-spacing: .20em; color: #c1ded2; }
+.survey-header h2 { margin: 3px 0 0; font: 600 clamp(22px,3.15vw,42px)/1.1 "Songti SC",SimSun,serif; color: #f1f8ed; }
+.survey-close,.survey-actions button {
+  min-width: 44px; min-height: 44px; border-radius: 4px 9px 4px 9px;
+  color: #e0f5ee; font-size: 23px; border: 1px solid #9fcec07a; background: #13252df0;
+}
+.survey-close:hover,.survey-actions button:hover { background: #2c4549; }
+.survey-dock {
+  position: absolute; right: clamp(12px,3vw,32px); bottom: max(clamp(12px,3vw,30px),env(safe-area-inset-bottom));
+  display: grid; gap: 8px; width: min(300px,calc(100% - 24px));
+}
+.survey-dock::before {
+  content: ""; position: absolute; inset: -15px -15px -9px; z-index: -1;
+  background: radial-gradient(ellipse at 73% 68%,#07141cad,transparent 76%); pointer-events: none;
+}
+.survey-route {
+  border: 1px solid #b3d2c267; border-radius: 4px 12px 4px 12px; overflow: hidden;
+  background: linear-gradient(145deg,#203236f5,#0c1a24fa);
+  box-shadow: 0 11px 42px #050a11a6;
+}
+.survey-route-media { position: relative; height: 100px; overflow: hidden; }
+.survey-route-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(0deg,#111e27aa,transparent 52%); }
+.survey-route-media img { width: 100%; height: 100%; object-fit: cover; object-position: center 51%; }
+.survey-route-body { padding: 11px 14px 12px; }
+.survey-route h3 { margin: 0; font: 620 23px/1.22 "Songti SC",SimSun,serif; color: #f5e2bf; overflow-wrap: anywhere; }
+.survey-route p { margin: 5px 0 8px; color: #d9e5df; font-size: 12px; line-height: 1.65; }
+#survey-enter {
+  display: inline-flex; align-items: center; gap: 15px; min-height: 44px; padding: 4px 12px;
+  border: 1px solid #ffdb9886; background: #78503251; color: #ffe2ad;
+  text-decoration: none; border-radius: 4px 9px 4px 9px; font-size: 13px;
+}
+#survey-enter:hover { background: #9e764065; }
+.survey-actions {
+  display: flex; align-items: center; justify-content: space-between; gap: 4px;
+  padding: 0 2px; min-width: 0; text-align: center;
+}
+.survey-actions a { display: inline-flex; align-items: center; min-height: 44px; color: #d8eee6; font-size: 12px; padding: 6px; }
+#coast-survey[data-fallback] .survey-viewport {
+  background: linear-gradient(180deg,#09172044,#0b1b27db),url("../img/workroom-worlds.webp") center / cover;
+}
+#coast-survey[data-fallback] canvas,#coast-survey[data-fallback] [data-view] { display: none; }
+#coast-survey[data-fallback] .survey-pins {
+  display: flex; position: absolute; inset: auto auto 35% 50%; translate: -50% 0; gap: 8px;
+}
+#coast-survey[data-fallback] .survey-pin { position: relative; translate: none; }
+#coast-survey[data-fallback] .survey-pin::after { content: none; }
+@media (max-width: 700px) {
+  .survey-viewport { top: 43px; bottom: min(31dvh,222px); }
+  .survey-dock { left: 12px; right: 12px; width: auto; }
+  .survey-route { display: grid; grid-template-columns: minmax(80px,29%) 1fr; }
+  .survey-route-media { height: 100%; min-height: 114px; }
+  .survey-route-body { padding: 8px 10px; }
+  .survey-route h3 { font-size: 19px; }
+  .survey-route p { margin: 4px 0; }
+  .survey-route-media::after { background: linear-gradient(90deg,transparent,#111e2770); }
+}
+@media (max-height: 490px) and (orientation: landscape) {
+  .survey-route-media { display: none; }
+  .survey-route { display: block; }
+  .survey-viewport { bottom: 0; }
+  .survey-dock { width: min(228px,39vw); left: auto; }
+}
