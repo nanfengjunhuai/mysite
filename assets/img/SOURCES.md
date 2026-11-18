@@ -150,10 +150,20 @@ Cinematic widescreen landscape 16:9 1672x941 feature film high resolution realis
 
 ## 观测站开场短片
 
-`flight-*.webp` 是为本站制作的 ImageGen 画面，原始比例为 1672 × 941。片头按引力透镜、观测站远景、进近和气闸特写剪接。浏览器分别移动飞船、光学层和两扇门，门框和室内推进镜头用同一机位的素材。
+`flight-*.webp` 是为本站制作的 ImageGen 画面，原始比例为 1672 × 941。片头在同一条运动轨迹上投影虫洞、外部泊位和廊道。轨道画面通过虫洞口露出，廊道通过与站体同步移动的舱口露出，再通过远处开口接入真实工作台。飞船、两扇门和光学层各自运动。
+
+- 连续镜头的空间遮挡参考 [《战神》单镜头制作访谈](https://blog.playstation.com/2018/09/28/the-art-of-the-scene-cinematic-challenges-in-god-of-war/)。
+- `flight-continuous-corridor.webp` 是由内置 ImageGen 以开启的气闸画面为参考制作的 1672 × 941 廊道近景。廊道与外部气闸以同一消失点对齐，按自己的深度比例推进。
+
+<details>
+<summary>廊道近景的 ImageGen 提示词</summary>
+
+A matching feature-film VFX plate INSIDE the same spacecraft airlock corridor shown in the supplied scene reference. 16:9 wide landscape 1672x941, optically sharp modern 35 mm film frame, aged bronze gray titanium, repeated thick beveled industrial ribs, same warm muted brass and cream overhead practical lights and gridded coppery steel floor, same patterns of black maintenance pipes along the upper side edges. CAMERA is about four meters forward of the provided frame, physically INSIDE the corridor after passing the exterior door, at eye height pointed level straight down the same narrow corridor to the SAME small dull blue Earth horizon window with 4 vertical bars at the far side, vanishing point x50% y55%. This is a matching clean detailed corridor-only texture/plate with no exterior door and no foreground airlock, the foreground side walls and ceiling have sharp, immaculately rendered industrial relief on both sides, many successive narrow arch frames establishing real depth. Near foreground feels grounded and tactile, warm light pools on metal and cold muted atmosphere in far window. Use the same ceiling details and colors from the reference but establish genuinely more detail at this nearer camera than a crop. Real manufactured materials, subtle small scratches and use, no deliberate blur, no neon, no people, no text or logos, no watermarks.
+
+</details>
 
 - 跃迁的视觉参考为 [《星际穿越》虫洞片段](https://www.youtube.com/watch?v=u-ElPzExvPA)。画面使用本站的原创飞船、尘雾和折射层。
-- 停靠镜头参考 [《星际穿越》停靠片段](https://www.youtube.com/watch?v=v2H1s9gj5DA) 与 [Bethesda 的《星空》停靠说明](https://help.bethesda.net/app/answers/detail/a_id/60992/~/how-do-i-dock-my-starship-in-starfield)。剪辑采用远景交代比例、近景给出相对位移、气闸特写表现锁定和放行的顺序。
+- 停靠镜头参考 [《星际穿越》停靠片段](https://www.youtube.com/watch?v=v2H1s9gj5DA) 与 [Bethesda 的《星空》停靠说明](https://help.bethesda.net/app/answers/detail/a_id/60992/~/how-do-i-dock-my-starship-in-starfield)。飞船沿泊位轴线减速，气闸按锁定和放行顺序动作。
 - 同机位的开门、关门图为气闸提供门扇纹理和门后廊道。关门图按中缝分为两扇，浏览器用实际位移揭开廊道。
 
 <details>

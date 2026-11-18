@@ -273,6 +273,7 @@
       for (const s of [-1,1]) box(runway,graphite,s*.49,.095,z,.13,.013,.032);
     }
     const tracks = [];
+    const lockingArms = [];
     for (const s of [-1,1]) {
       section(dock,alloy,s*1.52,0,1.075,.27,1.85,.14,.085);
       beam(runway,oxide,v(s*1.04,.12,-.44),v(s*1.17,.12,1.63),.07,true);
@@ -282,6 +283,17 @@
       }
       box(dock,cold,s*1.4,.72,1.18,.047,.24,.04);
       glow(dock,"#8ad8ed",s*1.39,.72,1.24,.52,.43);
+      for (const y of [-.56,.47]) {
+        const assembly=group(dock,s*1.24,y,1.31);
+        section(assembly,weathered,s*.12,0,0,.32,.21,.29,.066);
+        beam(assembly,graphite,v(s*.26,0,.038),v(-s*.08,0,.038),.105);
+        const piston=group(assembly);
+        piston.userData.movable=true;
+        beam(piston,accessSteel,v(0,0,.038),v(-s*.31,0,.038),.050);
+        section(piston,oxide,-s*.31,0,.048,.13,.127,.17,.040);
+        const signal=box(piston,red,-s*.29,.008,.146,.050,.038,.015);
+        lockingArms.push({piston,signal,side:s});
+      }
     }
 
     for (let i=0;i<5;i++) {
@@ -326,14 +338,23 @@
     interior.position.set(0,.45,-.32);
     dock.add(interior);
     function open(amount) {
-      shutters.forEach((slide,i) => { slide.position.x = (i?1:-1)*(.545+.99*amount); });
-      inside.material.opacity = amount*.61;
-      interior.intensity = .9+amount*8.4;
+      const release=Math.min(1,amount/.28);
+      const travel=Math.max(0,(amount-.24)/.76);
+      const slideAmount=travel*travel*(3-2*travel);
+      for (const arm of lockingArms) {
+        arm.piston.position.x=arm.side*.30*release;
+        arm.signal.material=slideAmount>.91?cold:release>.12?honey:red;
+      }
+      shutters.forEach((slide,i) => { slide.position.x = (i?1:-1)*(.545+.99*slideAmount); });
+      inside.material.opacity = slideAmount*.61;
+      interior.intensity = .9+slideAmount*8.4;
     }
     tracks.forEach(item => { item.userData.movable = true; });
-    function guide(time,amount=1) {
+    function guide(time,active,openAmount) {
+      const lead=(7-Math.floor(time*5)%8);
       tracks.forEach((track,index) => {
-        track.material = amount < 1 && index%8 < Math.floor((time*3)%8) ? oxide : index%8%3===0?honey:cold;
+        const marker=index%8;
+        track.material=active && openAmount<.94 && Math.abs(marker-lead)>1?brownout:marker%3===0?honey:cold;
       });
     }
     return {dock,open,guide};

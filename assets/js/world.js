@@ -127,6 +127,7 @@
       shadowOpen=shouldOpen;
     }
     const t = reduce.matches ? 0 : time*.001;
+    model.guide(t,selected === "berth" && !reduce.matches,aperture);
     patrol.ship.position.set(4.38+2.35*Math.sin(t*.18),-2.55+.33*Math.sin(t*.27),3.5+1.9*Math.cos(t*.18));
     patrol.ship.rotation.set(.02,-t*.18-Math.PI/2,.065*Math.cos(t*.18));
     renderer.render(scene,camera);
