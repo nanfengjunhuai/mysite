@@ -45,12 +45,13 @@
     },
     research: {
       name:"研究室", image:"research", color:"#bde9d8", center:[.50,.51],
+      portraitCenter:[.456,.51],
       alt:"研究室中央是一座海岸城地形模型，右侧放着机器人训练设备。",
       points:[
         { title:"海岸城", at:[.48,.56], action:() => {
           if (window.openCoastSurvey) window.openCoastSurvey();
           else location.hash="coast";
-        }, primary:true },
+        }, primary:true, style:"relief" },
         { title:"机器人训练", at:[.776,.496], action:showRobotLab }
       ]
     },
@@ -108,7 +109,7 @@
     if (snapshot && typeof snapshot==="object" && !Array.isArray(snapshot)) savedCameras=snapshot;
   } catch {}
   const sceneImage = scene => scene.src ?? "assets/img/station-" + scene.image + ".webp";
-  const sceneCenter = room => portrait.matches && room.portrait ? room.portraitCenter : room.center;
+  const sceneCenter = room => portrait.matches && room.portraitCenter ? room.portraitCenter : room.center;
   const cameraFormat = () => portrait.matches ? "portrait" : "wide";
   const delays={room:{swap:384,total:780},walk:{swap:510,total:1060}};
   document.querySelector("#owner").textContent = window.SITE_CONTENT.workroom.author;
@@ -520,6 +521,7 @@
         plate.append(preview);
       }
       if (point.preview) mountReel(plate,target);
+      if (point.style==="relief") window.mountCoastProjection?.(frame,plate,image,target);
     }
     if (id === "collection") arrangeExhibits(plate);
     frame.append(plate);

@@ -20,12 +20,14 @@
   };
   let selected;
   let resources;
+  let threeSource;
   let loaded;
   let view;
   let frame = 0;
   let last = 0;
   let gesture;
   let previousFocus;
+  let projectionYaw=-.25;
   const buttons = new Map();
 
   function setRoute(id) {
@@ -63,9 +65,13 @@
     });
   }
 
+  function prepareThree() {
+    return window.THREE ? Promise.resolve() : (threeSource??=script("assets/vendor/three-r159.min.js"));
+  }
+
   function prepare() {
     resources??=Promise.all([
-      window.THREE?Promise.resolve():script("assets/vendor/three-r159.min.js"),
+      prepareThree(),
       script("assets/img/survey-terrain.js").catch(()=>{})
     ]);
     return resources;
@@ -93,6 +99,21 @@
     return new T.Vector3((u-.5)*dimensions[0],shape(u,v)+offset,(v-.5)*dimensions[1]);
   }
 
+  function reliefGeometry(T,columns,rows) {
+    const terrain=new T.PlaneGeometry(...dimensions,columns,rows);
+    terrain.rotateX(-Math.PI/2);
+    const coords=terrain.getAttribute("position"),uv=terrain.getAttribute("uv");
+    for (let i=0;i<coords.count;i++) coords.setY(i,shape(uv.getX(i),1-uv.getY(i)));
+    terrain.computeVertexNormals();
+    return terrain;
+  }
+
+  function routeGeometry(T,landmark) {
+    const way=new T.CatmullRomCurve3(landmark.path.map(([u,v])=>new T.Vector3(u,0,v)));
+    const line=new T.CatmullRomCurve3(way.getPoints(75).map(point=>position(point.x,point.z,.035)));
+    return new T.TubeGeometry(line,120,.026,6,false);
+  }
+
   function makeSurvey() {
     const T=window.THREE;
     const renderer = new T.WebGLRenderer({canvas,antialias:true,alpha:true,powerPreference:"high-performance"});
@@ -112,11 +133,7 @@
     const map=new T.Group();
     scene.add(map);
     const [width,depth]=dimensions;
-    const terrain=new T.PlaneGeometry(width,depth,130,72);
-    terrain.rotateX(-Math.PI/2);
-    const coords=terrain.getAttribute("position"),uv=terrain.getAttribute("uv");
-    for (let i=0;i<coords.count;i++) coords.setY(i,shape(uv.getX(i),1-uv.getY(i)));
-    terrain.computeVertexNormals();
+    const terrain=reliefGeometry(T,130,72);
     const textureCanvas=document.createElement("canvas");
     const fallbackWidth=240,fallbackHeight=136;
     textureCanvas.width=fallbackWidth; textureCanvas.height=fallbackHeight;
@@ -198,9 +215,7 @@
 
     const routeObjects=new Map();
     for (const [id,landmark] of Object.entries(landmarks)) {
-      const way=new T.CatmullRomCurve3(landmark.path.map(([u,v])=>new T.Vector3(u,0,v)));
-      const line=new T.CatmullRomCurve3(way.getPoints(75).map(point=>position(point.x,point.z,.035)));
-      const routeLine=new T.Mesh(new T.TubeGeometry(line,120,.026,6,false),new T.MeshBasicMaterial({color:"#b3ece1",toneMapped:false}));
+      const routeLine=new T.Mesh(routeGeometry(T,landmark),new T.MeshBasicMaterial({color:"#b3ece1",toneMapped:false}));
       const ring=new T.Mesh(new T.RingGeometry(.105,.129,32),new T.MeshBasicMaterial({color:"#b3ece1",side:T.DoubleSide,toneMapped:false}));
       ring.rotateX(-Math.PI/2);
       ring.position.copy(position(...landmark.spot,.071));
@@ -220,6 +235,218 @@
     texture.needsUpdate=true;
     return texture;
   }
+
+  function makeProjection(canvas) {
+    const T=window.THREE;
+    const renderer=new T.WebGLRenderer({canvas,alpha:true,antialias:true,powerPreference:"low-power"});
+    renderer.setClearColor(0,0);
+    const scene=new T.Scene();
+    const map=new T.Group();
+    scene.add(map);
+    const camera=new T.OrthographicCamera(-6,6,3,-3,.1,40);
+    const time={value:0};
+    const surveyLight={value:0};
+    const material=new T.ShaderMaterial({
+      transparent:true,
+      extensions:{derivatives:true},
+      uniforms:{time,surveyLight,coastline:{value:waterMask(T)}},
+      vertexShader:`
+        varying vec2 tex;
+        varying float elevation;
+        varying vec3 reliefNormal;
+        void main() {
+          tex=vec2(uv.x,1.-uv.y);
+          elevation=position.y;
+          reliefNormal=normal;
+          gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.);
+        }
+      `,
+      fragmentShader:`
+        uniform float time;
+        uniform float surveyLight;
+        uniform sampler2D coastline;
+        varying vec2 tex;
+        varying float elevation;
+        varying vec3 reliefNormal;
+        float line(float phase) {
+          float d=abs(fract(phase+.5)-.5);
+          return 1.-smoothstep(.028,.028+max(.014,fwidth(phase)),d);
+        }
+        void main() {
+          float shore=texture2D(coastline,vec2(tex.y,.5)).r;
+          float land=1.-smoothstep(shore-.008,shore+.016,tex.x);
+          float silhouette=1.-smoothstep(.83,1.13,length((tex-.5)*2.));
+          float key=clamp(dot(normalize(reliefNormal),normalize(vec3(-.5,.8,.42))),0.,1.);
+          float contour=line(elevation*16.+.24)*land*smoothstep(.012,.08,elevation);
+          float grid=max(line(tex.x*32.),line(tex.y*18.));
+          float spray=1.-smoothstep(.007,.025,abs(tex.x-shore));
+          float beam=(tex.y-mod(time*.14,1.4)+.16)*28.;
+          float scan=exp(-beam*beam);
+          vec3 color=mix(vec3(.055,.31,.40),vec3(.09,.36,.40)*(key+.43),land);
+          color+=elevation*vec3(.27,.36,.34)+contour*vec3(.24,.47,.53);
+          color+=grid*vec3(.045,.11,.13)+spray*vec3(.13,.43,.51);
+          color+=scan*vec3(.05,.13,.18)+surveyLight*vec3(.025,.12,.14);
+          gl_FragColor=vec4(color,silhouette*(.45+land*.42+spray*.09));
+        }
+      `
+    });
+    map.add(new T.Mesh(reliefGeometry(T,112,64),material));
+    const blocks=new T.InstancedMesh(new T.BoxGeometry(1,1,1),new T.MeshBasicMaterial({color:0x8fdfec}),42);
+    const placement=new T.Object3D();
+    let block=0;
+    for (let row=0;row<6;row++) for (let col=0;col<7;col++) {
+      const v=.399+row*.028;
+      const shore=coastAt(v);
+      const u=shore-.047-col*.014+Math.sin(row*1.8+col*1.9)*.003;
+      const height=.038+(1+Math.sin(row*2.23+col*4.7))*.061;
+      placement.position.copy(position(u,v,height/2));
+      placement.scale.set(.073+(col%3)*.015,height,.057+(row%3)*.012);
+      placement.updateMatrix();
+      blocks.setMatrixAt(block++,placement.matrix);
+    }
+    map.add(blocks);
+    const outlines=[5.32,5.61].map((radius,index)=>{
+      const points=new T.EllipseCurve(0,0,radius,2.91+index*.19,0,Math.PI*2).getPoints(104);
+      const loop=new T.LineLoop(
+        new T.BufferGeometry().setFromPoints(points.map(p=>new T.Vector3(p.x,-.07,p.y))),
+        new T.LineBasicMaterial({color:0x5fd9ee,transparent:true,opacity:index?.47:.77})
+      );
+      map.add(loop);
+      return loop;
+    });
+    const beacons=[];
+    for (const [id,landmark] of Object.entries(landmarks)) {
+      const color=id==="harbor"?0xffd49a:0xaefff1;
+      const routeMaterial=new T.MeshBasicMaterial({color,toneMapped:false});
+      map.add(new T.Mesh(routeGeometry(T,landmark),routeMaterial));
+      const marker=new T.Group();
+      marker.position.copy(position(...landmark.spot,.036));
+      const stem=new T.Mesh(new T.CylinderGeometry(.012,.012,.46,8),routeMaterial);
+      stem.position.y=.23;
+      const jewel=new T.Mesh(new T.OctahedronGeometry(.12),routeMaterial);
+      jewel.position.y=.49;
+      const pulse=new T.Mesh(new T.RingGeometry(.095,.116,32),new T.MeshBasicMaterial({
+        color,side:T.DoubleSide,transparent:true,depthWrite:false,toneMapped:false
+      }));
+      pulse.rotation.x=-Math.PI/2;
+      pulse.position.y=.017;
+      marker.add(stem,jewel,pulse);
+      map.add(marker);
+      beacons.push({jewel,pulse});
+    }
+    return {
+      resize(w,h) {
+        const aspect=w/h;
+        const compact=aspect<1.5;
+        map.scale.y=compact?2.20:1.43;
+        camera.position.set(0,compact?9.0:7.3,14.5);
+        camera.lookAt(0,compact?1.15:1.02,0);
+        camera.top=6/aspect;
+        camera.bottom=-camera.top;
+        camera.updateProjectionMatrix();
+        renderer.setPixelRatio(Math.min(devicePixelRatio||1,1.35,1120/w));
+        renderer.setSize(w,h,false);
+      },
+      render(seconds,yaw,inspection) {
+        time.value=seconds;
+        surveyLight.value=inspection;
+        map.rotation.y=yaw;
+        outlines[0].material.opacity=.54+inspection*.28;
+        beacons.forEach(({jewel,pulse},index)=>{
+          const sweep=(seconds*.73+index*.51)%1;
+          pulse.scale.setScalar(1+sweep*3.25);
+          pulse.material.opacity=(1-sweep)*.69;
+          jewel.rotation.y=seconds*.84;
+        });
+        renderer.render(scene,camera);
+      }
+    };
+  }
+
+  window.mountCoastProjection=(room,plate,background,control)=>{
+    const canvas=document.createElement("canvas");
+    canvas.className="room-relief";
+    canvas.setAttribute("aria-hidden","true");
+    plate.insertBefore(canvas,control);
+    background.classList.add("room-relief-fallback");
+    const dialogs=[...document.querySelectorAll("dialog")];
+    const warmImage="assets/img/station-research-table.webp";
+    let optics;
+    let setup;
+    let queued=0;
+    let previous=0;
+    let seconds=0;
+    let dirty=true;
+    let yaw=-.17;
+    let pressure=0;
+    let direction=0;
+    let failed=false;
+    const visible=()=>room.hasAttribute("data-active") && !room.closest("[inert]") && !document.hidden && !dialogs.some(item=>item.open);
+
+    function restore() {
+      delete room.dataset.relief;
+    }
+    function render(now) {
+      queued=0;
+      if (!visible() || motion.matches || failed) return;
+      const gap=now-previous;
+      if (dirty || gap>=40) {
+        previous=now;
+        seconds+=Math.min(gap,70)*.001;
+        const inspected=control.matches(":hover,:focus-visible");
+        pressure+=((inspected?1:0)-pressure)*.16;
+        yaw+=(-.17+direction*.16*pressure+Math.sin(seconds*.63)*.055-yaw)*.12;
+        projectionYaw=yaw;
+        if (dirty) {
+          optics.resize(Math.max(1,canvas.clientWidth),Math.max(1,canvas.clientHeight));
+          dirty=false;
+        }
+        optics.render(seconds,yaw,pressure);
+        if (!room.hasAttribute("data-relief")) room.dataset.relief="";
+      }
+      queued=requestAnimationFrame(render);
+    }
+    function sync() {
+      if (motion.matches && room.hasAttribute("data-relief")) restore();
+      if (!visible() || motion.matches || failed) {
+        cancelAnimationFrame(queued);
+        queued=0;
+        previous=0;
+        return;
+      }
+      if (optics) {
+        if (!queued) queued=requestAnimationFrame(render);
+        return;
+      }
+      if (setup) return;
+      const clean=new Image();
+      clean.className="room-relief-backdrop";
+      clean.alt="";
+      clean.src=warmImage;
+      setup=Promise.all([prepareThree(),clean.decode()]).then(()=>{
+        optics=makeProjection(canvas);
+        plate.insertBefore(clean,background);
+        sync();
+      }).catch(()=>{ failed=true; });
+    }
+    const observer=new MutationObserver(sync);
+    observer.observe(room,{attributes:true,attributeFilter:["inert","data-active"]});
+    for (const item of dialogs) observer.observe(item,{attributes:true,attributeFilter:["open"]});
+    new ResizeObserver(()=>{ dirty=true; }).observe(canvas);
+    document.addEventListener("visibilitychange",sync);
+    motion.addEventListener("change",sync);
+    canvas.addEventListener("webglcontextlost",()=>{
+      failed=true;
+      restore();
+      sync();
+    });
+    control.addEventListener("pointermove",event=>{
+      if (event.pointerType==="touch") return;
+      const bounds=control.getBoundingClientRect();
+      direction=Math.max(-1,Math.min(1,(event.clientX-bounds.left)/bounds.width*2-1));
+    });
+    control.addEventListener("pointerleave",()=>{ direction=0; });
+  };
 
   function markRoute() {
     for (const [id,{routeLine,ring}] of view.routeObjects) {
@@ -321,6 +548,7 @@
     dialog.dataset.fallback="";
     loaded??=prepare().then(()=>{
       view=makeSurvey();
+      view.yaw=view.wantedYaw=projectionYaw;
       delete dialog.dataset.fallback;
       view.onResize.observe(viewport);
       markRoute();

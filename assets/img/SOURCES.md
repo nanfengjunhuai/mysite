@@ -103,6 +103,15 @@ Horizontal widescreen 16:9, cinematic premium anime 3D environment concept art f
 
 场景以 1672 × 941 的 ImageGen 关键帧为底，压缩为 WebP。网页按画面内的实际物件定位入口。工作台主屏、研究台和项目放映墙的灯光使用独立动画层，自叙帖的放映窗使用站内短片。
 
+- `station-research-table.webp` 是以原研究室关键帧制作的空台底图。海岸城实时模型由 `assets/js/survey.js` 渲染，和可旋转地形台共用地形与步行路线。WebGL、底图不可用或系统开启减弱动效时，研究室显示原画 `station-research.webp`。
+
+<details>
+<summary>研究室空台底图的 ImageGen 提示词</summary>
+
+Precisely edit the provided widescreen sci-fi coastal observatory research room, preserving its composition and camera. The only change is to switch off the large blue hologram floating over the oval champagne-metal display table at center-left: completely erase the floating terrain, mountains, lighthouse, clouds and cyan wireframes. Inpaint only where they were. Reveal the plain actual dark teal smoked-glass top within the same solid oval bronze table at precisely the same position, table center approximately x43%, y63%, with a subdued narrow cyan seam in the rim; reconstruct the background from the existing left windows, stone column and staircase visible around the original hologram. Keep table silhouette, perspective, scale, material, sculpted base and lighting, room architecture, aquarium, robot and table on the right, left windows, sunset, details and exact framing as close to the source as possible. Dark teal glass top and room are ready for a separate live 3D projection added by the website. No objects, floating lines, holograms, glowing effects, words or watermark in the blank volume above the table. Preserve crisp high-resolution material detail. Widescreen 16:9.
+
+</details>
+
 - `station-workshop.webp` 选用工作台的第二次构图。将戴蓝色眼镜的程序员置于右侧，左侧和中央留出三个无遮挡的透明屏幕，桌上放小机器人，从狭长窗缝引入傍晚斜光。
 - `station-workshop-portrait.webp` 是以横版工作台为参考重构的竖幅镜头，ImageGen 原生尺寸 941 × 1672。手机竖屏使用该图及独立的屏幕、机器人入口坐标。欢迎语及自叙帖标题由网页渲染。
 - `personal-space-project-current.webp` 取自 1440 × 870 的工作台浏览器实屏，用于项目库展示当前版本。

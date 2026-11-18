@@ -98,6 +98,21 @@ button { cursor: pointer; }
   background: linear-gradient(0deg,transparent 45%,#8ceeff48 52%,#c2f8ff8a 53%,transparent 56%) 0 0 / 100% 38% no-repeat;
   animation: model-scan 5.8s ease-in-out infinite;
 }
+.room-relief {
+  position: absolute; top: 23.5%; left: 15.1%; width: 55.5%; height: 43.5%;
+  pointer-events: none; visibility: hidden;
+}
+.scene .room-relief-backdrop { visibility: hidden; }
+.scene[data-relief] .room-relief-fallback { opacity: 0; }
+.scene[data-relief] :is(.room-relief,.room-relief-backdrop) { visibility: visible; }
+.scene[data-relief] .practical { display: none; }
+.scene[data-relief] .plate::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  clip-path: ellipse(23.4% 3.9% at 43% 61.5%);
+  background: radial-gradient(ellipse 24% 4% at 43% 61.3%,#69e9f857,transparent 98%);
+  mix-blend-mode: screen; opacity: .52; transition: opacity 260ms ease;
+}
+.scene[data-relief]:has([data-style="relief"]:is(:hover,:focus-visible)) .plate::after { opacity: .88; }
 @keyframes model-scan {
   0%,18% { background-position-y: 1%; opacity: 0; }
   28%,62% { opacity: .75; }
@@ -143,6 +158,18 @@ button { cursor: pointer; }
 .focus-point[data-style="landmark"] { color: #fbecd5; }
 .focus-point[data-style="landmark"]::before { border-color: #fff0d8; background: #17293294; }
 .focus-point[data-style="landmark"] .point-title { background: #10222be9; }
+.focus-point[data-style="relief"] {
+  width: 44%; height: 30%; min-width: 82px; min-height: 46px;
+  border-radius: 5px;
+}
+.focus-point[data-style="relief"]::before { inset: auto; width: 22px; height: 22px; top: calc(50% + 8px); }
+.focus-point[data-style="relief"]::after { width: 4px; height: 4px; top: calc(50% + 17px); }
+.focus-point[data-style="relief"]:focus-visible { outline-color: transparent; }
+.focus-point[data-style="relief"]:focus-visible::before { outline: 2px solid #fff0c4; outline-offset: 3px; }
+.focus-point[data-style="relief"] .point-title {
+  top: calc(50% + 34px); color: #e7fffa;
+  background: #102b32ef; border: 1px solid #80c4c282;
+}
 .focus-point[data-style="trail"] { color: #ffdc9f; }
 .focus-point[data-style="trail"]::after {
   width: 9px; height: 9px; translate: 1px 0; border-radius: 0; border-top: 2px solid #ffdfaa;
@@ -455,6 +482,8 @@ button { cursor: pointer; }
 }
 @media (any-hover:none) { .point-title { opacity: 1; } }
 @media (max-aspect-ratio: 4/5) {
+  .room-relief { left: 44.7%; top: 34%; width: min(55.5%,92vw); height: 38%; translate: -50% 0; }
+  .focus-point[data-style="relief"] { left: 44.7%; width: min(44%,85vw); height: 20%; }
   .scene[data-room="desk"] .plate {
     --console-width: 58%; --console-height: 12.5%;
     --cockpit-glass: polygon(21.7% 39.2%,80.6% 39.75%,82% 40.45%,82% 51.45%,80.5% 52.2%,21.3% 53.1%,20.1% 52.35%,20.1% 40.45%);
