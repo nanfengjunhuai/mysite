@@ -10,10 +10,16 @@
   const kicker = document.querySelector("#location-kicker");
   const [left,right] = [document.querySelector("#look-left"),document.querySelector("#look-right")];
   const reduced = matchMedia("(prefers-reduced-motion: reduce)");
+  const portrait = matchMedia("(max-aspect-ratio: 4/5)");
+  const fieldNote = document.querySelector("#field-note");
+  const fieldBack = document.querySelector("#field-back");
   const notes = window.SITE_NOTES.filter(note => note.type === "personal" && !note.sample);
   const feature = notes.find(note => note.id === "cause-or-fate") ?? notes[0];
   const projects = window.SITE_PROJECTS.filter(project => !project.sample);
   const field = window.WORLD_FIELD_STUDY;
+  const walks = new Map();
+  const visited = new Set();
+  let fieldNoteOrigin;
   const archive = [...window.SPACE_COLLECTION];
   const data = {
     desk: {
@@ -60,19 +66,25 @@
     }
   };
   if (field) {
+    const observations = marks => marks.map(mark => ({
+      title:mark.title, at:mark.at ?? [mark.x,mark.y], portrait:mark.portrait, style:"landmark", inline:true,
+      action:() => fieldObservation(mark.title,mark.detail)
+    }));
     data.coast = {
       name:field.start.title, src:field.start.image, alt:field.start.alt, color:"#b2e5ed",center:[.51,.53],
       points:[
-        { title:field.routes[0].label, at:[.30,.70], room:"harbor", primary:true },
-        { title:field.routes[1].label, at:[.76,.66], room:"ridge", primary:true }
+        { title:field.routes[0].label, at:[.33,.714], room:"harbor", primary:true, style:"trail", direction:"left" },
+        { title:field.routes[1].label, at:[.739,.625], room:"ridge", primary:true, style:"trail", direction:"right" },
+        ...observations(field.landmarks)
       ]
     };
     for (const route of field.routes) {
       data[route.id] = {
-        name:route.title, src:route.image, alt:route.alt, color:"#b2e5ed",center:[.54,.54],
+        name:route.title, src:route.image, portrait:route.portrait, alt:route.alt, color:"#b2e5ed",center:[.54,.54],
+        portraitCenter:route.id === "ridge" ? [.54,.52] : [.51,.52],
         points:[
-          { title:"观察记录",at:[.55,.54],action:() => openVisor(route.title,node("p",route.description)),primary:true },
-          { title:"回岔路口",at:[.36,.71],room:"coast" }
+          ...observations(route.landmarks ?? []),
+          { title:"回岔路口",at:[.207,.667],portrait:[.285,.664],room:"coast",style:"trail",direction:"left",primary:true }
         ]
       };
     }
@@ -88,7 +100,40 @@
   let requestedOrigin = null;
   const views = new Map();
   const sceneImage = scene => scene.src ?? "assets/img/station-" + scene.image + ".webp";
+  const sceneCenter = room => portrait.matches && room.portrait ? room.portraitCenter : room.center;
   document.querySelector("#owner").textContent = window.SITE_CONTENT.workroom.author;
+
+  function fieldObservation(title,detail,origin=document.activeElement) {
+    fieldNoteOrigin=origin;
+    fieldNote.hidden=false;
+    fieldNote.querySelector("h2").textContent=title;
+    fieldNote.querySelector("p").textContent=detail;
+  }
+  function closeFieldObservation(restore=false) {
+    const needsFocus=restore && fieldNote.contains(document.activeElement);
+    fieldNote.hidden=true;
+    if (needsFocus && fieldNoteOrigin?.isConnected && !fieldNoteOrigin.closest("[inert]")) fieldNoteOrigin.focus({preventScroll:true});
+    fieldNoteOrigin=undefined;
+  }
+  fieldNote.querySelector("button").addEventListener("click",()=>closeFieldObservation(true));
+
+  function prepareWalk(route) {
+    if (!route?.approach) return null;
+    if (walks.has(route.id)) return walks.get(route.id);
+    const image=new Image();
+    image.decoding="async";
+    image.fetchPriority="low";
+    image.src=route.approach;
+    const walk={image,ready:image.decode().catch(()=>{})};
+    walks.set(route.id,walk);
+    return walk;
+  }
+  function pathBetween(from,to) {
+    if (from!=="coast" && to!=="coast") return null;
+    const route=field?.routes.find(route=>route.id===(from==="coast"?to:from));
+    if (!route) return null;
+    return {route,direction:(route.id==="harbor")===(from==="coast")?"left":"right"};
+  }
 
   function node(tag,text,className) {
     const element = document.createElement(tag);
@@ -348,12 +393,21 @@
     image.width = 1672; image.height = 941; image.decoding = "async";
     if (id === "desk") image.fetchPriority = "high";
     else image.fetchPriority = "low";
+    let visual=image;
+    if (room.portrait) {
+      frame.dataset.portrait="";
+      visual=node("picture");
+      const vertical=node("source");
+      vertical.media=portrait.media;
+      vertical.srcset=room.portrait;
+      visual.append(vertical,image);
+    }
     const practical = node("div",null,"practical");
     practical.setAttribute("aria-hidden","true");
     practical.style.setProperty("--light-x",room.center[0]*100+"%");
     practical.style.setProperty("--light-y",room.center[1]*100+"%");
     practical.style.setProperty("--light-color",room.color + "59");
-    plate.append(image,practical);
+    plate.append(visual,practical);
     for (const point of room.points) {
       const target = point.room ? anchor("","#"+point.room) : node("button");
       if (point.room) {
@@ -361,21 +415,30 @@
           if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
           const rectangle = target.getBoundingClientRect();
           requestedOrigin = {
-            to:point.room,at:point.at,
+            to:point.room,at:portrait.matches && point.portrait ? point.portrait : point.at,
             x:(rectangle.left+rectangle.width/2)/stage.clientWidth,
             y:(rectangle.top+rectangle.height/2)/stage.clientHeight
           };
         });
       } else {
         target.type = "button";
-        target.setAttribute("aria-haspopup","dialog");
-        target.addEventListener("click",point.action);
+        if (!point.inline) target.setAttribute("aria-haspopup","dialog");
+        else target.setAttribute("aria-controls","field-note");
+        target.addEventListener("click",event=>{
+          point.action();
+          if (point.inline && event.detail===0) fieldNote.querySelector("button").focus({preventScroll:true});
+        });
       }
       target.className = "focus-point";
       target.style.setProperty("--x",point.at[0]*100+"%");
       target.style.setProperty("--y",point.at[1]*100+"%");
       if (point.tint) target.style.setProperty("--point-color",point.tint);
       if (point.style) target.dataset.style = point.style;
+      if (point.direction) target.dataset.direction=point.direction;
+      if (point.portrait) {
+        target.style.setProperty("--portrait-x",point.portrait[0]*100+"%");
+        target.style.setProperty("--portrait-y",point.portrait[1]*100+"%");
+      }
       target.toggleAttribute("data-primary",!!point.primary);
       target.append(node("span",point.title,"point-title"));
       if (point.style === "console") target.append(node("span",window.SITE_CONTENT.workroom.intro,"console-intro"));
@@ -388,7 +451,7 @@
         preview.setAttribute("aria-hidden","true");
         const source = point.screen === "research" ? field?.start.image : sceneImage(data.projects);
         const show = () => {
-          if (source) preview.style.setProperty("--projection",'url("'+source+'")');
+          if (source) preview.style.setProperty("--projection",'url("'+new URL(source,document.baseURI).href+'")');
           preview.dataset.lit = "";
         };
         const hide = () => { delete preview.dataset.lit; };
@@ -426,9 +489,10 @@
     const room = data[active];
     const view = views.get(active);
     const maxX = (view.plate.offsetWidth-stage.clientWidth)/2;
-    const base = view.plate.offsetWidth*(.5-room.center[0]);
+    const center=sceneCenter(room);
+    const base = view.plate.offsetWidth*(.5-center[0]);
     offset = Math.max(-maxX-base,Math.min(maxX-base,offset+delta));
-    align(view,room.center,offset);
+    align(view,center,offset);
   }
   left.addEventListener("click",() => look(stage.clientWidth*.36));
   right.addEventListener("click",() => look(-stage.clientWidth*.36));
@@ -467,6 +531,12 @@
     if (event.detail && performance.now()<suppressUntil) { event.preventDefault(); event.stopPropagation(); }
   },true);
   window.addEventListener("resize",() => { if (active) look(0); });
+  portrait.addEventListener("change",()=>{
+    if (active && data[active].portrait) {
+      offset=0;
+      align(views.get(active),sceneCenter(data[active]));
+    }
+  });
 
   async function openScene(id, moveFocus = false) {
     const step = ++navigation;
@@ -474,29 +544,45 @@
     requestedOrigin = null;
     const next = mount(id);
     stopReel();
+    closeFieldObservation();
     if (visor.open) visor.close();
     if (survey.open) survey.close();
     if (active === id) {
       delete stage.dataset.cut;
+      delete stage.dataset.walk;
       delete next.frame.dataset.departing;
       return;
     }
+    const arrivingFrom=active;
+    let walking=false;
     if (active && id !== active && !reduced.matches) {
+      const path=pathBetween(active,id);
+      const walk=prepareWalk(path?.route);
       if (!next.image.complete) await next.image.decode().catch(() => {});
+      if (walk && !walk.image.complete) await Promise.race([walk.ready,new Promise(resolve=>setTimeout(resolve,320))]);
       if (step !== navigation) return;
       const current = views.get(active);
       delete stage.dataset.boot;
       delete stage.dataset.cut;
+      delete stage.dataset.walk;
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       if (step !== navigation) return;
       stage.style.setProperty("--cut-x",(origin?.x ?? .5)*100+"%");
       stage.style.setProperty("--cut-y",(origin?.y ?? .5)*100+"%");
-      current.plate.style.setProperty("--departure-x",(origin?.at[0] ?? data[active].center[0])*100+"%");
-      current.plate.style.setProperty("--departure-y",(origin?.at[1] ?? data[active].center[1])*100+"%");
+      const departure=origin?.at ?? sceneCenter(data[active]);
+      current.plate.style.setProperty("--departure-x",departure[0]*100+"%");
+      current.plate.style.setProperty("--departure-y",departure[1]*100+"%");
       current.frame.dataset.departing = "";
       stage.dataset.transit = id;
+      if (path && (walk?.image.naturalWidth || next.image.naturalWidth)) {
+        walking=true;
+        stage.dataset.walk=path.direction;
+        const source=walk?.image.naturalWidth?path.route.approach:next.image.currentSrc;
+        stage.style.setProperty("--walk-image",'url("'+new URL(source,document.baseURI).href+'")');
+        stage.style.setProperty("--walk-focus",walk?.image.naturalWidth?(path.route.approachCrop ?? "50% 56%"):"50% 50%");
+      }
       stage.dataset.cut = "";
-      await new Promise(resolve => setTimeout(resolve,370));
+      await new Promise(resolve => setTimeout(resolve,walking?510:370));
     }
     if (step !== navigation) return;
     if (active && active !== id) {
@@ -507,10 +593,13 @@
       delete old.dataset.departing;
     }
     active = id;
+    fieldBack.hidden=id!=="coast";
     if (id === "research") window.prepareCoastSurvey?.();
+    if (id === "coast" && !reduced.matches) field.routes.forEach(prepareWalk);
+    if (field?.routes.some(route=>route.id===id)) visited.add(id);
     offset = 0;
     const room = data[id];
-    align(next,room.center);
+    align(next,sceneCenter(room));
     next.frame.inert = false;
     next.frame.dataset.active = "";
     if (moveFocus && !reduced.matches) next.frame.dataset.arriving = "";
@@ -519,12 +608,29 @@
     name.textContent = room.name;
     kicker.textContent = ["coast","harbor","ridge"].includes(id) ? "海岸城" : "观测站";
     if (moveFocus) document.querySelector(".home").focus({preventScroll:true});
+    const recall=id === "coast" && field?.routes.some(route=>route.id===arrivingFrom);
+    const showRecall=()=>{
+      if (recall && fieldNote.hidden) fieldObservation("石拱岔路",visited.size===field.routes.length?field.compared:field.revisit);
+    };
+    if (walking) setTimeout(()=>{
+      if (step !== navigation) return;
+      delete next.frame.dataset.arriving;
+      delete stage.dataset.walk;
+      delete stage.dataset.cut;
+      showRecall();
+    },560);
+    else showRecall();
   }
   const route = () => Object.hasOwn(data,location.hash.slice(1)) ? location.hash.slice(1) : "desk";
   window.addEventListener("hashchange",() => openScene(route(),true));
   window.addEventListener("keydown",event => {
     if (survey.open) return;
-    if (event.key === "Escape" && !visor.open && active !== "desk") location.hash = "desk";
+    if (event.key === "Escape" && !visor.open) {
+      if (!fieldNote.hidden) closeFieldObservation(true);
+      else if (active === "coast") location.hash="research";
+      else if (field?.routes.some(route=>route.id===active)) location.hash="coast";
+      else if (active !== "desk") location.hash="desk";
+    }
     if (!visor.open && event.key === "ArrowLeft") look(stage.clientWidth*.3);
     if (!visor.open && event.key === "ArrowRight") look(-stage.clientWidth*.3);
   });

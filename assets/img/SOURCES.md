@@ -45,6 +45,23 @@ HORIZONTAL WIDE SCREEN wallpaper, a widescreen landscape establishing shot, 16:9
 
 </details>
 
+## 海岸城的步行过渡
+
+`world-walk-harbor.webp` 和 `world-walk-ridge.webp` 是内置 ImageGen 生成的 1672 × 941 中途画面。两张图分别参考石拱岔路和对应终点的原有画面。它们用于真实交互的方向遮挡过渡。码头和山脊的终点继续使用原有横版与竖版构图。
+
+<details>
+<summary>中途画面的 ImageGen 提示词</summary>
+
+### 下到码头
+
+An original environment frame for the same premium illustrated narrative game as the supplied references. Horizontal landscape 16:9, 1672x941, extremely detailed environmental illustration with bright clear coastal Mediterranean afternoon sunlight, pale warm limestone, olive trees and vivid but natural turquoise bay, and a silvery faintly futuristic skyline. The first reference is where the camera departed, the second is where it will arrive. Design the SHORT connecting walk in the same world and same daylight, at human eye height and before arriving. Foreground strong framing planes, real perspective and legible walking path heading toward an opening centered around x50%, y50%, mobile center crop should still show where to go. No character in frame, no silhouette, no typography, signage text, UI, logos, watermarks, dark vignette or fog. This will be visible as the camera walks around a corner. Here the camera is halfway down aging white limestone steps between white stone buildings and a low wall, about to pass a thick weathered ochre stone pilaster which fills the extreme LEFT EDGE only as a close foreground element. Farther down, the stair curves toward a quay, under blue canvas awnings, with the little pale lighthouse ahead through the opening, blue-white waves, citrus foliage and the same distant multi-span bridge. Oblique walk feels like descending two steps and turning slightly toward the sea, no institution or interior.
+
+### 登上山脊
+
+An original environment frame for the same premium illustrated narrative game as the supplied references. Horizontal landscape 16:9, 1672x941, extremely detailed environmental illustration with bright clear coastal Mediterranean afternoon sunlight, pale warm limestone, olive trees and vivid but natural turquoise bay, and a silvery faintly futuristic skyline. The first reference is where the camera departed, the second is where it will arrive. Design the SHORT connecting walk in the same world and same daylight, at human eye height and before arriving. Foreground strong framing planes, real perspective and legible walking path heading toward an opening centered around x50%, y50%, mobile center crop should still show where to go. No character in frame, no silhouette, no typography, signage text, UI, logos, watermarks, dark vignette or fog. This will be visible as the camera walks around a corner. Here the camera is climbing sunlit broad weathered limestone steps along the hillside under climbing jasmine and vines. It passes a thick irregular old wall and coping on the extreme RIGHT EDGE only as a close foreground element. Across the opening the same silver high tower encircled by its delicate ring appears closer above the town on the right in the distance, whilst patches of sun and soft olive branches mark the ascending path. Subtle wind implied, clear depth, broad sea glimpse to the left beyond the low stone rail. Awake vivid afternoon, no interiors.
+
+</details>
+
 ## 空间转场
 
 <details>
