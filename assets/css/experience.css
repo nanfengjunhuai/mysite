@@ -18,7 +18,7 @@ button { cursor: pointer; }
 .scenes,.scene,.vignette,.shutter { position: absolute; inset: 0; }
 .scene {
   overflow: hidden; isolation: isolate; pointer-events: none;
-  opacity: 0; transition: opacity 480ms var(--ease); touch-action: pan-y pinch-zoom;
+  opacity: 0; touch-action: pan-y pinch-zoom;
 }
 .scene[data-active] { z-index: 1; opacity: 1; pointer-events: auto; }
 .plate {
@@ -35,7 +35,6 @@ button { cursor: pointer; }
 }
 #experience[data-boot] .scene[data-active] .plate { animation: arrival-shot 2.25s cubic-bezier(.19,.68,.23,1) both; }
 #experience[data-flight-landing] .scene[data-active] .plate { animation: flight-settle 570ms var(--ease) both; }
-#experience[data-cut] .scene { transition: none; }
 #experience[data-cut] .scene[data-active] { pointer-events: none; }
 @keyframes arrive { from { transform: scale(1.045); } to { transform: scale(1); } }
 @keyframes depart { from { transform: scale(1); } to { transform: scale(1.3); } }
@@ -277,7 +276,12 @@ button { cursor: pointer; }
 .scene-buttons button:disabled { opacity: .42; cursor: default; }
 .shutter {
   z-index: 3; pointer-events: none; opacity: 0; overflow: hidden;
-  background: radial-gradient(ellipse at var(--cut-x,50%) var(--cut-y,50%),color-mix(in srgb,var(--transfer-light,var(--accent)) 31%,#101a22),transparent 44%),#101a22;
+  background: #182831;
+}
+#scene-message {
+  position: absolute; left: 0; bottom: calc(100% + 10px); margin: 0;
+  max-width: min(290px,100%); padding: 8px 12px; border: 1px solid #87a8a7;
+  border-radius: 5px; background: #132630f5; color: #f4fff9; font-size: 13px;
 }
 .field-note {
   position: absolute; z-index: 4; left: var(--edge); bottom: max(77px,calc(var(--edge) + 52px));
@@ -309,54 +313,22 @@ button { cursor: pointer; }
 #field-back span { font-size: 20px; line-height: 1; }
 .passage {
   position: absolute; inset: 0;
-  background: radial-gradient(ellipse at center,transparent 16%,var(--transit-shadow,#091723c5) 94%),var(--transit-image) center / cover;
-  transform-origin: 50% 48%;
+  background: linear-gradient(0deg,var(--transit-shadow,#1021346b),transparent 48%),var(--passage-image) var(--passage-focus,50% 50%) / cover no-repeat;
+  transform-origin: var(--passage-origin,50% 50%);
 }
-#experience { --transit-image: url("../img/universe-tunnel.webp"); }
-#experience[data-transit="story"] { --transit-image: url("../img/universe-tunnel-story.webp"); }
-#experience[data-transit="projects"] { --transit-image: url("../img/universe-tunnel-projects.webp"); }
-#experience[data-transit="collection"] { --transit-shadow: #2a181dc8; }
-#experience[data-transit="research"] { --transit-shadow: #071e24c8; }
-#experience[data-cut] .shutter { animation: passage-cut var(--transfer-duration,780ms) var(--ease) both; }
-#experience[data-cut] .passage { animation: passage-flight var(--transfer-duration,780ms) cubic-bezier(.44,.13,.69,.95) both; }
-.passage::after {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(ellipse 42% 27% at 50% 49%,color-mix(in srgb,var(--transfer-light,var(--accent)) 26%,transparent),transparent 84%);
-  mix-blend-mode: screen; opacity: 0;
-}
-#experience[data-cut] .passage::after { animation: passage-light var(--transfer-duration,780ms) ease-out; }
-@keyframes passage-light { 0%,100% { opacity: 0; } 52% { opacity: .52; } }
-@keyframes passage-cut {
-  0%,5% { opacity: 1; clip-path: polygon(var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point)); }
-  38%,55% { opacity: 1; clip-path: polygon(-9% -11%,109% -11%,111% -8%,111% 108%,109% 111%,-9% 111%,-11% 108%,-11% -8%); }
-  100% { opacity: 0; clip-path: polygon(-9% -11%,109% -11%,111% -8%,111% 108%,109% 111%,-9% 111%,-11% 108%,-11% -8%); }
-}
-@keyframes passage-flight { from { transform: scale(1); filter: brightness(.5); } to { transform: scale(1.75); filter: brightness(1); } }
-#experience[data-cut][data-walk] .shutter { background: #332e28; }
-#experience[data-cut][data-walk="left"] .shutter { animation-name: walk-left; --step-x: -5%; }
-#experience[data-cut][data-walk="right"] .shutter { animation-name: walk-right; --step-x: 5%; }
-#experience[data-cut][data-walk] .passage {
-  background: var(--walk-image) var(--walk-focus,50% 56%) / cover; transform-origin: 50% 59%;
-  animation: walk-depth var(--transfer-duration) cubic-bezier(.21,.58,.31,1) both;
-}
-#experience[data-cut][data-walk] .passage::after { animation: none; }
+#experience[data-transit="collection"] { --transit-shadow: #26161972; }
+#experience[data-transit="research"] { --transit-shadow: #0c2a3272; }
+#experience[data-cut] .passage { animation: passage-flight 665ms var(--ease) both; }
+@keyframes passage-flight { from { transform: scale(1); } to { transform: scale(1.23); } }
+#experience[data-cut][data-walk] .shutter { background: #3a3733; }
+#experience[data-cut][data-walk] .passage { animation: walk-depth 860ms var(--ease) both; }
 #experience[data-cut][data-walk="left"] { --step-x: -3.6%; }
 #experience[data-cut][data-walk="right"] { --step-x: 3.6%; }
-#experience[data-cut][data-walk] .scene[data-departing] .plate { animation: walk-depart 585ms ease-in-out both; }
-#experience[data-cut][data-walk] .scene[data-arriving] .plate { animation: walk-arrive 535ms var(--ease) both; }
+#experience[data-cut][data-walk] .scene[data-departing] .plate { animation: walk-depart 400ms ease-in-out both; }
+#experience[data-cut][data-walk] .scene[data-arriving] .plate { animation: walk-arrive 460ms var(--ease) both; }
 @keyframes walk-depart { from { transform: scale(1); } to { transform: translateX(var(--step-x)) scale(1.15); } }
 @keyframes walk-arrive { from { transform: translateX(calc(var(--step-x) * -.7)) scale(1.09); } to { transform: scale(1); } }
 @keyframes walk-depth { from { transform: translateX(calc(var(--step-x) * -.42)) scale(1.08); } to { transform: translateX(var(--step-x)) scale(1.24); } }
-@keyframes walk-left {
-  0% { opacity: 1; clip-path: polygon(0 0,0 0,0 100%,0 100%); }
-  39%,58% { opacity: 1; clip-path: polygon(0 0,100% 0,100% 100%,0 100%); }
-  100% { opacity: 1; clip-path: polygon(100% 0,100% 0,100% 100%,100% 100%); }
-}
-@keyframes walk-right {
-  0% { opacity: 1; clip-path: polygon(100% 0,100% 0,100% 100%,100% 100%); }
-  39%,58% { opacity: 1; clip-path: polygon(0 0,100% 0,100% 100%,0 100%); }
-  100% { opacity: 1; clip-path: polygon(0 0,0 0,0 100%,0 100%); }
-}
 .visor {
   width: min(710px,calc(100% - 26px)); max-height: 86dvh; overflow: auto;
   padding: clamp(16px,3.8vw,36px); color: #f6eee2;

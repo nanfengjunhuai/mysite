@@ -9,56 +9,13 @@
   position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
 }
 .arrival-film { z-index: 0; }
-.film-plane {
-  position: absolute; inset: 0 auto auto 0; display: block;
-  width: var(--plane-width); height: var(--plane-height);
-  object-fit: fill; transform-origin: 0 0; user-select: none;
-}
-.film-window { position: absolute; inset: 0; overflow: hidden; }
-.film-window[data-window="berth"] { background: #2a211f; }
-.film-window[data-window="corridor"] {
-  background: transparent;
-  clip-path: polygon(28.2% 18.7%,71.2% 18.7%,75.3% 24.63%,75.3% 78.7%,71.76% 84.6%,28.2% 84.6%,24.7% 78.7%,24.7% 24.63%);
-}
-[data-surface="shuttle"] {
-  clip-path: polygon(31.35% 77.9%,35.7% 74.2%,41.2% 71.6%,45.2% 68.7%,47.6% 65.2%,49.8% 62.3%,52% 61.8%,54% 62.3%,55.4% 65.2%,57.1% 68.7%,59.8% 71.6%,64% 75.5%,67.9% 79.6%,67.8% 82.2%,64.7% 81.4%,60.5% 80.3%,57.2% 81.2%,55% 83.5%,51% 83.4%,49.1% 84%,46.5% 84.1%,44.8% 81.5%,41.4% 82%,37.7% 80.1%,34.4% 79.5%,31.3% 79.4%);
-}
-.airlock-opening {
-  position: absolute; inset: 18.7% 24.7% 15.4%; overflow: hidden;
-  clip-path: polygon(7% 0,92% 0,100% 9%,100% 91%,93% 100%,7% 100%,0 91%,0 9%);
-  perspective: 500px; box-shadow: inset 0 0 20px #120e14e0;
-}
-.airlock-leaf {
-  position: absolute; top: 0; width: 50.3%; height: 100%;
-  background: url("../img/flight-airlock-leaves.webp") var(--door-sampling,33.14%) 54.84% / 392.92% 151.75%;
-}
-.airlock-leaf[data-leaf="left"] { left: 0; transform: translateX(calc(var(--door,0) * -100%)); }
-.airlock-leaf[data-leaf="right"] { right: 0; transform: translateX(calc(var(--door,0) * 100%)); --door-sampling: 66.86%; }
-.airlock-leaf::after {
-  content: ""; position: absolute; width: 1.05%; top: 17%; bottom: 22%; right: 1%;
-  opacity: var(--door-rim,0); box-shadow: 0 0 11px #ffb274;
-  background: linear-gradient(transparent,#ffc884 23% 77%,transparent);
-}
-.airlock-leaf[data-leaf="right"]::after { right: auto; left: 1%; }
-[data-surface="airlock"]::after {
-  content: ""; position: absolute; inset: 0; pointer-events: none;
-  background: radial-gradient(ellipse 5% 3% at 32% 8%,#ffbb6c9b,transparent),
-    radial-gradient(ellipse 5% 3% at 69% 8%,#ffbb6c9b,transparent);
-  mix-blend-mode: screen; opacity: var(--dock-lights,0);
-}
 .arrival-grade {
   z-index: 2;
   background: linear-gradient(180deg,#070911c9,transparent 18% 77%,#070911bc),
     radial-gradient(ellipse at center,transparent 48%,#04060c56);
 }
-.arrival-grade::after {
-  content: ""; position: absolute; inset: 0;
-  background: radial-gradient(ellipse at 51% 48%,#140f0c,#080b12 76%);
-  opacity: var(--threshold-shadow,0);
-}
 #arrival[data-handoff] { background: transparent; }
-#arrival[data-handoff] .arrival-film { visibility: hidden; }
-#arrival[data-handoff] .arrival-grade { background: transparent; }
+#arrival[data-handoff] :is(.arrival-film,.arrival-grade) { opacity: var(--flight-opacity,1); }
 #arrival[data-handoff] :is(.arrival-heading,.flight-readout) { visibility: hidden; }
 #arrival[data-crossing] #arrival-sound:not(:focus-visible) { visibility: hidden; }
 .arrival-frame {

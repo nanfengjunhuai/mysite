@@ -204,7 +204,7 @@ Create a premium strategy video game terrain albedo texture for an interactive t
 
 ## 观测站开场短片
 
-`flight-*.webp` 是为本站制作的 ImageGen 画面，原始比例为 1672 × 941。片头从外部泊位开始。廊道通过与站体同步移动的舱口露出，镜头掠过门框时短暂压暗，在曝光恢复时接入工作台。飞船、泊位灯和两扇门按入港顺序运动。
+`flight-*.webp` 是为本站制作的 ImageGen 画面，原始比例为 1672 × 941。片头从外部泊位开始。站体、舱口、门扇和廊道合成到同一张画布，片尾从廊道直接淡入已就绪的工作台。
 
 - 连续镜头的空间遮挡参考 [《战神》单镜头制作访谈](https://blog.playstation.com/2018/09/28/the-art-of-the-scene-cinematic-challenges-in-god-of-war/)。
 - `flight-continuous-corridor.webp` 是由内置 ImageGen 以开启的气闸画面为参考制作的 1672 × 941 廊道近景。廊道与外部气闸以同一消失点对齐，按自己的深度比例推进。
