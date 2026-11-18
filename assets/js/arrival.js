@@ -9,7 +9,8 @@
   const status = layer.querySelector("#flight-status");
   const workshop = document.querySelector("#experience");
   const motion = matchMedia("(prefers-reduced-motion: reduce)");
-  const duration = 13.05;
+  const beats = { align: 1.25, lock: 3.42, doors: 3.70, open: 5.05, crossing: 5.25, handoff: 5.98, end: 6.65 };
+  const duration = beats.end;
   const sessionKey = "station-arrived-flight";
 
   function alreadySeen() {
@@ -21,8 +22,6 @@
   if (motion.matches || (route && route !== "desk") || (!force && (route || alreadySeen()))) return;
 
   const film = layer.querySelector(".arrival-film");
-  const optics = layer.querySelector("canvas");
-  const ctx = optics.getContext("2d");
   const plate = (name,file,parent) => {
     const image = new Image();
     image.className = "film-plane";
@@ -40,11 +39,9 @@
     parent.append(view);
     return view;
   };
-  const warp = plate("gravity","flight-gravity-background.webp",film);
-  warp.fetchPriority = "high";
-  const orbitWindow = windowLayer("orbit",film);
-  const station = plate("station","flight-berth-background.webp",orbitWindow);
-  const berthWindow = windowLayer("berth",orbitWindow);
+  const station = plate("station","flight-berth-background.webp",film);
+  station.fetchPriority = "high";
+  const berthWindow = windowLayer("berth",film);
   const hull = document.createElement("div");
   hull.className = "film-plane";
   hull.dataset.surface = "airlock";
@@ -71,9 +68,8 @@
   const loadLimit = 3200;
   const resizeObserver = new ResizeObserver(resize);
   const flightPath = [
-    [0,.50,.72,.84,-3.5], [1.5,.485,.66,.68,1.4], [3.10,.49,.55,.44,-3.1],
-    [4.44,.49,.59,.38,-1.6], [5.91,.50,.57,.34,0], [6.78,.502,.56,.31,1.2],
-    [7.42,.51,.60,.39,1.8], [8.17,.53,.86,.65,1.5], [8.85,.56,1.32,1.0,2.1]
+    [0,.505,.663,.57,-1.7], [.84,.511,.629,.47,-1.3], [1.95,.503,.603,.37,-.4],
+    [2.56,.50,.653,.41,0], [3.06,.50,.816,.60,.3], [beats.lock,.50,1.21,.88,.3]
   ];
 
   // The openings are measured in the same image coordinates as the station.
@@ -86,7 +82,6 @@
   let busy = false;
   let ended = false;
   let started = false;
-  let lensDrawn = false;
   let w = 1;
   let h = 1;
   let imageW = 1;
@@ -104,10 +99,7 @@
     imageH = imageW*941/1672;
     film.style.setProperty("--plane-width",imageW+"px");
     film.style.setProperty("--plane-height",imageH+"px");
-    const scatterScale = Math.min(devicePixelRatio || 1,1.15);
-    optics.width = Math.ceil(w*scatterScale);
-    optics.height = Math.ceil(h*scatterScale);
-    ctx?.setTransform(scatterScale,0,0,scatterScale,0,0);
+
   }
 
   function project(element,anchorX,anchorY,z,screenX,screenY,bank=0) {
@@ -136,107 +128,59 @@
   }
 
   function frameFlight(t) {
-    const phase = t<2.6?0:t<5.15?1:t<8.85?2:t<11.64?3:4;
+    const phase = t<beats.align?0:t<beats.lock?1:t<beats.doors?2:t<beats.crossing?3:4;
     if (phase!==clock.phase) {
       clock.phase=phase;
       layer.dataset.flightStage=String(phase);
       const messages=[
-        ["穿越引力透镜",""],["轨道观测站",""],["对准泊位","推进器减速"],
-        ["泊位已锁定","气闸均压中"],["进入工作台",""]
+        ["靠近观测站",""],["对准泊位","推进器减速"],["泊位已锁定","气闸均压"],
+        ["气闸开启",""],["通过气闸",""]
       ];
       [status.textContent,caption.textContent]=messages[phase];
+      if (phase===4) layer.dataset.crossing="";
     }
 
-    const tunnel=ease(0,4.55,t);
-    const flight=Math.max(0,Math.min(1,(t-2.0)/7.25));
-    const iris=ease(2.12,4.58,t);
-    const lensX=mix(.493,.506,tunnel)*w, lensY=mix(.384,.468,tunnel)*h;
-    project(warp,.49,.375,1.04+tunnel*.50,lensX,lensY);
-    const reach=Math.hypot(w,h);
-    const radius=reach*.934*iris;
-    orbitWindow.style.clipPath = "ellipse("+radius.toFixed(1)+"px "+(.86*radius).toFixed(1)+"px at "+lensX.toFixed(1)+"px "+lensY.toFixed(1)+"px)";
-    warp.hidden = iris>=1;
-
-    // The inner view stays registered to the same opening as the exterior moves past the camera.
-    const bearingX=mix(.532,.50,flight)*w,bearingY=mix(.468,.505,flight)*h;
-    const magnification=1.20+9.10*flight**2.65;
+    // The view through the berth follows the same opening as the station approaches.
+    const flight=ease(0,beats.lock,t);
+    const interior=ease(beats.doors,beats.end,t);
+    const bearingX=mix(.532,.50,flight)*w,bearingY=mix(.472,.497,flight)*h;
+    const magnification=1.14+7.95*flight**3.05+interior*2.0;
     const stationPose=project(station,.557,.508,magnification,bearingX,bearingY);
     const ring=berthPolygon.map(([x,y])=>[
       stationPose.x+x*imageW*magnification,
       stationPose.y+y*imageH*magnification
     ]);
     berthWindow.style.clipPath="polygon("+ring.map(([x,y])=>x.toFixed(1)+"px "+y.toFixed(1)+"px").join(",")+")";
-    const interior=ease(10.19,12.92,t);
     const hatchScale=.34*magnification+interior*.79;
     project(hull,.50,.52,hatchScale,bearingX,bearingY);
     if (!corridorWindow.hidden) {
-      const depthScale=Math.min(.70, (1.43+interior*.23)/hatchScale);
+      const forward=ease(beats.open,beats.handoff,t);
+      const depthScale=Math.min(.82, (1.43+interior*.23+forward*.94)/hatchScale);
       project(corridor,.50,.55,depthScale,.501*imageW,.548*imageH);
     }
-    const opened=ease(9.29,11.38,t);
+    const opened=ease(beats.doors,beats.open,t);
+    const latched=ease(beats.lock,beats.doors,t);
     hull.style.setProperty("--door",opened);
-    hull.style.setProperty("--door-rim",ease(8.93,9.28,t)*(1-opened*.8));
-    if (phase===3 && opened>.74 && caption.textContent!=="气闸已开启") caption.textContent="气闸已开启";
+    hull.style.setProperty("--door-rim",latched*(1-opened*.8));
+    hull.style.setProperty("--dock-lights",latched*(1-interior*.38));
 
     const [x,y,scale,bank]=pilotAt(t);
     const phoneScale=(w<h ? .68 : 1);
-    shuttle.hidden=t>8.88;
+    shuttle.hidden=t>=beats.lock;
     if (!shuttle.hidden) {
       project(shuttle,.5,.74,scale*phoneScale,x*w,y*h,bank);
-      shuttle.style.filter="brightness("+(1-ease(6.7,8.4,t)*.40)+")";
+      shuttle.style.filter="brightness("+(1-ease(beats.align,beats.lock,t)*.35)+")";
+      shuttle.style.opacity=1-ease(beats.lock-.27,beats.lock,t);
     }
 
-    if (t<4.59) {
-      drawLens(t,ease(2.3,4.59,t),lensX,lensY,radius);
-      lensDrawn=true;
-    } else if (lensDrawn) {
-      ctx?.clearRect(0,0,w,h);
-      lensDrawn=false;
-    }
-    if (t >= 11.68) {
-      const through=ease(11.68,13.02,t);
-      const exitX=mix(bearingX,w*.508,through), exitY=mix(h*.59,h*.48,through);
-      const width=1+reach*.98*through, height=1+reach*.87*through;
-      const opening=[[-.83,-1],[.83,-1],[1,-.77],[1,.77],[.83,1],[-.83,1],[-1,.77],[-1,-.77],[-.83,-1]];
-      const inner=opening.map(([x,y])=>(exitX+x*width).toFixed(1)+"px "+(exitY+y*height).toFixed(1)+"px");
-      layer.style.setProperty("--exit-mask","polygon(evenodd,0 0,100% 0,100% 100%,0 100%,0 0,"+inner.join(",")+")");
-      // The actual workroom is visible through the opening before it accepts input.
+    const shadow=ease(beats.handoff-.23,beats.handoff-.04,t)*(1-ease(beats.handoff+.04,beats.handoff+.37,t));
+    layer.style.setProperty("--threshold-shadow",shadow.toFixed(3));
+    if (t >= beats.handoff && !layer.hasAttribute("data-handoff")) {
+      // The corridor and workshop change places at the darkest point of the threshold.
       layer.dataset.handoff="";
+      delete workshop.dataset.boot;
+      workshop.dataset.flightLanding="";
     }
-  }
-
-  function drawLens(t,approach,x,y,irisRadius) {
-    if (!ctx) return;
-    ctx.clearRect(0,0,w,h);
-    ctx.globalCompositeOperation = "screen";
-    const reach = Math.hypot(w,h);
-    const compression = w<h ? .74 : .86;
-
-    // Sparse, curved reflections expand around the existing lens. The central silhouette stays clear.
-    for (let i=0;i<15;i++) {
-      const z = ((i*.153+t*.41+approach*.11)%1);
-      const radius = reach*(.064+z*z*.51);
-      const a = i*1.917+t*.175;
-      const alpha = Math.sin(z*Math.PI)*(.13+approach*.12);
-      const gradient = ctx.createLinearGradient(x-radius,y+radius*.38,x+radius,y-radius*.38);
-      gradient.addColorStop(0,"#27304f00");
-      gradient.addColorStop(.43,"rgba(98,139,192,"+alpha+")");
-      gradient.addColorStop(.58,"rgba(149,160,207,"+(alpha*.63)+")");
-      gradient.addColorStop(1,"#7197c900");
-      ctx.strokeStyle = gradient;
-      ctx.lineWidth = Math.max(.9,radius*.012);
-      ctx.beginPath();
-      ctx.ellipse(x,y,radius,radius*compression,.33,a,a+.35+z*.66);
-      ctx.stroke();
-    }
-    if (irisRadius>2 && irisRadius<reach*.80) {
-      ctx.strokeStyle="rgba(219,217,255,"+(.19*(1-approach))+")";
-      ctx.lineWidth=4+irisRadius*.012;
-      ctx.beginPath();
-      ctx.ellipse(x,y,irisRadius,irisRadius*.86,0,0,2*Math.PI);
-      ctx.stroke();
-    }
-    ctx.globalCompositeOperation = "source-over";
   }
 
   function draw(time) {
@@ -267,6 +211,7 @@
     audioButton.removeEventListener("click",toggleSound);
     access.removeEventListener("click",finish);
     closeSound();
+    delete workshop.dataset.flightLanding;
     workshop.inert = false;
     access.hidden = true;
     if (hadFocus) workshop.querySelector(".home")?.focus({preventScroll:true});
@@ -277,7 +222,6 @@
     setTimeout(() => {
       layer.hidden = true;
       film.replaceChildren();
-      optics.width = optics.height = 1;
     },motion.matches ? 0 : 520);
   }
   function onKey(event) { if (event.key === "Escape") finish(); }
@@ -364,19 +308,16 @@
       oscillator.stop(end+.02);
     }
 
-    air(0,3.25,150,470,.7,.41,-.16,.55);
-    air(1.5,2.05,540,1720,1.7,.29,.21,.57);
-    bell(2.69,.66,93,39,.61);
-    air(2.85,5.84,143,73,1.15,.35,-.18);
-    bell(5.42,.19,770,756,.21,"sine",.14);
-    bell(5.66,.29,885,863,.13,"sine",.14);
-    air(8.79,.25,864,115,.91,.59,.11,.14);
-    bell(8.85,.51,118,47,.46,"triangle");
-    air(9.04,.72,1310,451,1.2,.34,.23,.09);
-    air(9.29,2.16,239,151,2.4,.28,-.21,.36);
-    air(10.85,.62,882,373,2.7,.18,.10,.19);
-    bell(11.70,.95,261,260,.13);
-    bell(11.84,1.09,391,390,.10);
+    air(0,beats.lock,152,74,1.15,.34,-.16,.22);
+    bell(beats.align,.19,684,674,.16,"sine",.14);
+    bell(beats.align+.19,.25,837,820,.12,"sine",.14);
+    air(beats.lock-.08,.25,864,115,.91,.50,.11,.14);
+    bell(beats.lock,.46,118,47,.41,"triangle");
+    air(beats.lock+.10,.60,1310,451,1.2,.31,.23,.09);
+    air(beats.doors,beats.open-beats.doors,239,125,2.4,.29,-.21,.24);
+    air(beats.open-.21,.36,626,250,2.7,.14,.10,.19);
+    bell(beats.handoff-.12,.61,261,260,.11);
+    bell(beats.handoff+.03,.56,391,390,.08);
     master.gain.setTargetAtTime(0,Math.max(available,zero+duration-.38),.18);
   }
 
@@ -390,8 +331,8 @@
   window.addEventListener("keydown",onKey);
   motion.addEventListener("change",finish);
 
-  const ready = Promise.all([warp,station,airlock,doorTexture,shuttle].map(image=>image.decode())).then(()=>true,()=>false);
-  corridor.decode().then(()=>{ if (!ended && clock.elapsed<9.29) corridorWindow.hidden=false; }).catch(()=>{});
+  const ready = Promise.all([station,airlock,doorTexture,shuttle].map(image=>image.decode())).then(()=>true,()=>false);
+  corridor.decode().then(()=>{ if (!ended && clock.elapsed<beats.open) corridorWindow.hidden=false; }).catch(()=>{});
   const deadline = new Promise(resolve => setTimeout(() => resolve(false),loadLimit));
   Promise.race([ready,deadline]).then(ok => {
     if (ended) return;

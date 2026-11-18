@@ -8,7 +8,7 @@ python -m http.server 8000
 
 本地预览地址为 `http://localhost:8000/`。桌面可拖动镜头，手机可左右滑动，也可以用屏幕下方的箭头。右下角的「航图」标出当前位置，可预览并进入各个舱室，也可打开观测站的三维外部视图。同一标签页内会记住各舱室的取景位置。
 
-首次打开会播放约 13 秒的飞船抵达片头。镜头沿同一条航线穿出虫洞、靠近泊位、进入气闸和工作台。点击音效按钮可以听到推进器、锁扣和气闸声。再次检查片头可直接打开 `experience.html?arrival=1`。航线、空间开口和音效位于 `assets/js/arrival.js`，场景图位于 `assets/img/flight-*.webp`。可交互观测站的三维模型位于 `assets/js/observatory.js`。
+首次打开会播放约 6.7 秒的飞船抵达片头。镜头从观测站外沿泊位轴线推进，经气闸进入工作台。点击音效按钮可以听到推进器、锁扣和气闸声。再次检查片头可直接打开 `experience.html?arrival=1`。航线、空间开口和音效位于 `assets/js/arrival.js`，场景图位于 `assets/img/flight-*.webp`。可交互观测站的三维模型位于 `assets/js/observatory.js`。
 
 ## 修改内容
 

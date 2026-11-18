@@ -5,7 +5,7 @@
   --cinema-block: max(25px,5.4dvh,env(safe-area-inset-bottom));
 }
 #arrival[data-leaving] { opacity: 0; pointer-events: none; transition: opacity 500ms cubic-bezier(.23,.73,.3,1); }
-#arrival canvas,.arrival-film,.arrival-grade,.arrival-frame {
+.arrival-film,.arrival-grade,.arrival-frame {
   position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;
 }
 .arrival-film { z-index: 0; }
@@ -14,7 +14,7 @@
   width: var(--plane-width); height: var(--plane-height);
   object-fit: fill; transform-origin: 0 0; user-select: none;
 }
-.film-window { position: absolute; inset: 0; overflow: hidden; background: #101019; clip-path: ellipse(0 0 at 50% 50%); }
+.film-window { position: absolute; inset: 0; overflow: hidden; }
 .film-window[data-window="berth"] { background: #2a211f; }
 .film-window[data-window="corridor"] {
   background: transparent;
@@ -40,22 +40,33 @@
   background: linear-gradient(transparent,#ffc884 23% 77%,transparent);
 }
 .airlock-leaf[data-leaf="right"]::after { right: auto; left: 1%; }
-#arrival canvas { z-index: 1; mix-blend-mode: screen; }
+[data-surface="airlock"]::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse 5% 3% at 32% 8%,#ffbb6c9b,transparent),
+    radial-gradient(ellipse 5% 3% at 69% 8%,#ffbb6c9b,transparent);
+  mix-blend-mode: screen; opacity: var(--dock-lights,0);
+}
 .arrival-grade {
   z-index: 2;
   background: linear-gradient(180deg,#070911c9,transparent 18% 77%,#070911bc),
     radial-gradient(ellipse at center,transparent 48%,#04060c56);
 }
+.arrival-grade::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 51% 48%,#140f0c,#080b12 76%);
+  opacity: var(--threshold-shadow,0);
+}
 #arrival[data-handoff] { background: transparent; }
-#arrival[data-handoff] :is(.arrival-film,.arrival-grade) { clip-path: var(--exit-mask); }
-#arrival[data-handoff] .arrival-frame { opacity: 0; }
-#arrival[data-handoff] #arrival-sound:not(:focus-visible) { visibility: hidden; }
+#arrival[data-handoff] .arrival-film { visibility: hidden; }
+#arrival[data-handoff] .arrival-grade { background: transparent; }
+#arrival[data-handoff] :is(.arrival-heading,.flight-readout) { visibility: hidden; }
+#arrival[data-crossing] #arrival-sound:not(:focus-visible) { visibility: hidden; }
 .arrival-frame {
   z-index: 4; display: grid; grid-template-columns: minmax(0,1fr) auto; grid-template-rows: min-content 1fr min-content;
   padding: max(25px,5.4dvh,env(safe-area-inset-top)) var(--cinema-edge) var(--cinema-block);
   opacity: 0; transition: opacity 340ms ease;
 }
-#arrival[data-initialized]:not([data-leaving],[data-handoff]) .arrival-frame { opacity: 1; }
+#arrival[data-initialized]:not([data-leaving],[data-crossing]) .arrival-frame { opacity: 1; }
 .arrival-heading { display: grid; gap: 5px; align-self: center; }
 .arrival-heading strong { font-size: clamp(15px,1.45vw,20px); font-weight: 560; letter-spacing: .085em; text-shadow: 0 1px 14px #070711; }
 .arrival-heading span { font-size: 11px; color: #c1cad3; letter-spacing: .14em; }
@@ -73,7 +84,7 @@
   color: #eef6ff; background: #182433; border-radius: 4px; pointer-events: auto;
 }
 #flight-access:not(:focus) { clip-path: inset(50%); }
-.arrival-frame:focus-within { opacity: 1; }
+.arrival-frame:has(:focus-visible) { opacity: 1; }
 .flight-readout {
   grid-row: 3; display: grid; gap: 3px; align-self: end; width: fit-content;
   color: #edf1f7; text-shadow: 0 2px 12px #020613;
@@ -81,7 +92,7 @@
 .flight-readout strong { font: 560 clamp(17px,1.8vw,26px)/1.25 "Geist","Microsoft YaHei",sans-serif; letter-spacing: .10em; }
 .flight-readout span { font-size: 11px; letter-spacing: .10em; color: #e6d4ba; }
 .flight-readout span:empty { display: none; }
-#arrival[data-flight-stage="3"] .arrival-grade {
+#arrival[data-flight-stage="3"]:not([data-handoff]) .arrival-grade {
   background: linear-gradient(180deg,#070911a4,transparent 18% 77%,#070911a4),radial-gradient(ellipse at center,transparent 57%,#08090e5c);
 }
 @media (max-width:600px) {

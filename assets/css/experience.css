@@ -34,11 +34,13 @@ button { cursor: pointer; }
   animation: depart 490ms cubic-bezier(.35,.03,.9,.42) both;
 }
 #experience[data-boot] .scene[data-active] .plate { animation: arrival-shot 2.25s cubic-bezier(.19,.68,.23,1) both; }
+#experience[data-flight-landing] .scene[data-active] .plate { animation: flight-settle 570ms var(--ease) both; }
 #experience[data-cut] .scene { transition: none; }
 #experience[data-cut] .scene[data-active] { pointer-events: none; }
 @keyframes arrive { from { transform: scale(1.045); } to { transform: scale(1); } }
 @keyframes depart { from { transform: scale(1); } to { transform: scale(1.3); } }
 @keyframes arrival-shot { from { transform: scale(1.12); filter: brightness(.68); } to { transform: scale(1); filter: brightness(1); } }
+@keyframes flight-settle { from { transform: scale(1.038); } to { transform: scale(1); } }
 .plate > img,.plate > picture,.plate > picture > img { position: absolute; width: 100%; height: 100%; inset: 0; object-fit: fill; pointer-events: none; user-select: none; }
 @media (max-aspect-ratio: 4/5) {
   .scene[data-portrait] .plate { width: max(109vw,61.35dvh); height: max(109dvh,193.68vw); }
