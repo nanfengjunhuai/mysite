@@ -9,14 +9,14 @@ window.SITE_PROJECTS = [
     tags: ["HTML", "CSS", "JavaScript", "Canvas"],
     deskPreview: "assets/img/universe-projects.webp",
     image: {
-      url: "assets/img/personal-space-project.webp",
-      alt: "My Personal Space 实际工作台画面，程序员前方的显示器亮着，右侧桌上有通往收藏室的笔记本"
+      url: "assets/img/personal-space-project-current.webp",
+      alt: "My Personal Space 工作台实屏。主屏显示李银的欢迎语，两侧通往研究室和项目库，右侧的机器人旁是收藏室入口。"
     },
-    credit: { label: "工作台实屏", href: "workroom.html" },
+    credit: { label: "工作台实屏", href: "experience.html#desk" },
     sections: [
       {
         title: "从工作台出发",
-        text: "访客先站在程序员身后，三块显示器分别通往研究室、项目库和自叙帖。收藏室的入口放在桌上的笔记本上，手机端可以用全景取景带移动视角。"
+        text: "访客先站在程序员身后。主屏显示我的欢迎语和《因果还是宿命？》，侧屏通往研究室和项目库。收藏室从桌边的小机器人进入，也可以通过站内航图直接前往。手机竖屏另用一个镜头，把这几个入口和人物都留在画面里。"
       },
       {
         title: "两种可探索的演示",
@@ -28,7 +28,7 @@ window.SITE_PROJECTS = [
       }
     ],
     relatedNote: "building-my-personal-space",
-    links: { source: null, demo: "workroom.html" }
+    links: { source: null, demo: "experience.html#desk" }
   },
   {
     id: "image-palette",

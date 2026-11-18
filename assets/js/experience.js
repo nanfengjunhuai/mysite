@@ -24,13 +24,14 @@
   const archive = [...window.SPACE_COLLECTION];
   const data = {
     desk: {
-      name: "工作台", image: "workshop", color: "#ffdaa7", center: [.51,.47],
+      name: "工作台", image: "workshop", color: "#ffdaa7", center: [.53,.47],
+      portrait: "assets/img/station-workshop-portrait.webp", portraitCenter: [.535,.49],
       alt: "傍晚的海边观测站工作台，程序员佩戴蓝色科技眼镜，桌上有三块显示器和一个小机器人。",
       points: [
-        { title:"自叙帖", at:[.484,.364], room:"story", primary:true, style:"console" },
-        { title:"研究室", at:[.18,.385], room:"research", tint:"#a9ebd9", screen:"research" },
-        { title:"项目库", at:[.716,.394], room:"projects", tint:"#e4c8f3", screen:"projects" },
-        { title:"收藏室", at:[.961,.459], room:"collection", tint:"#bfeaff" }
+        { title:"自叙帖", at:[.483,.373], portrait:[.505,.461], room:"story", primary:true, style:"console" },
+        { title:"研究室", at:[.18,.365], portrait:[.265,.308], room:"research", tint:"#a9ebd9", screen:"research" },
+        { title:"项目库", at:[.716,.394], portrait:[.763,.317], room:"projects", tint:"#e4c8f3", screen:"projects" },
+        { title:"收藏室", at:[.961,.429], portrait:[.212,.643], room:"collection", tint:"#f7d9ac", style:"companion" }
       ]
     },
     story: {
@@ -175,7 +176,13 @@
     return element;
   }
   function openVisor(title,...blocks) {
-    if (!visor.open) visorReturn = document.activeElement;
+    if (!visor.open) {
+      visorReturn = document.activeElement;
+      const artifact = visorReturn?.closest(".focus-point")?.getBoundingClientRect();
+      const x = artifact ? (artifact.left+artifact.width/2)/stage.clientWidth : .5;
+      const y = artifact ? (artifact.top+artifact.height/2)/stage.clientHeight : .5;
+      visor.style.setProperty("--read-origin",Math.max(0,Math.min(x,1))*100+"% "+Math.max(0,Math.min(y,1))*100+"%");
+    }
     stopReel();
     delete visor.dataset.surface;
     document.querySelector("#visor-title").textContent = title;
@@ -215,7 +222,11 @@
   function readNote(note) {
     const date = node("time",note.date);
     date.dateTime = note.date;
-    openVisor(note.title,date,...textBlocks(note),button("全部记录 ›",openNotes));
+    const signature = node("p",null,"paper-signature");
+    signature.append(node("span",window.SITE_CONTENT.workroom.author),date);
+    const text = node("article",null,"paper-text");
+    text.append(...textBlocks(note));
+    openVisor(note.title,signature,text,button("全部记录 ›",openNotes));
     visor.dataset.surface = "paper";
   }
   function openNotes() {
@@ -308,7 +319,7 @@
   function showProject(project) {
     const cover = safeUrl(project.image?.url);
     const media = cover ? node("img") : null;
-    if (media) { media.src = cover; media.alt = project.image.alt ?? ""; }
+    if (media) { media.src = cover; media.alt = project.image.alt ?? ""; media.decoding = "async"; }
     const parts = [node("p",project.description),...textBlocks(project)];
     if (project.tags?.length) {
       const stack=node("ul",null,"project-stack");
@@ -316,7 +327,11 @@
       stack.append(...project.tags.map(tag=>node("li",tag)));
       parts.unshift(stack);
     }
-    if (media) parts.unshift(media);
+    if (media) {
+      const screen = node("figure",null,"project-screen");
+      screen.append(media);
+      parts.unshift(screen);
+    }
     if (projects.length > 1) parts.push(button("返回作品列表",showProjects));
     openVisor(project.title,...parts);
     visor.dataset.surface = "projection";
@@ -343,8 +358,25 @@
     openVisor(item.title,...parts,button("返回收藏",showCollection));
   }
   function showCollection() {
-    openVisor("收藏室",...archive.map(item => button(item.title + " ↗",() => showCollectible(item))),
-      anchor("＋ 添加收藏","collection-editor.html?from=experience"));
+    const shelf = node("div",null,"collection-shelf");
+    for (const item of archive) {
+      const exhibit = button("",() => showCollectible(item));
+      const cover=safeUrl(item.image ?? (item.kind==="image" ? item.url : ""));
+      if (cover) {
+        const image=node("img");
+        image.src=cover;
+        image.alt="";
+        image.loading="lazy";
+        image.decoding="async";
+        exhibit.append(image);
+      }
+      const label=node("span",null,"shelf-label");
+      label.append(node("span",item.title),node("small",item.category));
+      exhibit.append(label);
+      shelf.append(exhibit);
+    }
+    openVisor("收藏室",shelf,anchor("＋ 添加收藏","collection-editor.html?from=experience"));
+    visor.dataset.surface="cabinet";
   }
   function arrangeExhibits(plate) {
     plate.querySelectorAll(".exhibit").forEach(exhibit => exhibit.remove());
@@ -391,7 +423,6 @@
     frame.setAttribute("aria-label",room.name);
     const plate = node("div",null,"plate");
     const image = node("img");
-    image.src = sceneImage(room);
     image.alt = room.alt;
     image.width = 1672; image.height = 941; image.decoding = "async";
     if (id === "desk") image.fetchPriority = "high";
@@ -405,6 +436,7 @@
       vertical.srcset=room.portrait;
       visual.append(vertical,image);
     }
+    image.src = sceneImage(room);
     const practical = node("div",null,"practical");
     practical.setAttribute("aria-hidden","true");
     practical.style.setProperty("--light-x",room.center[0]*100+"%");
@@ -414,6 +446,7 @@
     for (const point of room.points) {
       const target = point.room ? anchor("","#"+point.room) : node("button");
       if (point.room) {
+        target.setAttribute("aria-label",point.title);
         target.addEventListener("click",event => {
           if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return;
           const rectangle = target.getBoundingClientRect();
@@ -444,7 +477,20 @@
       }
       target.toggleAttribute("data-primary",!!point.primary);
       target.append(node("span",point.title,"point-title"));
-      if (point.style === "console") target.append(node("span",window.SITE_CONTENT.workroom.intro,"console-intro"));
+      if (point.style === "console") {
+        const greeting=node("span",null,"console-intro");
+        const intro=window.SITE_CONTENT.workroom.intro;
+        const pause=intro.lastIndexOf("，")+1;
+        if (pause && pause<intro.length) {
+          greeting.append(node("span",intro.slice(0,pause)),node("span",intro.slice(pause)));
+        } else greeting.textContent=intro;
+        greeting.id="workshop-greeting";
+        target.setAttribute("aria-describedby",greeting.id);
+        const prompt=node("span",null,"console-prompt");
+        prompt.append(node("span",feature?.title ?? "打开记录"),node("span","↗"));
+        prompt.lastElementChild.setAttribute("aria-hidden","true");
+        target.append(greeting,prompt);
+      }
       if (point.style === "display" && projects.length) target.append(node("span",projects[0].title,"display-title"));
       plate.append(target);
       if (point.screen) {
@@ -453,8 +499,17 @@
         preview.dataset.screen = point.screen;
         preview.setAttribute("aria-hidden","true");
         const source = point.screen === "research" ? field?.start.image : sceneImage(data.projects);
+        let decoding;
         const show = () => {
-          if (source) preview.style.setProperty("--projection",'url("'+new URL(source,document.baseURI).href+'")');
+          if (!source || reduced.matches) return;
+          if (!decoding) {
+            const image = new Image();
+            image.src = source;
+            decoding=image.decode().then(() => {
+              preview.style.setProperty("--projection",'url("'+new URL(source,document.baseURI).href+'")');
+              preview.dataset.ready = "";
+            }).catch(() => { decoding=undefined; });
+          }
           preview.dataset.lit = "";
         };
         const hide = () => { delete preview.dataset.lit; };

@@ -104,7 +104,16 @@ Horizontal widescreen 16:9, cinematic premium anime 3D environment concept art f
 场景以 1672 × 941 的 ImageGen 关键帧为底，压缩为 WebP。网页按画面内的实际物件定位入口。工作台主屏、研究台和项目放映墙的灯光使用独立动画层，自叙帖的放映窗使用站内短片。
 
 - `station-workshop.webp` 选用工作台的第二次构图。将戴蓝色眼镜的程序员置于右侧，左侧和中央留出三个无遮挡的透明屏幕，桌上放小机器人，从狭长窗缝引入傍晚斜光。
+- `station-workshop-portrait.webp` 是以横版工作台为参考重构的竖幅镜头，ImageGen 原生尺寸 941 × 1672。手机竖屏使用该图及独立的屏幕、机器人入口坐标。欢迎语及自叙帖标题由网页渲染。
+- `personal-space-project-current.webp` 取自 1440 × 870 的工作台浏览器实屏，用于项目库展示当前版本。
 - `station-atlas.webp` 是站内航图底图，以当前实时三维观测站的实屏为结构参考制作。输出 1672 × 941，转换为 WebP。舱室节点、连线与选中状态在网页上绘制。
+
+<details>
+<summary>竖幅工作台的 ImageGen 提示词</summary>
+
+Create a new VERTICAL 9:16 animated science-fiction game environment still, intended as the mobile camera of the exact widescreen scene in the reference. Imagine stepping back behind the young male programmer and lifting the virtual camera so the character, four interfaces, pet robot and coastal observatory read clearly in a single tall composition. Retain the recognizable anime character with dark tousled hair, luminous slim cobalt blue eyeglasses, black technical jacket and seated hands over keyboard, recognizable curved brushed titanium C-shaped table with bronze edges, crystalline stone walls, amber evening sunlight through a narrow opening and blue-white interior architecture. Shot from behind and to his right. Art direction is premium hand-illustrated cinematic 3D anime game, physically shaded metals and glass, sharp high detail, rich deliberate accents, same world and artist as reference. Composition very important: top 0%-18% mostly scenic station architecture. Put a small sea-green physical navigation monitor at x27%, y30%, and a small violet physical work monitor at x73%, y30%, each a visible complete frame. Put a SINGLE broad horizontal amber-edged main glass screen at x47%, y49%, with its clean inner display occupying x12%–82% and y39%–59%; its blank interior is DARK warm smoked brown so live Chinese text can be added later with code. Both side screens above this main screen, and no accessory obstructs any screen. Put the seated man in the lower RIGHT foreground (head starts BELOW y61%, body from y68% down), large enough to recognize clearly, seen in profile from behind, looking at the monitors with blue eyeglasses catching light, hands plausible clean on well-lit keyboard around x46%, y71%. Put a small rounded ivory robot beside the keyboard at LEFT near x22%, y69%, with a dark inset glowing face, unobscured. Depth cues and clustered blue instrumentation far in background; clean surfaces, no overlaid interface, blooms restrained. NO text, words, numerals, watermark, borders or recreated browser. Portrait native composition with important features in the middle 85% of width, no composited two-panel layouts.
+
+</details>
 
 <details>
 <summary>站内航图的 ImageGen 提示词</summary>
