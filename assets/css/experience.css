@@ -26,16 +26,16 @@ button { cursor: pointer; }
   width: max(103vw,183.02dvh); height: max(103dvh,57.97vw);
   translate: calc(-50% + var(--look-x,0px)) calc(-50% + var(--look-y,0px));
   transform: scale(1); transform-origin: var(--focus-x,50%) var(--focus-y,50%);
-  transition: translate 510ms var(--ease);
 }
-.scene[data-dragging] .plate { transition: none; }
-.scene[data-arriving] .plate { animation: arrive 600ms var(--ease) both; }
+.scene[data-panning]:not([data-dragging]) .plate { transition: translate 510ms var(--ease); }
+.scene[data-arriving] .plate { animation: arrive 388ms var(--ease) both; }
 .scene[data-departing] .plate {
   transform-origin: var(--departure-x,var(--focus-x,50%)) var(--departure-y,var(--focus-y,50%));
   animation: depart 490ms cubic-bezier(.35,.03,.9,.42) both;
 }
 #experience[data-boot] .scene[data-active] .plate { animation: arrival-shot 2.25s cubic-bezier(.19,.68,.23,1) both; }
 #experience[data-cut] .scene { transition: none; }
+#experience[data-cut] .scene[data-active] { pointer-events: none; }
 @keyframes arrive { from { transform: scale(1.045); } to { transform: scale(1); } }
 @keyframes depart { from { transform: scale(1); } to { transform: scale(1.3); } }
 @keyframes arrival-shot { from { transform: scale(1.12); filter: brightness(.68); } to { transform: scale(1); filter: brightness(1); } }
@@ -215,7 +215,18 @@ button { cursor: pointer; }
 .scene-location { display: grid; gap: 1px; padding-inline-start: 12px; border-inline-start: 1px solid var(--accent); text-shadow: 0 2px 7px #050a10; }
 .scene-location span { font-size: 10px; color: #dbe3e5; letter-spacing: .18em; }
 .scene-location strong { font-size: clamp(18px,2.5vw,30px); font-family: "Songti SC",SimSun,serif; line-height: 1.15; }
-.scene-buttons { display: flex; align-items: center; gap: 5px; pointer-events: auto; }
+.scene-buttons { position: relative; display: flex; align-items: center; gap: 5px; pointer-events: auto; }
+.view-track {
+  position: absolute; right: 6px; left: 6px; top: -8px; height: 1px;
+  background: #d1e5eb63; opacity: 0; pointer-events: none; transition: opacity 250ms;
+}
+#experience[data-view-travel]:not([data-cut]) .view-track { opacity: 1; }
+.view-track i {
+  position: absolute; left: clamp(7px,var(--view-travel,50%),calc(100% - 7px)); top: 0;
+  width: 14px; height: 2px; translate: -50% -25%; background: var(--accent);
+  box-shadow: 0 0 8px var(--accent); transition: left 380ms var(--ease);
+}
+#experience:has(.scene[data-dragging]) .view-track i { transition: none; }
 .scene-buttons button, .visor-head button {
   display: inline-flex; align-items: center; justify-content: center; gap: 6px;
   min-height: 44px; min-width: 44px; padding: 4px 12px;
@@ -228,7 +239,7 @@ button { cursor: pointer; }
 .scene-buttons button:disabled { opacity: .42; cursor: default; }
 .shutter {
   z-index: 3; pointer-events: none; opacity: 0; overflow: hidden;
-  background: radial-gradient(ellipse at var(--cut-x,50%) var(--cut-y,50%),color-mix(in srgb,var(--accent) 31%,#101a22),transparent 44%),#101a22;
+  background: radial-gradient(ellipse at var(--cut-x,50%) var(--cut-y,50%),color-mix(in srgb,var(--transfer-light,var(--accent)) 31%,#101a22),transparent 44%),#101a22;
 }
 .field-note {
   position: absolute; z-index: 4; left: var(--edge); bottom: max(77px,calc(var(--edge) + 52px));
@@ -268,27 +279,27 @@ button { cursor: pointer; }
 #experience[data-transit="projects"] { --transit-image: url("../img/universe-tunnel-projects.webp"); }
 #experience[data-transit="collection"] { --transit-shadow: #2a181dc8; }
 #experience[data-transit="research"] { --transit-shadow: #071e24c8; }
-#experience[data-cut] .shutter { animation: passage-cut 690ms var(--ease) both; }
-#experience[data-cut] .passage { animation: passage-flight 690ms cubic-bezier(.44,.13,.69,.95) both; }
+#experience[data-cut] .shutter { animation: passage-cut var(--transfer-duration,780ms) var(--ease) both; }
+#experience[data-cut] .passage { animation: passage-flight var(--transfer-duration,780ms) cubic-bezier(.44,.13,.69,.95) both; }
 .passage::after {
   content: ""; position: absolute; inset: 0;
-  background: radial-gradient(ellipse 42% 27% at 50% 49%,color-mix(in srgb,var(--accent) 26%,transparent),transparent 84%);
+  background: radial-gradient(ellipse 42% 27% at 50% 49%,color-mix(in srgb,var(--transfer-light,var(--accent)) 26%,transparent),transparent 84%);
   mix-blend-mode: screen; opacity: 0;
 }
-#experience[data-cut] .passage::after { animation: passage-light 690ms ease-out; }
+#experience[data-cut] .passage::after { animation: passage-light var(--transfer-duration,780ms) ease-out; }
 @keyframes passage-light { 0%,100% { opacity: 0; } 52% { opacity: .52; } }
 @keyframes passage-cut {
-  0%,5% { opacity: 1; clip-path: circle(0 at var(--cut-x,50%) var(--cut-y,50%)); }
-  37%,59% { opacity: 1; clip-path: circle(148vmax at 50% 50%); }
-  100% { opacity: 1; clip-path: circle(0 at 50% 50%); }
+  0%,5% { opacity: 1; clip-path: polygon(var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point),var(--cut-point)); }
+  38%,55% { opacity: 1; clip-path: polygon(-9% -11%,109% -11%,111% -8%,111% 108%,109% 111%,-9% 111%,-11% 108%,-11% -8%); }
+  100% { opacity: 0; clip-path: polygon(-9% -11%,109% -11%,111% -8%,111% 108%,109% 111%,-9% 111%,-11% 108%,-11% -8%); }
 }
 @keyframes passage-flight { from { transform: scale(1); filter: brightness(.5); } to { transform: scale(1.75); filter: brightness(1); } }
-#experience[data-cut][data-walk] .shutter { background: #332e28; animation-duration: 1060ms; }
+#experience[data-cut][data-walk] .shutter { background: #332e28; }
 #experience[data-cut][data-walk="left"] .shutter { animation-name: walk-left; --step-x: -5%; }
 #experience[data-cut][data-walk="right"] .shutter { animation-name: walk-right; --step-x: 5%; }
 #experience[data-cut][data-walk] .passage {
   background: var(--walk-image) var(--walk-focus,50% 56%) / cover; transform-origin: 50% 59%;
-  animation: walk-depth 1060ms cubic-bezier(.21,.58,.31,1) both;
+  animation: walk-depth var(--transfer-duration) cubic-bezier(.21,.58,.31,1) both;
 }
 #experience[data-cut][data-walk] .passage::after { animation: none; }
 #experience[data-cut][data-walk="left"] { --step-x: -3.6%; }

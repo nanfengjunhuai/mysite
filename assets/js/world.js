@@ -11,6 +11,13 @@
   const back = document.querySelector("#room-back");
   const controls = document.querySelector(".orbit-controls");
   const reader = document.querySelector("#world-journal");
+  const returnLink = document.querySelector(".world-return");
+  const interiorRoutes={desk:"工作台",story:"自叙帖",research:"研究室",projects:"项目库",collection:"收藏室",coast:"石拱岔路",harbor:"灯塔码头",ridge:"山脊观景台"};
+  const returnRoom = new URLSearchParams(location.search).get("return");
+  if (Object.hasOwn(interiorRoutes,returnRoom)) {
+    returnLink.href="experience.html#"+returnRoom;
+    returnLink.firstChild.textContent="返回"+interiorRoutes[returnRoom]+" ";
+  }
   const berthReader = document.querySelector("#world-berth");
   const berthImage = document.querySelector("#berth-image");
   const berthDetail = document.querySelector("#berth-detail");

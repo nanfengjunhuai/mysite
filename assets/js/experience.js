@@ -5,6 +5,7 @@
   const scenes = document.querySelector("#scenes");
   const visor = document.querySelector("#visor");
   const survey = document.querySelector("#coast-survey");
+  const atlas = document.querySelector("#station-atlas");
   const body = document.querySelector("#visor-content");
   const name = document.querySelector("#location-name");
   const kicker = document.querySelector("#location-kicker");
@@ -99,8 +100,16 @@
   let visorReturn = null;
   let requestedOrigin = null;
   const views = new Map();
+  const cameraKey="station-viewpoints";
+  let savedCameras={};
+  try {
+    const snapshot=JSON.parse(sessionStorage.getItem(cameraKey));
+    if (snapshot && typeof snapshot==="object" && !Array.isArray(snapshot)) savedCameras=snapshot;
+  } catch {}
   const sceneImage = scene => scene.src ?? "assets/img/station-" + scene.image + ".webp";
   const sceneCenter = room => portrait.matches && room.portrait ? room.portraitCenter : room.center;
+  const cameraFormat = () => portrait.matches ? "portrait" : "wide";
+  const delays={room:{swap:384,total:780},walk:{swap:510,total:1060}};
   document.querySelector("#owner").textContent = window.SITE_CONTENT.workroom.author;
 
   function fieldObservation(title,detail,origin=document.activeElement) {
@@ -362,14 +371,8 @@
       plate.append(exhibit);
     });
   }
-  function showAtlas() {
-    const rooms = ["desk","story","research","projects","collection"];
-    openVisor("舱室",...rooms.map(id => button(data[id].name + (id === active ? " · 当前位置" : " ↗"),() => {
-      if (id === active) visor.close();
-      else location.hash = id;
-    })),anchor("查看三维观测站 ↗","world.html"));
-  }
-  document.querySelector("#atlas").addEventListener("click",showAtlas);
+  window.createStationAtlas?.({dialog:atlas,trigger:document.querySelector("#atlas"),scenes:data,imageFor:sceneImage,
+    current:()=>active,navigate:id=>{ location.hash=id; }});
   if (location.protocol !== "file:") {
     fetch("content/collection-personal.json").then(response => response.ok ? response.json() : []).then(items => {
       if (!Array.isArray(items) || !items.length) return;
@@ -466,7 +469,12 @@
     if (id === "collection") arrangeExhibits(plate);
     frame.append(plate);
     scenes.append(frame);
-    const view = { frame,plate,image };
+    const stored=savedCameras[id];
+    const cameras={wide:0,portrait:0};
+    for (const mode of Object.keys(cameras)) {
+      if (Number.isFinite(stored?.[mode])) cameras[mode]=Math.max(-1,Math.min(1,stored[mode]));
+    }
+    const view = { frame,plate,image,cameras };
     views.set(id,view);
     return view;
   }
@@ -475,24 +483,34 @@
     const height = view.plate.offsetHeight;
     const maxX = Math.max(0,(width-stage.clientWidth)/2);
     const maxY = Math.max(0,(height-stage.clientHeight)/2);
-    const x = width*(.5-center[0])+delta;
+    const base=width*(.5-center[0]);
+    const x = Math.max(-maxX,Math.min(maxX,base+delta));
     const y = height*(.5-center[1]);
-    view.plate.style.setProperty("--look-x",Math.max(-maxX,Math.min(maxX,x)) + "px");
+    view.plate.style.setProperty("--look-x",x + "px");
     view.plate.style.setProperty("--look-y",Math.max(-maxY,Math.min(maxY,y)) + "px");
     view.plate.style.setProperty("--focus-x",center[0]*100+"%");
     view.plate.style.setProperty("--focus-y",center[1]*100+"%");
     left.disabled = x >= maxX-1;
     right.disabled = x <= -maxX+1;
+    stage.toggleAttribute("data-view-travel",maxX>29);
+    stage.style.setProperty("--view-travel",(maxX ? (maxX-x)/(2*maxX) : .5)*100+"%");
+    return x-base;
+  }
+  function restoreCamera() {
+    if (!active) return;
+    const room=data[active],view=views.get(active);
+    delete view.frame.dataset.panning;
+    const saved=view.cameras[cameraFormat()]*view.plate.offsetWidth;
+    offset=align(view,sceneCenter(room),saved);
   }
   function look(delta) {
-    if (!active) return;
+    if (!active || stage.hasAttribute("data-cut")) return;
     const room = data[active];
     const view = views.get(active);
-    const maxX = (view.plate.offsetWidth-stage.clientWidth)/2;
     const center=sceneCenter(room);
-    const base = view.plate.offsetWidth*(.5-center[0]);
-    offset = Math.max(-maxX-base,Math.min(maxX-base,offset+delta));
-    align(view,center,offset);
+    view.frame.dataset.panning="";
+    offset=align(view,center,offset+delta);
+    view.cameras[cameraFormat()]=offset/Math.max(1,view.plate.offsetWidth);
   }
   left.addEventListener("click",() => look(stage.clientWidth*.36));
   right.addEventListener("click",() => look(-stage.clientWidth*.36));
@@ -503,8 +521,8 @@
     if (bounds.right > stage.clientWidth-12 || bounds.left < 12) look(stage.clientWidth/2-bounds.left-bounds.width/2);
   });
   scenes.addEventListener("pointerdown",event => {
-    if (!event.isPrimary || event.button !== 0) return;
-    gesture = { id:event.pointerId,x:event.clientX,y:event.clientY,offset,active:false };
+    if (!active || stage.hasAttribute("data-cut") || !event.isPrimary || event.button !== 0) return;
+    gesture = { id:event.pointerId,x:event.clientX,y:event.clientY,offset,active:false,view:views.get(active) };
   });
   scenes.addEventListener("pointermove",event => {
     if (!gesture || gesture.id !== event.pointerId || !active) return;
@@ -522,7 +540,7 @@
     if (event.pointerId !== gesture?.id) return;
     if (gesture.active) {
       suppressUntil = performance.now()+250;
-      if (active) delete views.get(active).frame.dataset.dragging;
+      delete gesture.view.frame.dataset.dragging;
     }
     gesture = null;
   }
@@ -530,13 +548,22 @@
   scenes.addEventListener("click",event => {
     if (event.detail && performance.now()<suppressUntil) { event.preventDefault(); event.stopPropagation(); }
   },true);
-  window.addEventListener("resize",() => { if (active) look(0); });
-  portrait.addEventListener("change",()=>{
-    if (active && data[active].portrait) {
-      offset=0;
-      align(views.get(active),sceneCenter(data[active]));
-    }
+  window.addEventListener("resize",restoreCamera);
+  portrait.addEventListener("change",restoreCamera);
+  window.addEventListener("pagehide",()=>{
+    for (const [id,view] of views) savedCameras[id]=view.cameras;
+    try { sessionStorage.setItem(cameraKey,JSON.stringify(savedCameras)); } catch {}
   });
+
+  function clearTransfer() {
+    delete stage.dataset.cut;
+    delete stage.dataset.walk;
+    if (!active) return;
+    const current=views.get(active).frame;
+    delete current.dataset.departing;
+    delete current.dataset.arriving;
+    if (gesture) release({pointerId:gesture.id});
+  }
 
   async function openScene(id, moveFocus = false) {
     const step = ++navigation;
@@ -547,14 +574,11 @@
     closeFieldObservation();
     if (visor.open) visor.close();
     if (survey.open) survey.close();
-    if (active === id) {
-      delete stage.dataset.cut;
-      delete stage.dataset.walk;
-      delete next.frame.dataset.departing;
-      return;
-    }
+    if (atlas.open) atlas.close();
+    clearTransfer();
+    if (active === id) return;
     const arrivingFrom=active;
-    let walking=false;
+    let timing;
     if (active && id !== active && !reduced.matches) {
       const path=pathBetween(active,id);
       const walk=prepareWalk(path?.route);
@@ -563,26 +587,28 @@
       if (step !== navigation) return;
       const current = views.get(active);
       delete stage.dataset.boot;
-      delete stage.dataset.cut;
-      delete stage.dataset.walk;
       await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
       if (step !== navigation) return;
       stage.style.setProperty("--cut-x",(origin?.x ?? .5)*100+"%");
       stage.style.setProperty("--cut-y",(origin?.y ?? .5)*100+"%");
+      stage.style.setProperty("--cut-point",(origin?.x ?? .5)*100+"% "+(origin?.y ?? .5)*100+"%");
       const departure=origin?.at ?? sceneCenter(data[active]);
       current.plate.style.setProperty("--departure-x",departure[0]*100+"%");
       current.plate.style.setProperty("--departure-y",departure[1]*100+"%");
       current.frame.dataset.departing = "";
       stage.dataset.transit = id;
+      timing=delays.room;
+      stage.style.setProperty("--transfer-light",data[id].color);
       if (path && (walk?.image.naturalWidth || next.image.naturalWidth)) {
-        walking=true;
+        timing=delays.walk;
         stage.dataset.walk=path.direction;
         const source=walk?.image.naturalWidth?path.route.approach:next.image.currentSrc;
         stage.style.setProperty("--walk-image",'url("'+new URL(source,document.baseURI).href+'")');
         stage.style.setProperty("--walk-focus",walk?.image.naturalWidth?(path.route.approachCrop ?? "50% 56%"):"50% 50%");
       }
+      stage.style.setProperty("--transfer-duration",timing.total+"ms");
       stage.dataset.cut = "";
-      await new Promise(resolve => setTimeout(resolve,walking?510:370));
+      await new Promise(resolve => setTimeout(resolve,timing.swap));
     }
     if (step !== navigation) return;
     if (active && active !== id) {
@@ -597,34 +623,31 @@
     if (id === "research") window.prepareCoastSurvey?.();
     if (id === "coast" && !reduced.matches) field.routes.forEach(prepareWalk);
     if (field?.routes.some(route=>route.id===id)) visited.add(id);
-    offset = 0;
     const room = data[id];
-    align(next,sceneCenter(room));
+    restoreCamera();
     next.frame.inert = false;
     next.frame.dataset.active = "";
-    if (moveFocus && !reduced.matches) next.frame.dataset.arriving = "";
+    if (timing) next.frame.dataset.arriving = "";
     stage.dataset.scene = id;
     stage.style.setProperty("--accent",room.color);
     name.textContent = room.name;
     kicker.textContent = ["coast","harbor","ridge"].includes(id) ? "海岸城" : "观测站";
-    if (moveFocus) document.querySelector(".home").focus({preventScroll:true});
+    if (moveFocus) name.focus({preventScroll:true});
     const recall=id === "coast" && field?.routes.some(route=>route.id===arrivingFrom);
     const showRecall=()=>{
       if (recall && fieldNote.hidden) fieldObservation("石拱岔路",visited.size===field.routes.length?field.compared:field.revisit);
     };
-    if (walking) setTimeout(()=>{
+    if (timing) setTimeout(()=>{
       if (step !== navigation) return;
-      delete next.frame.dataset.arriving;
-      delete stage.dataset.walk;
-      delete stage.dataset.cut;
+      clearTransfer();
       showRecall();
-    },560);
+    },timing.total-timing.swap+34);
     else showRecall();
   }
   const route = () => Object.hasOwn(data,location.hash.slice(1)) ? location.hash.slice(1) : "desk";
   window.addEventListener("hashchange",() => openScene(route(),true));
   window.addEventListener("keydown",event => {
-    if (survey.open) return;
+    if (survey.open || atlas.open) return;
     if (event.key === "Escape" && !visor.open) {
       if (!fieldNote.hidden) closeFieldObservation(true);
       else if (active === "coast") location.hash="research";

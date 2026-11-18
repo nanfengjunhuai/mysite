@@ -15,6 +15,7 @@
   <link rel="stylesheet" href="assets/css/experience.css">
   <link rel="stylesheet" href="assets/css/arrival.css">
   <link rel="stylesheet" href="assets/css/survey.css">
+  <link rel="stylesheet" href="assets/css/atlas.css">
   <link rel="preload" href="assets/img/station-workshop.webp" as="image">
   <script defer src="content/site.js"></script>
   <script defer src="content/notes.js"></script>
@@ -24,6 +25,7 @@
   <script defer src="content/robotics-study.js"></script>
   <script defer src="assets/js/robotics-study.js"></script>
   <script defer src="assets/js/survey.js"></script>
+  <script defer src="assets/js/atlas.js"></script>
   <script defer src="assets/js/experience.js"></script>
   <script defer src="assets/js/arrival.js"></script>
 </head>
@@ -58,10 +60,11 @@
       <a class="home" href="#desk" aria-label="李银的个人空间，回工作台"><span class="orbit-mark" aria-hidden="true"></span><span><strong lang="en">My Personal Space</strong><small id="owner">李银</small></span></a>
     </header>
     <footer class="scene-controls">
-      <div class="scene-location" aria-live="polite"><span id="location-kicker">观测站</span><strong id="location-name">工作台</strong></div>
+      <div class="scene-location" aria-live="polite"><span id="location-kicker">观测站</span><strong id="location-name" tabindex="-1">工作台</strong></div>
       <div class="scene-buttons">
+        <div class="view-track" aria-hidden="true"><i></i></div>
         <button type="button" id="look-left" class="look" aria-label="向左看">‹</button>
-        <button type="button" id="atlas" aria-haspopup="dialog"><span aria-hidden="true">◇</span> 舱室</button>
+        <button type="button" id="atlas" aria-haspopup="dialog" aria-controls="station-atlas"><span aria-hidden="true">◇</span> 航图</button>
         <button type="button" id="look-right" class="look" aria-label="向右看">›</button>
       </div>
     </footer>
@@ -73,6 +76,20 @@
       <form method="dialog"><button type="submit" aria-label="关闭">×</button></form>
     </div>
     <div id="visor-content" class="visor-content"></div>
+  </dialog>
+  <dialog id="station-atlas" aria-labelledby="station-atlas-title">
+    <header class="atlas-header">
+      <div><span id="atlas-location"></span><h2 id="station-atlas-title">站内航图</h2></div>
+      <form method="dialog"><button type="submit" aria-label="关闭航图">×</button></form>
+    </header>
+    <div class="atlas-layout">
+      <div class="atlas-map" role="group" aria-label="观测站舱室"></div>
+      <section class="atlas-preview" aria-labelledby="atlas-room-name">
+        <div class="atlas-window"><img alt="" decoding="async"><span class="atlas-indicator" aria-hidden="true"></span></div>
+        <div class="atlas-room-info"><div><h3 id="atlas-room-name"></h3><p></p></div><button type="button" id="atlas-enter">进入</button></div>
+        <a class="atlas-orbit" href="world.html">观察站体外部 <span aria-hidden="true">↗</span></a>
+      </section>
+    </div>
   </dialog>
   <dialog id="coast-survey" aria-labelledby="survey-title">
     <div class="survey-viewport">

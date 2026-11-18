@@ -104,6 +104,14 @@ Horizontal widescreen 16:9, cinematic premium anime 3D environment concept art f
 场景以 1672 × 941 的 ImageGen 关键帧为底，压缩为 WebP。网页按画面内的实际物件定位入口。工作台主屏、研究台和项目放映墙的灯光使用独立动画层，自叙帖的放映窗使用站内短片。
 
 - `station-workshop.webp` 选用工作台的第二次构图。将戴蓝色眼镜的程序员置于右侧，左侧和中央留出三个无遮挡的透明屏幕，桌上放小机器人，从狭长窗缝引入傍晚斜光。
+- `station-atlas.webp` 是站内航图底图，以当前实时三维观测站的实屏为结构参考制作。输出 1672 × 941，转换为 WebP。舱室节点、连线与选中状态在网页上绘制。
+
+<details>
+<summary>站内航图的 ImageGen 提示词</summary>
+
+Cinematic visual for a premium hard-science-fiction video game navigation display. 1672x941 widescreen, dark slate gradient deep space behind one single mature asymmetrical orbital research station with a broad inclined hollow habitat ring enclosing a narrow asymmetric industrial spine, a glass observation dome, two solar radiator fins and a docking collar, viewed in almost orthographic frontal three-quarter perspective. Use the supplied original screenshot strictly as reference for the station structure. Create a polished technical visualization or backlit engineering drawing for an in-world navigation atlas, not another viewport screenshot. Metallic wireframe contours, extremely fine subdued desaturated teal-blue tracing over graphite metallic construction and low opacity cyan architectural planes, restrained antique amber tiny docking indication lamps. Main station silhouette is centered within a square area near center of the wide frame, occupying about 70 percent height, quiet visual contrast so separately overlaid labels are easy to read. Large empty dark edge areas, no stars except rare tiny points. No typography of any kind, no numbers, no titles, no cards, no reticles, no buttons, no HUD, no logo, no watermark. Industrial precision, almost monochromatic slate ink and low-key cyan, subtle film grain without blur. Widescreen landscape.
+
+</details>
 
 <details>
 <summary>自叙帖的 ImageGen 提示词</summary>

@@ -1,0 +1,109 @@
+#station-atlas {
+  --atlas-light: #edc998;
+  position: fixed; width: min(1100px,calc(100% - 28px)); max-width: none; max-height: calc(100dvh - 22px);
+  padding: 0; overflow: auto; color: #edf7f3; background: #101b22;
+  border: 1px solid #89a8ad97; border-radius: 5px 19px 5px 19px;
+  box-shadow: 0 25px 105px #030811c9;
+}
+#station-atlas::backdrop { background: #081018bb; backdrop-filter: blur(8px); }
+#station-atlas[open] { animation: atlas-arrival 300ms cubic-bezier(.23,.7,.3,1) both; }
+@keyframes atlas-arrival {
+  from { opacity: .55; transform: translateY(6px) scale(.992); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.atlas-header {
+  display: flex; justify-content: space-between; align-items: flex-start; gap: 12px;
+  padding: clamp(15px,2.6vw,29px) clamp(16px,3vw,34px) clamp(12px,2vw,23px);
+  background: linear-gradient(135deg,#273841,#111c22 63%); border-bottom: 1px solid #607b808f;
+}
+.atlas-header span { color: #c4ddda; font-size: 11px; letter-spacing: .11em; }
+.atlas-header h2 { margin: 4px 0 0; font: 600 clamp(24px,3.25vw,42px)/1.12 "Songti SC",SimSun,serif; }
+.atlas-header button,.atlas-room-info button {
+  min-width: 44px; min-height: 44px; border: 1px solid #a4c3c38c; color: #edf7f2;
+  border-radius: 4px 9px 4px 9px; background: #19272e; padding: 4px 11px;
+}
+.atlas-header button { font-size: 24px; }
+.atlas-header button:hover { background: #34494f; }
+.atlas-layout { display: grid; grid-template-columns: minmax(0,1.42fr) minmax(270px,1fr); min-height: clamp(260px,58dvh,475px); }
+.atlas-map {
+  position: relative; isolation: isolate; min-width: 0;
+  background: radial-gradient(ellipse at 49% 54%,#173e4570,transparent 62%),#0c181e;
+  border-inline-end: 1px solid #526c744a;
+}
+.atlas-map::before {
+  content: ""; position: absolute; z-index: -1; inset: 0;
+  background: radial-gradient(ellipse at center,transparent 20%,#0a171ded),url("../img/station-atlas.webp") center / cover;
+  opacity: .93; pointer-events: none;
+}
+.atlas-map::after {
+  content: ""; position: absolute; z-index: -1; inset: 0; pointer-events: none;
+  background: linear-gradient(#c0f6e51a 1px,transparent 1px),linear-gradient(90deg,#c0f6e51a 1px,transparent 1px);
+  background-size: 39px 39px; mask-image: radial-gradient(ellipse,transparent 8%,#000 66%,transparent 94%);
+}
+.atlas-link {
+  position: absolute; left: min(var(--base-x),var(--pin-x)); top: min(var(--base-y),var(--pin-y));
+  width: calc(max(var(--base-x),var(--pin-x)) - min(var(--base-x),var(--pin-x)));
+  height: calc(max(var(--base-y),var(--pin-y)) - min(var(--base-y),var(--pin-y)));
+  border: 0 solid #a6d2cd69; pointer-events: none;
+}
+.atlas-link[data-side="left"] { border-left-width: 1px; }
+.atlas-link[data-side="right"] { border-right-width: 1px; }
+.atlas-link[data-vertical="upper"] { border-bottom-width: 1px; }
+.atlas-link[data-vertical="lower"] { border-top-width: 1px; }
+.atlas-link[data-selected] { border-color: var(--atlas-light); filter: drop-shadow(0 0 5px var(--atlas-light)); }
+.atlas-node {
+  position: absolute; left: var(--pin-x); top: var(--pin-y); transform: translate(-50%,-50%);
+  display: inline-flex; align-items: center; gap: 7px; min-height: 44px; padding: 5px 12px;
+  border: 1px solid #7dadaa9b; border-radius: 3px 10px 3px 10px;
+  color: #e8f9f0; background: #10222be7; white-space: nowrap; font-size: 13px;
+  box-shadow: 0 4px 14px #03090c9e;
+}
+.atlas-node::before {
+  content: ""; width: 7px; height: 7px; transform: rotate(45deg);
+  border: 1px solid #b9e5df; background: #173d43;
+}
+.atlas-node[aria-current="location"]::before { border-color: #d3fae1; background: #bcf2d2; }
+.atlas-node[aria-pressed="true"] {
+  color: #f9f6e7; border-color: var(--atlas-light);
+  background: linear-gradient(140deg,#30404a,#212626); box-shadow: 0 8px 20px #02090eb0,0 0 14px color-mix(in srgb,var(--atlas-light) 36%,transparent);
+}
+.atlas-node:hover { border-color: #e7eadd; }
+.atlas-preview { padding: clamp(12px,2vw,25px); display: grid; align-content: center; gap: 15px; min-width: 0; background: linear-gradient(155deg,#212e35,#0d171e 64%); }
+.atlas-window {
+  position: relative; overflow: hidden; aspect-ratio: 16/10;
+  border: 1px solid #79989aa3; border-radius: 3px 12px 3px 12px; background: #182a30;
+}
+.atlas-window img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.atlas-window::after {
+  content:""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(0deg,#0b171c8c,transparent 30%); box-shadow: inset 0 0 18px #0a171a66;
+}
+.atlas-indicator {
+  position: absolute; z-index: 1; bottom: 12px; left: 13px; width: 27px; height: 2px;
+  background: var(--atlas-light); box-shadow: 0 0 11px var(--atlas-light);
+}
+.atlas-room-info { display: flex; justify-content: space-between; align-items: center; gap: 11px; }
+.atlas-room-info h3 { margin: 0; color: var(--atlas-light); font: 620 clamp(21px,2.5vw,32px)/1.18 "Songti SC",SimSun,serif; }
+.atlas-room-info p { margin: 5px 0 0; color: #d2dedf; font-size: 12px; line-height: 1.6; }
+.atlas-room-info button { flex-shrink: 0; font-size: 13px; border-color: var(--atlas-light); background: #2a312d; }
+.atlas-room-info button:hover { background: #484b39; }
+.atlas-orbit {
+  display: inline-flex; min-height: 44px; align-items: center; justify-self: start;
+  gap: 12px; border-top: 1px solid #63807f5e; color: #c3dfdc; text-decoration: none; font-size: 13px;
+}
+.atlas-orbit:hover { color: #fff1d5; }
+@media (max-width: 680px) and (orientation: portrait) {
+  .atlas-layout { grid-template-columns: 1fr; min-height: 0; }
+  .atlas-map { min-height: clamp(205px,34dvh,305px); border-inline-end: 0; border-bottom: 1px solid #526c7466; }
+  .atlas-preview { gap: 9px; padding: 11px 15px 6px; }
+  .atlas-window { aspect-ratio: 16/7; }
+  .atlas-orbit { min-height: 44px; }
+  .atlas-node { padding-inline: 9px; font-size: 12px; }
+}
+@media (max-height: 490px) and (orientation: landscape) {
+  .atlas-header { padding: 9px 17px; }
+  .atlas-header h2 { font-size: 24px; }
+  .atlas-layout { grid-template-columns: minmax(0,1.48fr) minmax(220px,1fr); min-height: 230px; }
+  .atlas-preview { gap: 7px; padding: 9px 15px 3px; }
+  .atlas-window { aspect-ratio: 16/7; }
+}
