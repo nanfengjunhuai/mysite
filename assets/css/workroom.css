@@ -72,10 +72,8 @@ h1, h2, p { margin: 0; }
 .workroom-scene[data-pan] { touch-action: pan-y pinch-zoom; }
 .workroom-scene[data-pan][data-phase="ready"] .workroom-stage { cursor: grab; }
 .workroom-scene[data-dragging] .workroom-stage { cursor: grabbing; }
-.workroom-poster, .workroom-film, .room-ports { position: absolute; inset: 0; width: 100%; height: 100%; }
-.workroom-poster, .workroom-film { object-fit: fill; display: block; }
-.workroom-film { visibility: hidden; }
-[data-phase="playing"] .workroom-film { visibility: visible; }
+.workroom-poster, .room-ports { position: absolute; inset: 0; width: 100%; height: 100%; }
+.workroom-poster { object-fit: fill; display: block; }
 .workroom-practicals {
   position: absolute; inset: 0; pointer-events: none; display: none;
 }

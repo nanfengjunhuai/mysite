@@ -1,7 +1,6 @@
 (() => {
   const scene = document.querySelector("#scene");
   const desk = document.querySelector("#desk");
-  const opening = document.querySelector("#opening");
   const ports = document.querySelector("#ports");
   const stage = document.querySelector(".workroom-stage");
   const viewControls = document.querySelector("#view-controls");
@@ -71,8 +70,6 @@
   document.querySelector("#accessible-intro").textContent = intro;
   let current = "";
   let transitionFrame = 0;
-  let mediaAttempt = 0;
-  let mediaTimeout;
   let typingTimeout;
   let audioContext;
   let keyNoise;
@@ -204,9 +201,7 @@
   }
 
   function syncPageAudio() {
-    const foreground = pageIsForeground();
-    opening.muted = !audioOn || !foreground || desk.hidden;
-    if (!foreground) storyFilmPlayer.pause();
+    if (!pageIsForeground()) storyFilmPlayer.pause();
   }
 
   window.addEventListener("focus", () => { pageFocused = true; syncPageAudio(); });
@@ -221,50 +216,10 @@
 
   function finishOpening() {
     const animateArrival = !reduced.matches && !desk.hidden && !urlRoom() && scene.dataset.phase !== "ready";
-    mediaAttempt += 1;
-    clearTimeout(mediaTimeout);
-    window.workroomOpening.stop();
-    opening.pause();
     scene.dataset.phase = "ready";
     if (animateArrival) scene.dataset.arrival = "";
     ports.inert = false;
     syncPageAudio();
-  }
-
-  function playOpening() {
-    if (reduced.matches) {
-      finishOpening();
-      return;
-    }
-    const attempt = ++mediaAttempt;
-    scene.dataset.phase = "loading";
-    ports.inert = true;
-    syncPageAudio();
-    opening.currentTime = 0;
-    let revealed = false;
-    let ended = false;
-    const reveal = () => {
-      if (attempt !== mediaAttempt) return;
-      revealed = true;
-      if (ended) finishOpening();
-    };
-    clearTimeout(mediaTimeout);
-    mediaTimeout = setTimeout(() => {
-      if (attempt === mediaAttempt) finishOpening();
-    }, 3350);
-    window.workroomOpening.play(reveal);
-    opening.play().then(() => {
-      if (attempt === mediaAttempt) scene.dataset.phase = "playing";
-    }).catch(() => {
-      if (attempt !== mediaAttempt) return;
-      ended = true;
-      if (revealed) finishOpening();
-    });
-    opening.onended = opening.onerror = () => {
-      if (attempt !== mediaAttempt) return;
-      ended = true;
-      if (revealed) finishOpening();
-    };
   }
 
   ports.addEventListener("animationend", (event) => {
@@ -1111,7 +1066,6 @@
 
   const initial = urlRoom();
   layoutDesk();
-  if (initial || reduced.matches) finishOpening();
+  finishOpening();
   if (initial) showRoom(initial, false);
-  else if (!reduced.matches) playOpening();
 })();

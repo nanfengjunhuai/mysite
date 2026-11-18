@@ -6,9 +6,12 @@
   <title>My Personal Space</title>
   <meta name="description" content="李银的个人空间。由工作台进入研究室、项目库和自叙帖。">
   <script>
-    const rooms = ["", "#desk", "#story", "#research", "#projects", "#collection", "#coast", "#harbor", "#ridge"];
-    const entry = location.hash.startsWith("#relay-") ? "nearshore.html" : rooms.includes(location.hash) ? "experience.html" : "workroom.html";
-    location.replace(entry + location.search + location.hash);
+    const rooms = ["#desk", "#story", "#research", "#projects", "#collection", "#coast", "#harbor", "#ridge"];
+    const archived = ["#research/field", "#research/robotics"].includes(location.hash);
+    const relay = location.hash.startsWith("#relay-");
+    const entry = relay ? "nearshore.html" : archived ? "workroom.html" : "experience.html";
+    const hash = relay || archived || rooms.includes(location.hash) ? location.hash : "";
+    location.replace(entry + location.search + hash);
   </script>
 </head>
 <body>

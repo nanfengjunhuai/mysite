@@ -6,9 +6,15 @@
   <meta name="color-scheme" content="dark">
   <title>My Personal Space</title>
   <meta name="description" content="李银的个人空间。由工作台进入研究室、项目库和自叙帖。">
+  <script>
+    if (!["#research/field", "#research/robotics"].includes(location.hash)) {
+      const rooms = ["#desk", "#story", "#research", "#projects", "#collection", "#coast", "#harbor", "#ridge"];
+      const hash = rooms.includes(location.hash) ? location.hash : "";
+      location.replace("experience.html" + location.search + hash);
+    }
+  </script>
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/workroom.css?v=research-screen">
-  <link rel="stylesheet" href="assets/css/workroom-opening.css">
+  <link rel="stylesheet" href="assets/css/workroom.css?v=archive">
   <link rel="stylesheet" href="assets/css/field-study.css">
   <link rel="stylesheet" href="assets/css/project-bay.css">
   <link rel="stylesheet" href="assets/css/story-room.css">
@@ -25,8 +31,7 @@
   <script defer src="content/collection.js"></script>
   <script defer src="assets/js/robotics-study.js"></script>
   <script defer src="assets/js/project-bay.js"></script>
-  <script defer src="assets/js/workroom-opening.js"></script>
-  <script defer src="assets/js/workroom.js"></script>
+  <script defer src="assets/js/workroom.js?v=archive"></script>
   <script defer src="assets/js/scene-motion.js"></script>
 </head>
 <body>
@@ -40,7 +45,6 @@
         <h1 class="workroom-signature" lang="en"><span id="desk-title">My Personal Space</span></h1>
         <div class="workroom-stage">
           <img class="workroom-poster" src="assets/img/workroom-settled.webp" width="1248" height="704" alt="傍晚的动漫工作室。程序员坐在悬臂桌前打字，三块显示器亮着，右侧有一个小机器人。" fetchpriority="high">
-          <video class="workroom-film" id="opening" muted playsinline preload="auto" aria-hidden="true" disablepictureinpicture src="assets/video/workroom-opening.mp4"></video>
           <div class="workroom-practicals" aria-hidden="true">
             <span class="workroom-robot-light"></span>
             <svg class="desk-projection" viewBox="0 0 1248 704" preserveAspectRatio="none">
@@ -102,17 +106,6 @@
               <span class="screen-signal" aria-hidden="true"></span>
             </button>
           </div>
-        </div>
-        <div class="opening-optics" id="opening-optics" aria-hidden="true" hidden>
-          <canvas></canvas>
-          <div class="opening-channels">
-            <span>研究室</span><span>项目库</span><span>自叙帖</span><span>收藏室</span>
-          </div>
-          <div class="opening-optics-name">
-            <span>李银的个人空间</span>
-            <strong lang="en">My Personal Space</strong>
-          </div>
-          <span class="opening-optics-rule"></span>
         </div>
         <div class="view-controls" id="view-controls" role="group" aria-label="切换工作台视角" hidden>
           <div class="view-panorama" id="view-panorama" aria-hidden="true">

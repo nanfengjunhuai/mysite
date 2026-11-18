@@ -21,7 +21,7 @@ python -m http.server 8000
 - `content/world-models.js` 存放新版研究室的主题、公开案例和待做的回访测试。资料链接和实测记录应分别标明。
 - 图片、视频和声音放在 `assets/` 下对应的目录。替换媒体时同步更新引用它的相对路径。
 - `experience.html` 是观测站室内体验，热点与取景坐标在 `assets/js/experience.js` 的 `data` 中。航图节点坐标与预览描述在 `assets/js/atlas.js`。更换舱室图片后，需要按新图片的宽高比例重新确定热点坐标。美术素材说明见 `assets/img/SOURCES.md`。
-- `world.html` 是三维观测站，`workroom.html` 和 `nearshore.html` 是之前的入口版本。
+- `world.html` 是三维观测站。`workroom.html` 的常用入口会跳转到当前站点，旧专题深链接和 `nearshore.html` 继续保留。
 
 ## 本地走查
 

@@ -430,7 +430,7 @@
     document.title = personal ? project.title : `${project.title}｜${site.name}`;
     document.querySelector('meta[name="description"]').content = project.description;
     return `<div class="frame inner-page detail-page">
-      ${button(personal ? "返回项目库" : ui.backProjects, personal ? "workroom.html#projects" : "projects.html", "quiet", "arrow", "arrow-back")}
+      ${button(personal ? "返回项目库" : ui.backProjects, personal ? "experience.html#projects" : "projects.html", "quiet", "arrow", "arrow-back")}
       <article>
         <div class="project-lead">
           <header class="detail-heading">
@@ -518,7 +518,7 @@
     document.title = `${note.title}｜${personal ? site.workroom.title : site.name}`;
     document.querySelector('meta[name="description"]').content = note.summary;
     return `<div class="frame inner-page reading-page">
-      ${button(personal ? "返回自叙帖" : ui.backNotes, personal ? "workroom.html#story" : back, "quiet", "arrow", "arrow-back")}
+      ${button(personal ? "返回自叙帖" : ui.backNotes, personal ? "experience.html#story" : back, "quiet", "arrow", "arrow-back")}
       <article data-reading>
         <header class="article-heading">
           ${personal ? "" : `<p class="sample-label">${escape(ui.sample)}</p>`}
