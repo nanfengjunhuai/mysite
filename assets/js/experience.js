@@ -4,7 +4,6 @@
   const stage = document.querySelector("#experience");
   const scenes = document.querySelector("#scenes");
   const visor = document.querySelector("#visor");
-  const survey = document.querySelector("#coast-survey");
   const atlas = document.querySelector("#station-atlas");
   const body = document.querySelector("#visor-content");
   const name = document.querySelector("#location-name");
@@ -18,10 +17,11 @@
   const feature = notes.find(note => note.id === "cause-or-fate") ?? notes[0];
   const projects = window.SITE_PROJECTS.filter(project => !project.sample);
   const field = window.WORLD_FIELD_STUDY;
+  const study = window.WORLD_MODEL_STUDY;
   const walks = new Map();
   const visited = new Set();
   let fieldNoteOrigin;
-  const archive = [...window.SPACE_COLLECTION];
+  const archive = window.SPACE_COLLECTION.filter(item=>!item.sample);
   const data = {
     desk: {
       name: "工作台", image: "workshop", color: "#ffdaa7", center: [.53,.47],
@@ -44,16 +44,10 @@
       ]
     },
     research: {
-      name:"研究室", image:"research", color:"#bde9d8", center:[.50,.51],
+      name:"研究室", src:"assets/img/station-research-table.webp", color:"#bde9d8", center:[.50,.51],
       portraitCenter:[.456,.51],
-      alt:"研究室中央是一座海岸城地形模型，右侧放着机器人训练设备。",
-      points:[
-        { title:"海岸城", at:[.48,.56], action:() => {
-          if (window.openCoastSurvey) window.openCoastSurvey();
-          else location.hash="coast";
-        }, primary:true, style:"relief" },
-        { title:"机器人训练", at:[.776,.496], action:showRobotLab }
-      ]
+      alt:"海边研究室的玻璃展台，窗外是傍晚的海岸。",
+      points:[{title:study.title,at:[.43,.552],action:showWorldModels,primary:true,style:"research-console"}]
     },
     projects: {
       name:"项目库", image:"projects", color:"#dec6eb", center:[.49,.51],
@@ -305,17 +299,25 @@
   }
   document.addEventListener("visibilitychange",() => { if (document.hidden) stopReel(); });
   reduced.addEventListener("change",() => { if (reduced.matches) stopReel(); });
-  function showRobotLab() {
-    const controls = node("div",null,"visor-secondary");
-    controls.id = "robot-conditions";
-    const map = node("canvas");
-    map.id = "robot-map"; map.width = 660; map.height = 370;
-    map.setAttribute("role","img");
-    const result = node("strong"); result.id = "robot-result";
-    result.setAttribute("aria-live","polite");
-    const info = node("p"); info.id = "robot-note";
-    openVisor("机器人训练场",map,controls,result,info);
-    window.mountRobotStudy({ controls,map,result,note:info });
+  function showWorldModels() {
+    const lead=node("div",null,"research-lead");
+    lead.append(node("p",study.question,"research-question"),node("p",study.intro));
+    const cases=node("div",null,"research-cases");
+    for (const item of study.cases) {
+      const card=node("article",null,"research-case");
+      card.append(
+        node("h3",item.name),
+        node("p",item.focus,"research-focus"),
+        node("p",item.summary),
+        node("p",item.observation,"research-observation"),
+        anchor(item.sourceLabel+" ↗",item.source)
+      );
+      cases.append(card);
+    }
+    const next=node("section",null,"research-next");
+    next.append(node("h3",study.next.title),node("p",study.next.text),node("p",study.next.status,"research-status"));
+    openVisor(study.title,lead,cases,next);
+    visor.dataset.surface="research";
   }
   function showProject(project) {
     const cover = safeUrl(project.image?.url);
@@ -493,13 +495,14 @@
         target.append(greeting,prompt);
       }
       if (point.style === "display" && projects.length) target.append(node("span",projects[0].title,"display-title"));
+      if (point.style === "research-console") target.append(node("span",study.question,"research-console-question"));
       plate.append(target);
       if (point.screen) {
         target.dataset.deskScreen = point.screen;
         const preview = node("span",null,"desk-projection");
         preview.dataset.screen = point.screen;
         preview.setAttribute("aria-hidden","true");
-        const source = point.screen === "research" ? field?.start.image : sceneImage(data.projects);
+        const source = sceneImage(data[point.screen]);
         let decoding;
         const show = () => {
           if (!source || reduced.matches) return;
@@ -521,7 +524,6 @@
         plate.append(preview);
       }
       if (point.preview) mountReel(plate,target);
-      if (point.style==="relief") window.mountCoastProjection?.(frame,plate,image,target);
     }
     if (id === "collection") arrangeExhibits(plate);
     frame.append(plate);
@@ -630,7 +632,6 @@
     stopReel();
     closeFieldObservation();
     if (visor.open) visor.close();
-    if (survey.open) survey.close();
     if (atlas.open) atlas.close();
     clearTransfer();
     if (active === id) return;
@@ -677,7 +678,6 @@
     }
     active = id;
     fieldBack.hidden=id!=="coast";
-    if (id === "research") window.prepareCoastSurvey?.();
     if (id === "coast" && !reduced.matches) field.routes.forEach(prepareWalk);
     if (field?.routes.some(route=>route.id===id)) visited.add(id);
     const room = data[id];
@@ -704,7 +704,7 @@
   const route = () => Object.hasOwn(data,location.hash.slice(1)) ? location.hash.slice(1) : "desk";
   window.addEventListener("hashchange",() => openScene(route(),true));
   window.addEventListener("keydown",event => {
-    if (survey.open || atlas.open) return;
+    if (atlas.open) return;
     if (event.key === "Escape" && !visor.open) {
       if (!fieldNote.hidden) closeFieldObservation(true);
       else if (active === "coast") location.hash="research";

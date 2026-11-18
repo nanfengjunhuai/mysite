@@ -14,7 +14,6 @@
   <link rel="icon" href="assets/img/favicon.svg">
   <link rel="stylesheet" href="assets/css/experience.css">
   <link rel="stylesheet" href="assets/css/arrival.css">
-  <link rel="stylesheet" href="assets/css/survey.css">
   <link rel="stylesheet" href="assets/css/atlas.css">
   <link rel="preload" href="assets/img/station-workshop.webp" as="image" media="not all and (max-aspect-ratio: 4/5)">
   <link rel="preload" href="assets/img/station-workshop-portrait.webp" as="image" media="(max-aspect-ratio: 4/5)">
@@ -23,9 +22,7 @@
   <script defer src="content/projects.js"></script>
   <script defer src="content/collection.js"></script>
   <script defer src="content/field-study.js"></script>
-  <script defer src="content/robotics-study.js"></script>
-  <script defer src="assets/js/robotics-study.js"></script>
-  <script defer src="assets/js/survey.js"></script>
+  <script defer src="content/world-models.js"></script>
   <script defer src="assets/js/atlas.js"></script>
   <script defer src="assets/js/experience.js"></script>
   <script defer src="assets/js/arrival.js"></script>
@@ -89,31 +86,6 @@
         <div class="atlas-room-info"><div><h3 id="atlas-room-name"></h3><p></p></div><button type="button" id="atlas-enter">进入</button></div>
         <a class="atlas-orbit" href="world.html">观察站体外部 <span aria-hidden="true">↗</span></a>
       </section>
-    </div>
-  </dialog>
-  <dialog id="coast-survey" aria-labelledby="survey-title">
-    <div class="survey-viewport">
-      <canvas aria-hidden="true"></canvas>
-      <div class="survey-pins" aria-label="海岸城地标"></div>
-    </div>
-    <header class="survey-header">
-      <div><span>研究室</span><h2 id="survey-title">海岸城 · 地形观测</h2></div>
-      <form method="dialog"><button type="submit" class="survey-close" aria-label="关闭地形台，返回研究室" autofocus>×</button></form>
-    </header>
-    <div class="survey-dock">
-      <article class="survey-route" aria-labelledby="survey-route-name">
-        <div class="survey-route-media"><img alt="" decoding="async"></div>
-        <div class="survey-route-body">
-          <h3 id="survey-route-name" aria-live="polite"></h3>
-          <p></p>
-          <a id="survey-enter" href="#coast">进入路线 <span aria-hidden="true">↗</span></a>
-        </div>
-      </article>
-      <div class="survey-actions">
-        <button type="button" aria-label="向左转动地形" data-view="left">‹</button>
-        <a href="#coast">从石拱岔路出发</a>
-        <button type="button" aria-label="向右转动地形" data-view="right">›</button>
-      </div>
     </div>
   </dialog>
 </body>

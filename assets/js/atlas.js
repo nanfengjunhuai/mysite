@@ -4,7 +4,7 @@
   const layout = [
     {id:"desk", x:.49,y:.52,note:"从显示器进入各个舱室。"},
     {id:"story",x:.25,y:.32,note:"生活记录和夜空短片。"},
-    {id:"research",x:.72,y:.28,note:"海岸城地形台和机器人训练。"},
+    {id:"research",x:.72,y:.28,note:"世界模型与开放世界游戏的观察记录。"},
     {id:"projects",x:.75,y:.72,note:"在机房看作品及实现过程。"},
     {id:"collection",x:.24,y:.72,note:"收藏的影像、语录和资料。"}
   ];

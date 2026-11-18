@@ -9,6 +9,7 @@ window.SPACE_COLLECTION = [
   },
   {
     kind: "field",
+    sample: true,
     category: "站内演示",
     title: "海岸城",
     description: "走到灯塔或山脊，再回到同一个街角。",
@@ -16,6 +17,7 @@ window.SPACE_COLLECTION = [
   },
   {
     kind: "link",
+    sample: true,
     category: "外部资料",
     title: "仿真到真机",
     description: "Isaac Lab 官方教程里的机器人训练示例。",

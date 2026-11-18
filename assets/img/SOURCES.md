@@ -103,7 +103,7 @@ Horizontal widescreen 16:9, cinematic premium anime 3D environment concept art f
 
 场景以 1672 × 941 的 ImageGen 关键帧为底，压缩为 WebP。网页按画面内的实际物件定位入口。工作台主屏、研究台和项目放映墙的灯光使用独立动画层，自叙帖的放映窗使用站内短片。
 
-- `station-research-table.webp` 是以原研究室关键帧制作的空台底图。海岸城实时模型由 `assets/js/survey.js` 渲染，和可旋转地形台共用地形与步行路线。WebGL、底图不可用或系统开启减弱动效时，研究室显示原画 `station-research.webp`。
+- `station-research-table.webp` 是以原研究室关键帧制作的空台底图，公开研究室用它承载世界模型资料入口。旧版海岸城原画和地形渲染素材留在仓库。
 
 <details>
 <summary>研究室空台底图的 ImageGen 提示词</summary>
