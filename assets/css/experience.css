@@ -92,6 +92,8 @@ button { cursor: pointer; }
   78%,100% { background-position-y: 89%; opacity: 0; }
 }
 .scene[inert] .practical { animation-play-state: paused; }
+.scene[data-active]:has(.focus-point:is(:focus-visible,:hover)) .practical { filter: brightness(1.32); }
+.practical { transition: filter 280ms ease; }
 .focus-point {
   position: absolute; left: var(--x); top: var(--y); translate: -50% -50%; z-index: 2;
   width: clamp(46px,5.4dvh,62px); height: clamp(46px,5.4dvh,62px);
@@ -226,6 +228,13 @@ button { cursor: pointer; }
 #experience[data-transit="research"] { --transit-shadow: #071e24c8; }
 #experience[data-cut] .shutter { animation: passage-cut 690ms var(--ease) both; }
 #experience[data-cut] .passage { animation: passage-flight 690ms cubic-bezier(.44,.13,.69,.95) both; }
+.passage::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 42% 27% at 50% 49%,color-mix(in srgb,var(--accent) 26%,transparent),transparent 84%);
+  mix-blend-mode: screen; opacity: 0;
+}
+#experience[data-cut] .passage::after { animation: passage-light 690ms ease-out; }
+@keyframes passage-light { 0%,100% { opacity: 0; } 52% { opacity: .52; } }
 @keyframes passage-cut {
   0%,5% { opacity: 1; clip-path: circle(0 at var(--cut-x,50%) var(--cut-y,50%)); }
   37%,59% { opacity: 1; clip-path: circle(148vmax at 50% 50%); }

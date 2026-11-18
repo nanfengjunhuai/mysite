@@ -11,6 +11,7 @@
   <script defer src="content/site.js"></script>
   <script defer src="content/notes.js"></script>
   <script defer src="assets/vendor/three-r159.min.js"></script>
+  <script defer src="assets/img/observatory-textures.js"></script>
   <script defer src="assets/js/observatory.js"></script>
   <script defer src="assets/js/world.js"></script>
 </head>
@@ -32,11 +33,13 @@
       <button type="button" id="orbit-left" aria-label="向左观察">‹</button>
       <span id="orbit-hint">拖动观察</span>
       <button type="button" id="orbit-right" aria-label="向右观察">›</button>
+      <a id="berth-jump" href="#berth">巡检泊位 <span aria-hidden="true">↗</span></a>
     </div>
     <section class="room-console" id="room-console" aria-labelledby="room-name" hidden>
       <button type="button" class="room-back" id="room-back">‹ 全景</button>
       <h2 id="room-name"></h2>
-      <p id="room-detail"></p>
+      <p id="room-detail" aria-live="polite"></p>
+      <button type="button" id="berth-detail" class="room-back" hidden>查看泊位内部</button>
       <a id="room-link" href="experience.html#desk">进入 <span aria-hidden="true">↗</span></a>
     </section>
     <noscript><p class="no-script"><a href="workroom.html">进入静态工作台</a></p></noscript>
@@ -47,6 +50,10 @@
     <h2 id="world-journal-title"></h2>
     <div id="world-journal-body"></div>
     <a href="experience.html#story">全部记录 ↗</a>
+  </dialog>
+  <dialog id="world-berth" class="world-journal berth-detail" aria-labelledby="berth-title">
+    <div class="berth-detail-head"><h2 id="berth-title">泊位内部</h2><form method="dialog"><button type="submit" aria-label="关闭泊位内部">×</button></form></div>
+    <img id="berth-image" width="1672" height="941" alt="维修栈桥沿两侧延伸，工作灯照亮通往气闸的泊位内部。">
   </dialog>
 </body>
 </html>

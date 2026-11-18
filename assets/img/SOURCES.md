@@ -118,14 +118,33 @@ Original AAA narrative sci-fi game environment cinematics, wide 16:9 1672x941 cr
 
 ## 轨道抵达
 
-- `orbit-deep-space.webp` 是由 ImageGen 生成的 1672 × 941 轨道远景。程序将它投到三维观测站的背景球面。
+- `observatory-textures.js` 中的 `orbit` 是由 ImageGen 生成的 1672 × 941 轨道远景。程序将它投到三维观测站的背景球面。
 - 外部探索里的巡航飞船、观测站、泊位与可滑动的门使用 Three.js 模型。
-- 实时站体根据片头的环舱、玻璃穹顶和散热板重建。装甲表面的接缝、铆钉和磨损由 `assets/js/observatory.js` 生成，舷窗和轮廓反光来自场景灯光与环境贴图。工业材质参考 [《星空》的 NASA-Punk 美术访谈](https://news.microsoft.com/source/features/work-life/behind-the-scenes-of-starfield-where-you-can-explore-a-thousand-new-worlds-among-the-stars)。
+- 实时站体根据片头的环舱、玻璃穹顶和散热板重建。`assets/js/observatory.js` 生成站体网格及贴图加载前的备用材质，舷窗和轮廓反光来自场景灯光与环境贴图。工业材质参考 [《星空》的 NASA-Punk 美术访谈](https://news.microsoft.com/source/features/work-life/behind-the-scenes-of-starfield-where-you-can-explore-a-thousand-new-worlds-among-the-stars)。
 
 <details>
 <summary>轨道背景的 ImageGen 提示词</summary>
 
 Create a wide 16:9 deep space environment backdrop for a premium near-future cinematic spaceflight game. This is the distant SKY AND PLANET ONLY behind a real 3D station we will render separately. It must feel like a cleaned up expensive NASA photograph fused with restrained hard sci-fi cinematography. A giant dark indigo ocean planet's curved horizon, with small-scale oceans and atmospheric pearl-blue scattering, is cropped primarily in the bottom right, rim of upper curvature rises no more than halfway up on the right and runs toward the lower quarter on the left. Midnight blue and black space upper half with sparse precise stars, a faint diagonal slate blue gaseous structure that dissolves softly. The center and central left are open calm nearly black/navy with no dominant stars or distracting glowing rings, so detailed station geometry placed over it reads well. Light from upper right outside the frame like cool white moonlight with the faintest champagne rim. Strong blacks and subtle tonal gradation. Landscape 16:9, clean crisp dark cinematic render, no space station, no spacecraft, no buildings, no words, no logos, no watermark, no giant bright sun or lens flare.
+
+</details>
+
+## 外部巡检
+
+- `observatory-textures.js` 保存两张 WebP 数据纹理。`armor` 是 1672 × 940 的新装甲贴图，同时为金属表面提供细微的凹凸。`orbit` 是原有 1672 × 941 轨道远景。使用数据纹理，让直接打开本地 HTML 的预览也能上传图片到 WebGL。
+- `observatory-berth.webp` 是 1672 × 941 的泊位内部近景。外部的泊位巡检保持实时三维，查看泊位内部时打开这张近景图。
+- 外部桁架、外部实验舱和散热器的布局参考 [NASA 的国际空间站桁架](https://www.nasa.gov/international-space-station/integrated-truss-structure/)。服役痕迹和暖色维修照明参考 [《异形：隔离》环境美术](https://www.pauldavidabbott.co.uk/alien-isolation)。
+
+<details>
+<summary>内置 ImageGen 提示词</summary>
+
+### 装甲贴图
+
+A physically based film VFX texture map for a very old orbital facility, a single perfectly front-on orthographic flat material swatch, wide 16:9 exactly 1672x941. Snow-gray / slate-blue offwhite titanium station armor with uneven replacement panels in several shades, micro scratches, angular straight cut panel seams, densely spaced tiny rivets, scraped dark ink at plate edges, dry graphite oxide streaks, some ochre rusty fluid tracks around the fasteners, and area-specific grime. About 9 to 14 larger asymmetric rectilinear sheet metal panels each subdivided with sparse thin hard lines and tiny fasteners. Recessed screw plates, little status bars painted dark, subtle discolored primer. There is no global lighting direction or shadows, no directional highlight, no corner vignette, no bevel toward camera, no optical perspective, no text, no numbers, no letters, no logos, no background, no actual spacecraft or room as a whole, texture covers 100% of the full rectangular image, sharp enough to see rivets. Serious grounded near-future orbital movie production look, heavy used materials, physically realistic dull color. This is a seamless-looking PBR albedo for close-up, not a blueprint or illustration.
+
+### 泊位内部
+
+Cinematic widescreen landscape 16:9 1672x941 feature film high resolution realistic still inside the open docking berth of an immense old Earth-orbit observatory. An EVA inspection camera hanging just outside the right side of the airlock one floor above the docking deck, looking into a vast multipurpose dock at oblique angle. Big steel dock floor leads from foreground down toward a warm, much smaller airlock deeper inside; repeating ribs and many layered services; multiple stories of dense dull titanium paneling, maintenance catwalks and grated platforms, tiny mustard safety lines, flattened white scratched utility panels and gray concrete-like ceramics, delicate tiny white work lights, thick old conduit running around the aperture, cool dark blue steel contrasted with a few amber pool lights. Film miniature precision like a 1970s practical large scale sci-fi miniature captured with modern sharp 35mm glass, environmental storytelling of decades of repairs and human scale, clean silhouette composition, no people, no typography, no signs with text, no brand, no watermarks, no glowing neon, no explosions. Mainly industrial near-future lived-in structure, not a clean concept illustration. World background for a personal art site called Observatory.
 
 </details>
 

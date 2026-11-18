@@ -3,6 +3,7 @@
 
   const T = window.THREE;
   if (!T) return;
+  const textures = window.OBSERVATORY_TEXTURES;
   const TAU = Math.PI * 2;
   const v = (x,y,z) => new T.Vector3(x,y,z);
   const boxGeo = new T.BoxGeometry();
@@ -90,6 +91,24 @@
   const ceramic = new T.MeshStandardMaterial({color:"#d0d5d7",map:hullMap,roughness:.56,metalness:.37});
   const weathered = new T.MeshStandardMaterial({color:"#8999a3",map:hullMap,roughness:.47,metalness:.55});
   const radiator = material("#313b51",.48,.65);
+  const insulation = material("#604a3a",.83,.19);
+  const accessSteel = material("#89847a",.67,.47);
+  const brownout = light("#9fa6a6");
+
+  function loadArmor(onReady) {
+    if (!textures?.armor) return;
+    new T.TextureLoader().load(textures.armor,map=>{
+      map.colorSpace=T.SRGBColorSpace;
+      map.anisotropy=8;
+      for (const finish of [ceramic,weathered]) {
+        finish.map=map;
+        finish.bumpMap=map;
+        finish.bumpScale=.021;
+        finish.needsUpdate=true;
+      }
+      onReady();
+    },undefined,()=>{});
+  }
 
   function reflections(scene) {
     const width=256,height=128, data=new Uint16Array(width*height*4);
@@ -209,11 +228,19 @@
 
   function stationsLights(scene,environment) {
     if (environment) reflections(scene);
-    scene.add(new T.HemisphereLight("#d7e8f8","#293c52",.81));
-    const key = new T.DirectionalLight("#fff1db",3.35);
-    key.position.set(-13,15,9);
+    scene.add(new T.HemisphereLight("#c6d8f0","#3d4b59",.57));
+    const key = new T.DirectionalLight("#ffede1",3.60);
+    key.position.set(-15,17,8);
+    if (environment) {
+      key.castShadow=true;
+      key.shadow.mapSize.set(1024,1024);
+      Object.assign(key.shadow.camera,{left:-11,right:11,top:10,bottom:-10,near:.5,far:58});
+      key.shadow.camera.updateProjectionMatrix();
+      key.shadow.normalBias=.038;
+      key.shadow.bias=-.00034;
+    }
     scene.add(key);
-    const rim = new T.DirectionalLight("#6c9bcc",1.65);
+    const rim = new T.DirectionalLight("#85a8d8",1.47);
     rim.position.set(9,-5,-13);
     scene.add(rim);
   }
@@ -240,6 +267,11 @@
     }
     const runway = group(dock,0,-.94,1.53);
     box(runway,graphite,0,0,.60,2.35,.16,2.1);
+    for (let row=0;row<18;row++) {
+      const z=-.37+row*.114;
+      box(runway,row%6===0?accessSteel:steel,0,.085,z,1.30,.013,row%6===0?.031:.011);
+      for (const s of [-1,1]) box(runway,graphite,s*.49,.095,z,.13,.013,.032);
+    }
     const tracks = [];
     for (const s of [-1,1]) {
       section(dock,alloy,s*1.52,0,1.075,.27,1.85,.14,.085);
@@ -418,6 +450,72 @@
     }
   }
 
+  function catwalk(parent,x,y,z,length) {
+    const walk=group(parent,x,y,z);
+    box(walk,graphite,0,0,0,length,.075,.48);
+    const count=Math.floor(length/.14);
+    for (let i=0;i<count;i++) {
+      const x=(i/(count-1)-.5)*(length-.12);
+      box(walk,accessSteel,x,.042,0,.018,.013,.46);
+      if (i%5===0) {
+        for (const s of [-1,1]) box(walk,accessSteel,x,.159,s*.24,.021,.32,.021);
+        box(walk,i%10===0?honey:brownout,x,.092,.274,.052,.052,.027);
+      }
+    }
+    for (const s of [-1,1]) {
+      box(walk,accessSteel,0,.307,s*.24,length,.022,.027);
+      box(walk,steel,0,.133,s*.24,length,.013,.022);
+    }
+    return walk;
+  }
+
+  function utilitySpine(station) {
+    const spine=group(station,.47,.14,-.51);
+    spine.rotation.set(.09,-.25,.16);
+    const ends=[-6.37,6.33];
+    for (const y of [-.65,.64]) {
+      for (const z of [-.72,.72]) {
+        beam(spine,graphite,v(ends[0],y,z),v(ends[1],y,z),.27,true);
+        beam(spine,steel,v(ends[0],y+.15,z),v(ends[1],y+.15,z),.047,true);
+      }
+    }
+    for (let i=0;i<19;i++) {
+      const x=-6.12+i*.67;
+      for (const z of [-.69,.69]) {
+        beam(spine,steel,v(x,-.67,z),v(x,.66,z),.084,true);
+        if (i<18) beam(spine,i%5===0?oxide:steel,v(x,-.59,z),v(x+.65,.61,z),.082,true);
+        box(spine,accessSteel,x,.59,z,.14,.20,.15);
+      }
+      beam(spine,graphite,v(x,-.65,-.72),v(x,-.65,.72),.13,true);
+      if (i%3===0) box(spine,insulation,x,.38,0,.47,.58,.89);
+    }
+    for (const [x,y,z,span] of [[-3.6,1.14,.39,3.66],[3.6,1.61,.42,2.53],[-4.9,-1.08,.61,1.64],[4.7,-.67,.38,2.37]]) {
+      const sector=group(spine,x,y,z);
+      section(sector,weathered,0,0,0,span,1.22,1.46,.18);
+      section(sector,ceramic,0,.64,-.06,span-.19,.16,1.25,.067);
+      box(sector,deep,0,.19,.748,span-.26,.164,.055);
+      for (let i=0;i<Math.floor(span/.14)-1;i++) {
+        const x=-span/2+.19+i*.14;
+        box(sector,i%5===1?graphite:i%6===0?brownout:honey,x,.19,.784,.070,.052,.022);
+      }
+      for (let i=0;i<4;i++) {
+        const x=(i/3-.5)*(span-.24);
+        box(sector,graphite,x,0,-.727,.081,1.17,.052);
+        box(sector,steel,x,-.2,.76,.067,.54,.065);
+      }
+      catwalk(sector,0,-.66,1.02,span+.22);
+    }
+    const pipeRoutes=[[-5.92,-.94,.71,-3.1],[2.56,-.64,.89,6.04],[-6.05,.89,-.91,-2.83]];
+    for (const [x,y,z,to] of pipeRoutes) {
+      const axis=new T.CatmullRomCurve3([v(x,y,z),v(x+.77,y,z),v(x+1.12,y+.33,z+.18),v(to-.25,y+.33,z+.18),v(to,y+.61,z+.18)]);
+      mesh(spine,new T.TubeGeometry(axis,24,.059,8,false),oxide);
+      for (let i=0;i<6;i++) {
+        const center=axis.getPoint(.14+i*.14);
+        box(spine,steel,center.x,center.y,center.z,.079,.16,.17);
+      }
+    }
+  }
+
   function buildStation(scene) {
     const station = group(scene);
     const core = group(station,0,0,-.4);
@@ -425,6 +523,7 @@
     section(core,ceramic,0,2.05,.10,3.35,.92,2.8,.24);
     section(core,deep,0,-2.0,-.05,2.7,1.08,3.3,.33);
     observatoryCanopy(core);
+    utilitySpine(station);
     for (const direction of [-1,1]) {
       const deck = group(core,direction*2.83,.73,direction===1?-.38:.33);
       section(deck,weathered,0,0,0,1.95,1.05,3.79,.32);
@@ -469,8 +568,9 @@
       for (let slot=0;slot<4;slot++) box(core,slot%3===0?honey:graphite,s*1.54,.23+slot*.202,2.028,.15,.043,.037);
     }
 
-    const halo = group(station,0,.21,-.55);
-    halo.rotation.set(-.52,.32,-.18);
+    const halo = group(station,-.46,.15,-.72);
+    halo.rotation.set(-.59,.41,-.18);
+    halo.scale.set(1.09,1,.98);
     const radius = 6.23;
     for (const z of [-.53,.53]) {
       ring(halo,graphite,radius,.24,0,0,z);
@@ -491,9 +591,19 @@
       box(segment,i%8===0?honey:glass,0,-.36,.07,.31,.029,.50);
       box(segment,i%6===0?honey:cold,0,.034,.526,.32,.045,.027);
       box(segment,steel,0,.21,.522,.44,.057,.057);
-      if (i%8===0) glow(segment,"#c1ddff",0,.08,.60,.46,.27);
+      if (i%12===0) glow(segment,"#c1ddff",0,.08,.60,.39,.21);
     }
     habitat(halo,radius);
+    for (const [start,length,z] of [[.42,.99,-1.27],[2.05,1.27,-1.38],[4.01,.71,-1.18]]) {
+      const backing=shellSector(radius,start,length,[[-.63,-.33],[.63,-.33],[.73,.16],[.38,.38],[-.61,.40],[-.8,.03]]);
+      mesh(halo,backing,weathered,0,0,z);
+      for (let i=0;i<7;i++) {
+        const theta=start+(i+.4)*length/7;
+        const x=radius*Math.cos(theta),y=radius*Math.sin(theta);
+        beam(halo,oxide,v(x*.94,y*.94,z+.20),v(x,y,.35),.085);
+        box(halo,i%3===0?insulation:accessSteel,x,y,z-.26,.22,.28,.17);
+      }
+    }
     for (const i of [0,1,2,4,5]) {
       const theta = (i+.26)*TAU/6;
       const axis = v(Math.cos(theta),Math.sin(theta),0);
@@ -606,6 +716,11 @@
       glow(station,finishes[id].color,x,y-.38,z+.04,.53,.44);
     }
     batchHull(station);
+    station.traverse(object => {
+      if (!object.isMesh || !object.material.isMeshStandardMaterial) return;
+      object.castShadow=true;
+      object.receiveShadow=true;
+    });
     return {station,dock,open,guide,anchors};
   }
 
@@ -687,7 +802,7 @@
       `
     }));
     sphere.renderOrder = -2;
-    new T.TextureLoader().load("assets/img/orbit-deep-space.webp",texture => {
+    if (textures?.orbit) new T.TextureLoader().load(textures.orbit,texture => {
       sphere.material.uniforms.image.value = texture;
       sphere.material.uniforms.ready.value = 1;
       onReady();
@@ -703,5 +818,5 @@
     return renderer;
   }
 
-  window.Observatory = {buildStation,buildShip,stationsLights,backdrop,rendererFor};
+  window.Observatory = {buildStation,buildShip,stationsLights,backdrop,rendererFor,loadArmor};
 })();

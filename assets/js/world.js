@@ -11,6 +11,9 @@
   const back = document.querySelector("#room-back");
   const controls = document.querySelector(".orbit-controls");
   const reader = document.querySelector("#world-journal");
+  const berthReader = document.querySelector("#world-berth");
+  const berthImage = document.querySelector("#berth-image");
+  const berthDetail = document.querySelector("#berth-detail");
   const reduce = matchMedia("(prefers-reduced-motion: reduce)");
   const featured = window.SITE_NOTES.find(note => note.id === "cause-or-fate");
   const destinations = {
@@ -19,6 +22,11 @@
     projects:{detail:"作品演示和实现记录。",tint:"#e0cafa",angle:.42},
     collection:{detail:"收下的影像、资料和语录。",tint:"#a9dcf7",angle:.54}
   };
+  berthImage.addEventListener("error",()=>{ berthImage.src="assets/img/flight-airlock.webp"; },{once:true});
+  berthDetail.addEventListener("click",()=>{
+    if (!berthImage.getAttribute("src")) berthImage.src="assets/img/observatory-berth.webp";
+    berthReader.showModal();
+  });
   document.querySelector("#station-owner").textContent = window.SITE_CONTENT.workroom.author;
   if (featured) {
     document.querySelector("#world-journal-title").textContent = featured.title;
@@ -54,20 +62,27 @@
   let width = 0;
   let height = 0;
   let angle = -.69;
-  let wantedAngle = -.54;
-  let tilt = .22;
-  let wantedTilt = .22;
+  let wantedAngle = -.64;
+  let tilt = .15;
+  let wantedTilt = .15;
   let distance = 21;
   let wantedDistance = distance;
   let aperture = 0;
+  let shadowOpen = false;
   let previousTime = 0;
   let frame = 0;
   let pointer = null;
 
   if (scene) {
-    O.stationsLights(scene,renderer.capabilities.isWebGL2);
+    const capable=renderer.capabilities.isWebGL2;
+    O.stationsLights(scene,capable);
+    renderer.shadowMap.enabled=capable;
+    renderer.shadowMap.type=T.PCFSoftShadowMap;
+    renderer.shadowMap.autoUpdate=false;
+    renderer.shadowMap.needsUpdate=capable;
     O.backdrop(scene,requestDraw);
-    patrol.ship.scale.setScalar(.48);
+    O.loadArmor(requestDraw);
+    patrol.ship.scale.setScalar(.27);
   }
   function framing() {
     if (!renderer) return;
@@ -78,13 +93,16 @@
     camera.updateProjectionMatrix();
     renderer.setPixelRatio(Math.min(devicePixelRatio || 1,1.6));
     renderer.setSize(width,height,false);
-    const overview = Math.max(19,15.3/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));
-    if (selected) {
+    const overview = Math.max(19,16.1/(2*Math.tan(T.MathUtils.degToRad(camera.fov/2))*camera.aspect));
+    if (selected === "berth") {
+      nextFocus.set(.16,-.94,3.82);
+      wantedDistance=camera.aspect<1?11.4:8.1;
+    } else if (selected) {
       const pin = model.anchors[selected];
       nextFocus.set(pin.x*.46,pin.y*.51-.38,1.42);
       wantedDistance = overview*.74;
     } else {
-      nextFocus.set(0,-.18,.22);
+      nextFocus.set(-.04,-.05,.34);
       wantedDistance = overview;
     }
   }
@@ -100,11 +118,17 @@
     focus.lerp(nextFocus,follow);
     camera.position.set(focus.x+Math.sin(angle)*distance,focus.y+distance*tilt,focus.z+Math.cos(angle)*distance);
     camera.lookAt(focus);
-    aperture += ((selected === "story" ? 1 : 0)-aperture)*follow;
+    const shouldOpen=selected === "story" || selected === "berth";
+    aperture += ((shouldOpen ? 1 : 0)-aperture)*follow;
     model.open(aperture);
+    if (selected === "berth" && aperture > .93 && detail.textContent !== "气闸已开启") detail.textContent="气闸已开启";
+    if ((shouldOpen ? aperture > .92 && !shadowOpen : aperture < .08 && shadowOpen)) {
+      renderer.shadowMap.needsUpdate=true;
+      shadowOpen=shouldOpen;
+    }
     const t = reduce.matches ? 0 : time*.001;
-    patrol.ship.position.set(2.45+1.65*Math.sin(t*.27),-2.15+.22*Math.sin(t*.84),3.8+.62*Math.cos(t*.27));
-    patrol.ship.rotation.set(.07,.58+.32*Math.sin(t*.27),.13*Math.cos(t*.27));
+    patrol.ship.position.set(4.38+2.35*Math.sin(t*.18),-2.55+.33*Math.sin(t*.27),3.5+1.9*Math.cos(t*.18));
+    patrol.ship.rotation.set(.02,-t*.18-Math.PI/2,.065*Math.cos(t*.18));
     renderer.render(scene,camera);
     for (const port of ports) {
       if (port.hidden) continue;
@@ -122,13 +146,24 @@
   }
   function updateScene(moveFocus) {
     if (reader.open) reader.close();
+    if (berthReader.open) berthReader.close();
     const id = location.hash.slice(1);
-    selected = Object.hasOwn(destinations,id) ? id : "";
+    selected = id === "berth" || Object.hasOwn(destinations,id) ? id : "";
     world.dataset.room = selected;
     consolePanel.hidden = !selected;
     controls.hidden = !renderer || Boolean(selected);
     for (const port of ports) port.hidden = Boolean(selected);
-    if (selected) {
+    berthDetail.hidden = selected !== "berth";
+    if (selected === "berth") {
+      heading.textContent="泊位 01";
+      detail.textContent=renderer?"正在开启气闸":"气闸已开启";
+      consolePanel.style.setProperty("--room-tint","#ffcf94");
+      link.href="experience.html#desk";
+      link.firstChild.textContent="进入工作台 ";
+      wantedAngle=-.40;
+      wantedTilt=.17;
+      if (moveFocus) back.focus();
+    } else if (selected) {
       const item = destinations[selected];
       heading.textContent = ports.find(port => port.dataset.room === selected).textContent.trim();
       detail.textContent = item.detail;
@@ -139,8 +174,8 @@
       wantedTilt = .16;
       if (moveFocus) back.focus();
     } else {
-      wantedAngle = -.54;
-      wantedTilt = .22;
+      wantedAngle = -.64;
+      wantedTilt = .15;
       if (moveFocus) ports[0].focus();
     }
     framing();
@@ -182,7 +217,7 @@
   back.addEventListener("click",() => { location.hash = ""; });
   window.addEventListener("hashchange",() => updateScene(true));
   window.addEventListener("keydown",event => {
-    if (event.key === "Escape" && selected && !reader.open) location.hash = "";
+    if (event.key === "Escape" && selected && !reader.open && !berthReader.open) location.hash = "";
     if (!renderer || selected || reader.open || !event.key.startsWith("Arrow")) return;
     event.preventDefault();
     if (event.key === "ArrowLeft" || event.key === "ArrowRight") orbit(event.key === "ArrowLeft" ? -.20 : .20);
